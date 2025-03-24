@@ -1,4 +1,4 @@
-package com.team6.WEB3_4_MARCH_BE;
+package com.team6.domain;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

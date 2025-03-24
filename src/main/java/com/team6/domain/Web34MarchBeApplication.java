@@ -1,4 +1,4 @@
-package com.team6.WEB3_4_MARCH_BE;
+package com.team6.domain;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
