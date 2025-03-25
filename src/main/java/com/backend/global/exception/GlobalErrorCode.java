@@ -1,4 +1,4 @@
-package com.team6.global.exception;
+package com.backend.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
