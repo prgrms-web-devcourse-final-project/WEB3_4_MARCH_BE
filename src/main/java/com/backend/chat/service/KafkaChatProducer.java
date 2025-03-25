@@ -1,8 +1,8 @@
-package com.team6.domain.chat.service;
+package com.backend.chat.service;
 
+import com.backend.chat.dto.ChatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team6.domain.chat.dto.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

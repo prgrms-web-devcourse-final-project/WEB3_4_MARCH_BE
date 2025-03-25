@@ -1,4 +1,4 @@
-package com.team6.domain.chat.dto;
+package com.backend.chat.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

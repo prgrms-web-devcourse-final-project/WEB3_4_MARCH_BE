@@ -1,11 +1,11 @@
-package com.team6.domain.chat.service;
+package com.backend.chat.service;
 
+import com.backend.chat.dto.ChatMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team6.domain.chat.dto.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
