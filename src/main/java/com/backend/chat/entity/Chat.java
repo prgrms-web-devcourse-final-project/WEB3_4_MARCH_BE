@@ -1,4 +1,4 @@
-package com.team6.domain.chat.entity;
+package com.backend.chat.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
