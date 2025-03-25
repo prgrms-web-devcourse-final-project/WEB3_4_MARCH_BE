@@ -1,4 +1,4 @@
-package com.team6.global.baseentity;
+package com.backend.global.baseentity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
