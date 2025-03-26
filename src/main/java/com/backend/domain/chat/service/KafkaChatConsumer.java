@@ -1,6 +1,6 @@
-package com.backend.chat.service;
+package com.backend.domain.chat.service;
 
-import com.backend.chat.dto.ChatMessage;
+import com.backend.domain.chat.dto.ChatMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;

@@ -1,6 +1,6 @@
-package com.backend.chat.service;
+package com.backend.domain.chat.service;
 
-import com.backend.chat.dto.ChatMessage;
+import com.backend.domain.chat.dto.ChatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ public class KafkaChatProducer {
         try {
             String jsonMessage = objectMapper.writeValueAsString(message);
             kafkaTemplate.send("chat-messages", jsonMessage);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
