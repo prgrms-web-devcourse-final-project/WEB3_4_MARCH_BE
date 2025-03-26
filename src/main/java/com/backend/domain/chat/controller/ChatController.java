@@ -1,7 +1,7 @@
-package com.backend.chat.controller;
+package com.backend.domain.chat.controller;
 
-import com.backend.chat.dto.ChatMessage;
-import com.backend.chat.service.KafkaChatProducer;
+import com.backend.domain.chat.dto.ChatMessage;
+import com.backend.domain.chat.service.KafkaChatProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
