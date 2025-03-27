@@ -27,9 +27,13 @@ public class ImageEntity {
     // @JoinColumn(name = "user_id", nullable = false)
     // private Member user;
 
+    // 이미지 key
+    @Column(nullable = false)
+    private String key;
+
     // 이미지 URL
     @Column(nullable = false)
-    private String imageUrl;
+    private String url;
 
     // 대표 이미지 여부
     @Column(nullable = false)
