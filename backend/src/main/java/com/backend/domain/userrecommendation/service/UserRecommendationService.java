@@ -25,8 +25,8 @@ public class UserRecommendationService {
     @Transactional
     public List<RecommendedUserDto> generateRecommendations(Member me) {
 
-        // 기존 추천 삭제 (오늘 날짜 기준)
-        userRecommendationRepository.deleteByReceivingUser(me);
+        // 이전 추천 유저 ID 목록을 먼저 조회
+        Set<Long> previouslyRecommendedIds = userRecommendationRepository.findAllByReceivingUser(me);
 
         // 위치 기반 10km 이내 유저 조회
         List<Member> nearbyUsers = memberRepository.findNearbyUsers(me.getLatitude(), me.getLongitude());
@@ -47,6 +47,9 @@ public class UserRecommendationService {
                 .filter(u -> !u.getId().equals(me.getId()))
                 // 차단 id 제외
                 .filter(u -> !blockedUserIds.contains(u.getId()))
+                // 이전에 추천된 유저 제외
+                .filter(u -> !previouslyRecommendedIds.contains(u.getId()))
+                // 각 유저와의 공통 키워드 개수 계산 후 함께 리턴
                 .map(u -> {
                     List<Long> otherKeywordIds = userKeywordRepository.findByUser(u).stream()
                             .map(k -> k.getKeyword().getId())
