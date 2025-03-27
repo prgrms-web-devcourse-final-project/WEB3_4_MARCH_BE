@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Set;
 
+
 public interface UserRecommendationRepository extends JpaRepository<UserRecommendation, Long> {
 
     @Query("SELECT ur.recommendedUser.id FROM UserRecommendation ur WHERE ur.receivingUser = :user")
