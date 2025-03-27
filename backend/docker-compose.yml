@@ -19,10 +19,6 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - ./backend/infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./backend/infra/redis/data:/data # /data(redis) -> ./infra/redis/data(local) 저장
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
 volumes:
   mysql_data:
