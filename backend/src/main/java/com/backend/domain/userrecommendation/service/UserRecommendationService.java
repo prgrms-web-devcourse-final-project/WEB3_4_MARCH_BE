@@ -29,7 +29,7 @@ public class UserRecommendationService {
         Set<Long> previouslyRecommendedIds = userRecommendationRepository.findAllByReceivingUser(me);
 
         // 위치 기반 10km 이내 유저 조회
-        List<Member> nearbyUsers = memberRepository.findNearbyUsers(me.getLatitude(), me.getLongitude());
+        List<Member> nearbyUsers = memberRepository.findNearbyMembers(me.getLatitude(), me.getLongitude());
 
         // 내 키워드 ID 목록
         List<Long> myKeywordIds = userKeywordRepository.findByUser(me).stream()
