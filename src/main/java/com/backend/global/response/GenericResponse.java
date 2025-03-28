@@ -63,7 +63,7 @@ public class GenericResponse<T> {
     }
 
     /**
-     * 요청이 성공하고 code, data, message 있을 때
+     * 요청이 성공하고 code, message 있을 때
      *
      * @param code    응답 코드 값
      * @param message 반환 메세지
@@ -78,7 +78,7 @@ public class GenericResponse<T> {
     }
 
     /**
-     * 요청이 성공하고 code, data, message 있을 때
+     * 요청이 성공하고 code 있을 때
      *
      * @param code    응답 코드 값
      * @return {@link GenericResponse<T>}
@@ -228,6 +228,24 @@ public class GenericResponse<T> {
     }
 
     /**
+     * 요청이 실패하고 message, errorCode, path 있을 때
+     * <p>code 기본 값 : 400</p>
+     *
+     * @param message   반환 메세지
+     * @param errorCode 커스텀 에러 코드 Enum
+     * @param path      요청 URI
+     * @return {@link GenericResponse<T>}
+     */
+    public static <T> GenericResponse<T> fail(String message, Enum<?> errorCode, String path) {
+        String fullMessage = String.format("[%s] %s (path: %s)", errorCode.name(), message, path);
+        return GenericResponse.<T>builder()
+                .isSuccess(false)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(fullMessage)
+                .build();
+    }
+
+    /**
      * 요청이 실패하고 message 있을 때
      * <p>code 기본 값 : 400</p>
      *
@@ -271,4 +289,27 @@ public class GenericResponse<T> {
     }
 
 
+
+    /**
+     * 요청이 성공하고 data 있을 때
+     * <p>code 기본 값 : 200</p>
+     *
+     * @param data 반환 데이터
+     * @return {@link GenericResponse<T>}
+     */
+    public static <T> GenericResponse<T> of(T data) {
+        return ok(data);
+    }
+
+    /**
+     * 요청이 성공하고 data, message 있을 때
+     * <p>code 기본 값 : 200</p>
+     *
+     * @param data 반환 데이터
+     * @param message 반환 메세지
+     * @return {@link GenericResponse<T>}
+     */
+    public static <T> GenericResponse<T> of(T data, String message) {
+        return ok(data, message);
+    }
 }
