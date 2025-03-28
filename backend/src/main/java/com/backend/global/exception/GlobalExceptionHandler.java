@@ -55,9 +55,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MemberException.class)
     public ResponseEntity<GenericResponse<?>> handleMemberException(MemberException ex, HttpServletRequest request) {
-        return ResponseEntity
-                .status(ex.getStatus())
-                .body(GenericResponse.fail(ex.getStatus(), ex.getMessage()));
+        int statusCode = ex.getHttpStatus().value();
+        String fullMessage = String.format("[%s] %s (path: %s)", ex.getErrorCode(), ex.getMessage(), request.getRequestURI());
+
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(GenericResponse.fail(statusCode, fullMessage));
     }
 
     /**

@@ -13,7 +13,9 @@ public record MemberResponseDto(
         String gender,
         Integer age,
         Integer height,
-        String profileImage
+        String profileImage,
+        Double latitude,
+        Double longitude
 ) {
     public static MemberResponseDto from(Member member) {
         return new MemberResponseDto(
@@ -23,7 +25,9 @@ public record MemberResponseDto(
                 member.getGender(),
                 member.getAge(),
                 member.getHeight(),
-                member.getProfileImage()
+                member.getProfileImage(),
+                member.getLatitude(),
+                member.getLongitude()
         );
     }
 }

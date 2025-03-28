@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+/**
+ * 도메인 Member 커스텀 에러
+ */
 @AllArgsConstructor
 @Getter
 public enum MemberErrorCode {

@@ -1,5 +1,6 @@
 package com.backend.domain.member.service;
 
+import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.dto.MemberResponseDto;
@@ -28,45 +29,45 @@ public class MemberService {
     // 회원 가입 처리 (카카오 로그인 이후)
     // 재가입 허용 처리 포함
     @Transactional
-    public void registerMember(MemberRegisterRequestDto requestDto) {
+    public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부
         if (memberRepository.existsByKakaoIdAndIsDeletedFalse(requestDto.kakaoId())) {
             throw new MemberException(MemberErrorCode.DUPLICATE_MEMBER);
         }
 
-        // 2. 탈퇴한 회원이 있다면 복구
-        memberRepository.findByKakaoId(requestDto.kakaoId()).ifPresentOrElse(
-                existing -> {
-                    if (existing.isDeleted()) {
-                        existing.rejoin(requestDto);
-                    } else {
-                        throw new MemberException(MemberErrorCode.DUPLICATE_MEMBER);
-                    }
-                },
-                // 3. 없으면 신규 회원 생성
-                () -> {
-                    Member member = Member.builder()
-                            .kakaoId(requestDto.kakaoId())
-                            .email(requestDto.email())
-                            .nickname(requestDto.nickname())
-                            .age(requestDto.age())
-                            .height(requestDto.height())
-                            .gender(requestDto.gender())
-                            .profileImage(requestDto.profileImage())
-                            .chatAble(true)
-                            .latitude(requestDto.latitude())
-                            .longitude(requestDto.longitude())
-                            .kakaoAccessToken(null)
-                            .kakaoRefreshToken(null)
-                            .build();
-                    memberRepository.save(member);
-                }
-        );
+        // 2. 탈퇴한 회원이면 복구
+        Member member = memberRepository.findByKakaoId(requestDto.kakaoId()).map(existing -> {
+            if (existing.isDeleted()) {
+                existing.rejoin(requestDto);
+                return existing;
+            } else {
+                throw new MemberException(MemberErrorCode.DUPLICATE_MEMBER);
+            }
+        }).orElseGet(() -> {
+            // 3. 신규 등록
+            Member newMember = Member.builder()
+                    .kakaoId(requestDto.kakaoId())
+                    .email(requestDto.email())
+                    .nickname(requestDto.nickname())
+                    .age(requestDto.age())
+                    .height(requestDto.height())
+                    .gender(requestDto.gender())
+                    .profileImage(requestDto.profileImage())
+                    .chatAble(true)
+                    .latitude(requestDto.latitude())
+                    .longitude(requestDto.longitude())
+                    .kakaoAccessToken(null)
+                    .kakaoRefreshToken(null)
+                    .build();
+            return memberRepository.save(newMember);
+        });
+
+        return MemberInfoDto.from(member);
     }
 
     // 회원 정보 수정
     @Transactional
-    public void modifyMember(Long memberId, MemberModifyRequestDto requestDto) {
+    public MemberResponseDto modifyMember(Long memberId, MemberModifyRequestDto requestDto) {
         Member member = getMemberEntity(memberId);
 
         member.updateProfile(
@@ -80,11 +81,12 @@ public class MemberService {
                 requestDto.latitude() != null ? requestDto.latitude() : member.getLatitude(),
                 requestDto.longitude() != null ? requestDto.longitude() : member.getLongitude()
         );
+        return MemberResponseDto.from(member);
     }
 
     // 위치 정보 갱신 (프론트에서 버튼을 누르면 사용자 위치정보 최신화하여 갱신)
     @Transactional
-    public void updateLocation(Long memberId, Double latitude, Double longitude) {
+    public MemberResponseDto updateLocation(Long memberId, Double latitude, Double longitude) {
         Member member = getMemberEntity(memberId);
         member.updateProfile(
                 member.getNickname(),
@@ -96,6 +98,21 @@ public class MemberService {
                 latitude,
                 longitude
         );
+
+        return MemberResponseDto.from(member);
+    }
+
+    // 회원 탈퇴 처리
+    @Transactional
+    public MemberResponseDto withdraw(Long memberId) {
+        Member member = getMemberEntity(memberId);
+        member.withdraw();
+        return MemberResponseDto.from(member);
+    }
+
+    // 닉네임 중복 검사
+    public boolean isNicknameTaken(String nickname) {
+        return memberRepository.existsByNickname(nickname);
     }
 
     // 카카오 ID 기반 조회
@@ -110,17 +127,4 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
-    // 닉네임 중복 검사
-    public boolean isNicknameTaken(String nickname) {
-        return memberRepository.existsByNickname(nickname);
-    }
-
-
-    // 회원 탈퇴 처리
-    @Transactional
-    public void withdraw(Long memberId) {
-        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        member.withdraw();
-    }
 }

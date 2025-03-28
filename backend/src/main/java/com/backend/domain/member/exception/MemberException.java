@@ -15,11 +15,11 @@ public class MemberException extends RuntimeException {
         this.memberErrorCode = memberErrorCode;
     }
 
-    public HttpStatus getStatus() {
+    public HttpStatus getHttpStatus() {
         return memberErrorCode.getHttpStatus();
     }
 
-    public String getCode() {
+    public String getErrorCode() {
         return memberErrorCode.getCode();
     }
 }
