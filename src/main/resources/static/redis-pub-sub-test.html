@@ -58,14 +58,14 @@
 
     stompClient.connect({}, function () {
       const chatroomId = document.getElementById("chatroomId").value;
-      stompClient.subscribe("/sub/chat/" + chatroomId, function (msg) {
+      stompClient.subscribe("/api/sub/chat/" + chatroomId, function (msg) {
         const content = JSON.parse(msg.body);
         const formattedTime = formatKakaoStyleTime(content.sendTime);
         document.getElementById("chatLog").textContent +=
           `[${formattedTime}] ${content.senderId}: ${content.content}\n`;
       });
 
-      console.log("Connected to /sub/chat/" + chatroomId);
+      console.log("Connected to /api/sub/chat/" + chatroomId);
     });
   }
 
@@ -81,7 +81,7 @@
       content: document.getElementById("content").value
     };
 
-    stompClient.send("/pub/chat/send", {}, JSON.stringify(payload));
+    stompClient.send("/api/pub/chat/send", {}, JSON.stringify(payload));
   }
 
   // 자동 연결
