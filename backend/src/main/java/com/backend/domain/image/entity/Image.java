@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,20 +17,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class ImageEntity {
+@Table(name = "images")
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 사용자 (회원)
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "user_id", nullable = false)
-    // private Member user;
-
-    // 이미지 key
+    // 유저 Id
     @Column(nullable = false)
-    private String key;
+    private Long userId;
 
     // 이미지 URL
     @Column(nullable = false)
@@ -39,8 +36,7 @@ public class ImageEntity {
     @Column(nullable = false)
     private Boolean isPrimary;
 
-    // 대표 이미지 설정 메서드
-    public void updatePrimary(boolean isPrimary) {
+    public void updateIsPrimary(Boolean isPrimary) {
         this.isPrimary = isPrimary;
     }
 }
