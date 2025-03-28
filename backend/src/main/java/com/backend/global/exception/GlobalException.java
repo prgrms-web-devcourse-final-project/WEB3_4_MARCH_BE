@@ -25,5 +25,4 @@ public class GlobalException extends RuntimeException {
         return globalErrorCode.getHttpStatus();
     }
 
-
 }
