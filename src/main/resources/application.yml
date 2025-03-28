@@ -23,6 +23,13 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    admin:
+      fail-fast: false # KafkaAdmin 초기화 실패해도 앱 실행 계속
 
-server:
-  port: 8080
+  redis:
+    host: redis
+    port: 6379
+
+logging:
+  level:
+    org.apache.kafka: error # Kafka 관련 로그 너무 많을 때 INFO → ERROR
