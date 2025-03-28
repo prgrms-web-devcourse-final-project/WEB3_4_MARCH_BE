@@ -12,7 +12,7 @@ public class ChatWebSocketController {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/send")
+    @MessageMapping("api/chat/send")
     public void send(ChatMessageRequest message) {
         chatService.relayMessage(message);
     }
