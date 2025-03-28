@@ -37,6 +37,18 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.33' // mysql
 
 	implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0")
+
+	// WebSocket + STOMP
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// JSON 변환
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
