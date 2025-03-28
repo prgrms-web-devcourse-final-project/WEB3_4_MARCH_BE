@@ -1,12 +1,26 @@
 package com.backend.domain.chatroom.entity;
 
+import com.backend.domain.chat.exception.ChatErrorCode;
+import com.backend.domain.chat.exception.ChatException;
 import com.backend.domain.chatrequest.entity.ChatRequest;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import java.sql.Timestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatRoom {
 
     @Id
@@ -14,14 +28,42 @@ public class ChatRoom {
     private Long id;
 
     @Column(name = "sender_id", nullable = false)
-    private ChatRequest senderId;
+    private Long senderId;
 
     @Column(name = "receiver_id", nullable = false)
-    private ChatRequest receiverId;
+    private Long receiverId;
 
-    @Column(nullable = false)
-    private Timestamp created_at;
+    @OneToOne
+    @JoinColumn(name = "chat_request_id", nullable = false)
+    private ChatRequest chatRequest;
+
+    @Column(name = "created_at", nullable = false)
+    private Timestamp createdAt;
 
     @Column(nullable = false)
     private boolean is_blocked;
+
+    /**
+     * 차단 검증
+     */
+    public void validateBlocked() {
+        if (this.is_blocked) {
+            throw new ChatException(ChatErrorCode.BLOCKED_MEMBER);
+        }
+    }
+
+    /**
+     * 채팅창에서 보낸 사람을 제외한 나머지 1명(수신자)을 찾는 메서드입니다.
+     * @param currentMemberId
+     * @return senderId, receiverId
+     */
+    public Long getAnotherUserId(Long currentMemberId) {
+        if (currentMemberId.equals(this.senderId)) {
+            return this.receiverId;
+        } else if (currentMemberId.equals(this.receiverId)) {
+            return this.senderId;
+        } else {
+            throw new ChatException(ChatErrorCode.NOT_FOUND_BY_ID);
+        }
+    }
 }
