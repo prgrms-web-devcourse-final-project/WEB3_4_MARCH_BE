@@ -3,6 +3,8 @@ package com.backend.domain.member.dto;
 import com.backend.domain.member.entity.Member;
 import lombok.Builder;
 
+import java.util.List;
+
 /**
  * 서비스 내부 조회/리스트 반환용 Dto (Service → API/Query)
  */
@@ -17,24 +19,24 @@ public record MemberInfoDto(
         Integer height,
         String gender,
         Boolean chatAble,
-        String profileImage,
+        List<String> profileImage,
         Double latitude,
         Double longitude
 ) {
     public static MemberInfoDto from(Member member) {
-        return MemberInfoDto.builder()
-                .id(member.getId())
-                .kakaoId(member.getKakaoId())
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .age(member.getAge())
-                .height(member.getHeight())
-                .gender(member.getGender())
-                .chatAble(member.getChatAble())
-                .profileImage(member.getProfileImage())
-                .latitude(member.getLatitude())
-                .longitude(member.getLongitude())
-                .build();
+        return new MemberInfoDto(
+                member.getId(),
+                member.getKakaoId(),
+                member.getEmail(),
+                member.getNickname(),
+                member.getAge(),
+                member.getHeight(),
+                member.getGender(),
+                member.getChatAble(),
+                member.getProfileImage(),
+                member.getLatitude(),
+                member.getLongitude()
+        );
     }
 }
 

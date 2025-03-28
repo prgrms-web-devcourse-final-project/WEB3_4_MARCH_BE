@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.List;
+
 
 /**
  * 사용자 정보 수정에 사용할 Dto
@@ -26,7 +28,7 @@ public record MemberModifyRequestDto(
         String gender,
 
         @NotBlank(message = "프로필 이미지는 필수입니다.")
-        String profileImage,
+        List<String> profileImage,
 
         // 위도, 경도 정보
         Double latitude,

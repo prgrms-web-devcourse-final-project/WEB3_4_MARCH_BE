@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.List;
+
 /**
  * 회원 가입 요청 DTO (소셜 로그인 후 최초 등록 시)
  */
@@ -29,7 +31,7 @@ public record MemberRegisterRequestDto(
         Integer height,
 
         @NotBlank(message = "프로필 이미지는 필수입니다.")
-        String profileImage,
+        List<String> profileImage,
 
         // 위도, 경도 추가
         Double latitude,
