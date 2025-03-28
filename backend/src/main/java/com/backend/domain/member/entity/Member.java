@@ -1,5 +1,6 @@
 package com.backend.domain.member.entity;
 
+import com.backend.domain.image.entity.Image;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.global.base.BaseEntity;
 import jakarta.persistence.*;
@@ -38,15 +39,10 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String gender;
 
-    // 추후 이렇게 변경 예정
-//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private List<Image> profileImage = new ArrayList<>();
 
-    // 임시 코드
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "member_profile_images", joinColumns = @JoinColumn(name = "member_id"))
-    @Column(name = "profile_image", nullable = false)
-    private List<String> profileImage = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> profileImage = new ArrayList<>();
+
 
     @Column(nullable = false)
     private Boolean chatAble = true;
@@ -69,7 +65,7 @@ public class Member extends BaseEntity {
     @Builder
     public Member(Long kakaoId, String email, String nickname,
                   Integer age, Integer height, String gender,
-                  List<String> profileImage, Boolean chatAble,
+                  List<Image> profileImage, Boolean chatAble,
                   Double latitude, Double longitude,
                   String kakaoAccessToken, String kakaoRefreshToken) {
 
@@ -88,7 +84,7 @@ public class Member extends BaseEntity {
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
-                              List<String> profileImage, Boolean chatAble,
+                              List<Image> profileImage, Boolean chatAble,
                               Double latitude, Double longitude) {
         this.nickname = nickname;
         this.age = age;

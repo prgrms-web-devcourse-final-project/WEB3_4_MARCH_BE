@@ -1,12 +1,10 @@
 package com.backend.domain.member.repository;
 
 import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.dto.MemberInfoDto;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -26,16 +24,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 
     // 회원 상세 정보 DTO 조회 (단건)
-    @Query("SELECT new com.backend.domain.member.dto.MemberInfoDto(" +
-            "m.id, m.kakaoId, m.email, m.nickname, m.age, m.height, m.gender, " +
-            "m.chatAble, m.profileImage, m.latitude, m.longitude) " +
-            "FROM Member m WHERE m.id = :id")
-    Optional<MemberInfoDto> findMemberInfoDtoById(Long id);
+    // DTO 변환은 서비스에서 map(MemberInfoDto::from) 사용
+    Optional<Member> findById(Long id);
 
-    // 닉네임 유사 검색 (회원 리스트)
-    @Query("SELECT new com.backend.domain.member.dto.MemberInfoDto(" +
-            "m.id, m.kakaoId, m.email, m.nickname, m.age, m.height, m.gender, " +
-            "m.chatAble, m.profileImage, m.latitude, m.longitude) " +
-            "FROM Member m WHERE m.nickname LIKE %:nickname%")
-    List<MemberInfoDto> findMemberInfoDtosByNickname(String nickname);
+    // 닉네임 검색 (회원 리스트)
+    // DTO 변환은 서비스에서 map(MemberInfoDto::from) 사용
+    List<Member> findByNicknameContaining(String nickname);
 }

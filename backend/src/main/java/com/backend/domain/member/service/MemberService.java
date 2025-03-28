@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,9 +24,20 @@ public class MemberService {
 
     // 회원 정보 조회
     // Member 엔티티를 DTO로 변환해서 반환
-    public MemberResponseDto getMemberInfo(Long memberId) {
-        Member member = getMemberEntity(memberId);
-        return MemberResponseDto.from(member);
+    @Transactional(readOnly = true)
+    public MemberInfoDto getMemberInfo(Long memberId) {
+        return memberRepository.findById(memberId)
+                .filter(member -> !member.isDeleted())
+                .map(MemberInfoDto::from)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    // 닉네임으로 조회
+    public List<MemberInfoDto> searchByNickname(String nickname) {
+        return memberRepository.findByNicknameContaining(nickname).stream()
+                .filter(member -> !member.isDeleted())
+                .map(MemberInfoDto::from)
+                .collect(Collectors.toList());
     }
 
     // 회원 가입 처리 (카카오 로그인 이후)

@@ -1,10 +1,12 @@
 package com.backend.domain.member.dto;
 
+import com.backend.domain.image.entity.Image;
 import com.backend.domain.member.entity.Member;
 
 import java.util.List;
 
 /**
+ * API 응답 전용 DTO
  * 회원 정보 반환용 DTO (Controller → Client)
  */
 
@@ -15,7 +17,7 @@ public record MemberResponseDto(
         String gender,
         Integer age,
         Integer height,
-        List<String> profileImage,
+        List<Image> profileImage,
         Double latitude,
         Double longitude
 ) {

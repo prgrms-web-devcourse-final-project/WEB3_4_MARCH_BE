@@ -1,5 +1,6 @@
 package com.backend.domain.member.dto;
 
+import com.backend.domain.image.entity.Image;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public record MemberModifyRequestDto(
         String gender,
 
         @NotBlank(message = "프로필 이미지는 필수입니다.")
-        List<String> profileImage,
+        List<Image> profileImage,
 
         // 위도, 경도 정보
         Double latitude,

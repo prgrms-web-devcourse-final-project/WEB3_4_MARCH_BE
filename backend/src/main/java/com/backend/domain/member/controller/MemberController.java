@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
@@ -29,11 +31,16 @@ public class MemberController {
     // 회원 정보 조회
     // 클라이언트(프론트엔드)에 회원 정보 응답할 때 사용
     @GetMapping("/{memberId}")
-    public ResponseEntity<GenericResponse<MemberResponseDto>> getMemberInfo(
-            @PathVariable Long memberId) {
-
-        MemberResponseDto responseDto = memberService.getMemberInfo(memberId);
+    public ResponseEntity<GenericResponse<MemberInfoDto>> getMemberInfo(@PathVariable Long memberId) {
+        MemberInfoDto responseDto = memberService.getMemberInfo(memberId);
         return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+    }
+
+    // 닉네임 검색
+    @GetMapping("/search")
+    public ResponseEntity<GenericResponse<List<MemberInfoDto>>> searchMembersByNickname(@RequestParam String nickname) {
+        List<MemberInfoDto> members = memberService.searchByNickname(nickname);
+        return ResponseEntity.ok().body(GenericResponse.of(members));
     }
 
     // 회원 정보 수정
