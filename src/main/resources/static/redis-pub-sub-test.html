@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat WebSocket Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h2>WebSocket Chat Test</h2>
+
+<div>
+  <label>Room ID: <input type="number" id="chatroomId" value="1" /></label><br/>
+  <label>Sender ID: <input type="number" id="senderId" value="1" /></label><br/>
+  <label>Receiver ID: <input type="number" id="receiverId" value="2" /></label><br/>
+  <label>Message: <input type="text" id="content" /></label><br/>
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<hr/>
+<div><strong>Received:</strong></div>
+<pre id="chatLog"></pre>
+
+<script>
+  function formatKakaoStyleTime(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const period = hours < 12 ? "오전" : "오후";
+    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+
+    const timeString = `${period} ${hour12}:${minutes}`;
+
+    if (isToday) {
+      return timeString;
+    } else if (isYesterday) {
+      return `어제 ${timeString}`;
+    } else {
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}월 ${day}일 ${timeString}`;
+    }
+  }
+
+  let stompClient = null;
+
+  function connect() {
+    const socket = new SockJS("/ws");
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function () {
+      const chatroomId = document.getElementById("chatroomId").value;
+      stompClient.subscribe("/sub/chat/" + chatroomId, function (msg) {
+        const content = JSON.parse(msg.body);
+        const formattedTime = formatKakaoStyleTime(content.sendTime);
+        document.getElementById("chatLog").textContent +=
+          `[${formattedTime}] ${content.senderId}: ${content.content}\n`;
+      });
+
+      console.log("Connected to /sub/chat/" + chatroomId);
+    });
+  }
+
+  function sendMessage() {
+    if (!stompClient || !stompClient.connected) {
+      alert("WebSocket 연결이 아직 안 됐어요!");
+      return;
+    }
+
+    const payload = {
+      chatroomId: Number(document.getElementById("chatroomId").value),
+      senderId: Number(document.getElementById("senderId").value),
+      content: document.getElementById("content").value
+    };
+
+    stompClient.send("/pub/chat/send", {}, JSON.stringify(payload));
+  }
+
+  // 자동 연결
+  connect();
+</script>
+</body>
+</html>
