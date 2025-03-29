@@ -1,5 +1,7 @@
 {
   "recommendations": [
-    "biomejs.biome"
+    "biomejs.biome",
+    "arcanis.vscode-zipfs",
+    "dbaeumer.vscode-eslint"
   ]
 }
