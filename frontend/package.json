@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stackflow/core": "^1.2.0",
+    "@stackflow/plugin-basic-ui": "^1.13.1",
+    "@stackflow/plugin-renderer-basic": "^1.1.13",
+    "@stackflow/react": "^1.5.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reshaped": "^3.4.2"

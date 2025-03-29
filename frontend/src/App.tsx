@@ -1,12 +1,14 @@
-import { Reshaped } from "reshaped";
 import "reshaped/themes/reshaped/theme.css";
-import Demo from "./Test/Demo";
 import "./index.css";
+import "@stackflow/plugin-basic-ui/index.css";
+
+import { Reshaped } from "reshaped";
+import { Stack } from "./stackflow/stackflow";
 
 const App = () => {
   return (
     <Reshaped theme="reshaped">
-      <Demo />
+      <Stack />
     </Reshaped>
   );
 };
