@@ -1,12 +1,14 @@
 package com.backend.domain.member.dto;
 
+import java.util.List;
+
+import org.hibernate.validator.constraints.Length;
+
 import com.backend.domain.image.entity.Image;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import org.hibernate.validator.constraints.Length;
-
-import java.util.List;
 
 
 /**
@@ -29,7 +31,7 @@ public record MemberModifyRequestDto(
         String gender,
 
         @NotBlank(message = "프로필 이미지는 필수입니다.")
-        List<Image> profileImage,
+        List<Image> images,
 
         // 위도, 경도 정보
         Double latitude,

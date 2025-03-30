@@ -1,5 +1,11 @@
 package com.backend.domain.member.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -8,12 +14,8 @@ import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.exception.MemberErrorCode;
 import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class MemberService {
                     .age(requestDto.age())
                     .height(requestDto.height())
                     .gender(requestDto.gender())
-                    .profileImage(requestDto.profileImage())
+                    .images(requestDto.images())
                     .chatAble(true)
                     .latitude(requestDto.latitude())
                     .longitude(requestDto.longitude())
@@ -89,7 +91,7 @@ public class MemberService {
                 requestDto.age(),
                 requestDto.height(),
                 requestDto.gender(),
-                requestDto.profileImage(),
+                requestDto.images(),
                 member.getChatAble(),
                 // 사용자의 위도, 경도 값을 수정하여 위치 최신화
                 requestDto.latitude() != null ? requestDto.latitude() : member.getLatitude(),
@@ -107,7 +109,7 @@ public class MemberService {
                 member.getAge(),
                 member.getHeight(),
                 member.getGender(),
-                member.getProfileImage(),
+                member.getImages(),
                 member.getChatAble(),
                 latitude,
                 longitude

@@ -1,16 +1,25 @@
 package com.backend.domain.member.entity;
 
+import java.util.List;
+
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.global.base.BaseEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,9 +49,12 @@ public class Member extends BaseEntity {
     private String gender;
 
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Image> profileImage = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_image_id")
+    private Image profileImage;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Image> images;
 
     @Column(nullable = false)
     private Boolean chatAble = true;
@@ -65,7 +77,7 @@ public class Member extends BaseEntity {
     @Builder
     public Member(Long kakaoId, String email, String nickname,
                   Integer age, Integer height, String gender,
-                  List<Image> profileImage, Boolean chatAble,
+                  Image profileImage, List<Image> images, Boolean chatAble,
                   Double latitude, Double longitude,
                   String kakaoAccessToken, String kakaoRefreshToken) {
 
@@ -76,6 +88,7 @@ public class Member extends BaseEntity {
         this.height = height;
         this.gender = gender;
         this.profileImage = profileImage;
+        this.images = images;
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -84,13 +97,13 @@ public class Member extends BaseEntity {
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
-                              List<Image> profileImage, Boolean chatAble,
+        List<Image> images, Boolean chatAble,
                               Double latitude, Double longitude) {
         this.nickname = nickname;
         this.age = age;
         this.height = height;
         this.gender = gender;
-        this.profileImage = profileImage;
+        this.images = images;
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -113,7 +126,7 @@ public class Member extends BaseEntity {
         this.age = requestDto.age();
         this.height = requestDto.height();
         this.gender = requestDto.gender();
-        this.profileImage = requestDto.profileImage();
+        this.images = requestDto.images();
         this.isDeleted = false;
     }
 }
