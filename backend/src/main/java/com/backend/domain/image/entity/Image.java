@@ -29,10 +29,6 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 유저 Id
-    @Column(nullable = false)
-    private Long userId;
-
     // 이미지 URL
     @Column(nullable = false)
     private String url;

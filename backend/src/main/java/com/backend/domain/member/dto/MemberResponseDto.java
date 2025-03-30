@@ -17,7 +17,6 @@ public record MemberResponseDto(
         String gender,
         Integer age,
         Integer height,
-        Image profileImage,
         List<Image> images,
         Double latitude,
         Double longitude
@@ -30,7 +29,6 @@ public record MemberResponseDto(
                 member.getGender(),
                 member.getAge(),
                 member.getHeight(),
-                member.getProfileImage(),
                 member.getImages(),
                 member.getLatitude(),
                 member.getLongitude()

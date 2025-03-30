@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
+import com.backend.domain.member.entity.Member;
 
 @Service
 public class ImageService {
@@ -19,9 +20,9 @@ public class ImageService {
 
     // 프로필 수정 시 대표 이미지 업데이트
     @Transactional
-    public void setPrimaryImage(Long userId, Long imageId) {
+    public void setPrimaryImage(Member member, Long imageId) {
         // 현재 대표 이미지가 있으면 isPrimary를 false로 업데이트
-        Optional<Image> existingPrimary = imageRepository.findByUserIdAndIsPrimaryTrue(userId);
+        Optional<Image> existingPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member);
         existingPrimary.ifPresent(image -> {
             image.updateIsPrimary(false);
             imageRepository.save(image);

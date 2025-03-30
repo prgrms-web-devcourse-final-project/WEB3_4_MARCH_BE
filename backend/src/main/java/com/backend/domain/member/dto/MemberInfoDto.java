@@ -22,7 +22,6 @@ public record MemberInfoDto(
         Integer height,
         String gender,
         Boolean chatAble,
-        Image profileImage,
         List<Image> images,
         Double latitude,
         Double longitude
@@ -37,7 +36,6 @@ public record MemberInfoDto(
                 member.getHeight(),
                 member.getGender(),
                 member.getChatAble(),
-                member.getProfileImage(),
                 member.getImages(),
                 member.getLatitude(),
                 member.getLongitude()

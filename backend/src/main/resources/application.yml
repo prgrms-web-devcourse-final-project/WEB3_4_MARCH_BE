@@ -15,6 +15,12 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
-
 server:
   port: 8080
+
+cloud:
+  aws:
+    s3:
+      bucket: devcouse4-team06-bucket
+      region: ap-northeast-2
+      url-prefix: https://devcouse4-team06-bucket.s3.ap-northeast-2.amazonaws.com/
