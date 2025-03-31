@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.domain.image.service.ImageService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     // 회원 정보 조회
     // Member 엔티티를 DTO로 변환해서 반환
@@ -68,7 +70,7 @@ public class MemberService {
                     .age(requestDto.age())
                     .height(requestDto.height())
                     .gender(requestDto.gender())
-                    .images(requestDto.images())
+                    .images(null)
                     .chatAble(true)
                     .latitude(requestDto.latitude())
                     .longitude(requestDto.longitude())
@@ -77,6 +79,7 @@ public class MemberService {
                     .build();
             return memberRepository.save(newMember);
         });
+        // imageService.registerImages(member.getId(), requestDto.images());
 
         return MemberInfoDto.from(member);
     }

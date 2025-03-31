@@ -13,7 +13,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,6 +51,10 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> images;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_image_id")
+    private Image profileImage;
+
     @Column(nullable = false)
     private Boolean chatAble = true;
 
@@ -69,7 +75,8 @@ public class Member extends BaseEntity {
 
     @Builder
     public Member(Long kakaoId, String email, String nickname,
-                  Integer age, Integer height, String gender, List<Image> images, Boolean chatAble,
+                  Integer age, Integer height, String gender,
+                  List<Image> images, Boolean chatAble,
                   Double latitude, Double longitude,
                   String kakaoAccessToken, String kakaoRefreshToken) {
 
@@ -117,7 +124,10 @@ public class Member extends BaseEntity {
         this.age = requestDto.age();
         this.height = requestDto.height();
         this.gender = requestDto.gender();
-        this.images = requestDto.images();
         this.isDeleted = false;
+    }
+
+    public void setProfileImage(Image image) {
+        this.profileImage = image;
     }
 }

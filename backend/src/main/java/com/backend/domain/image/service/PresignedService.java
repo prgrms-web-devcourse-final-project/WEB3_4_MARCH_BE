@@ -13,13 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.backend.domain.image.dto.PresignedUrlRequest;
+import com.backend.domain.image.dto.PresignedUrlResponse;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -30,7 +31,6 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @RequiredArgsConstructor
 public class PresignedService {
 
-	private final S3Client s3Client;
 	private final S3Presigner s3Presigner;
 	private final ImageRepository imageRepository;
 	private final MemberRepository memberRepository;
@@ -41,6 +41,33 @@ public class PresignedService {
 	@Value("${cloud.aws.s3.url-prefix}")
 	private String urlPrefix;
 
+
+	public List<PresignedUrlResponse> generatePresignedUrls(List<PresignedUrlRequest> requests) throws IOException {
+		List<PresignedUrlResponse> responses = new ArrayList<>();
+		for (PresignedUrlRequest req : requests) {
+			String extension = req.extension(); // 실제 파일의 확장자를 사용
+			String uuid = UUID.randomUUID().toString();
+			String key = "images/" + uuid + "." + extension;
+
+			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+				.bucket(bucketName)
+				.key(key)
+				.contentType("image/" + extension)
+				.build();
+
+			PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+				.putObjectRequest(putObjectRequest)
+				.signatureDuration(Duration.ofMinutes(10))
+				.build();
+
+			PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+			String uploadUrl = presignedRequest.url().toString();
+			String imageUrl = urlPrefix + key;
+			responses.add(new PresignedUrlResponse(uploadUrl, imageUrl));
+		}
+		return responses;
+	}
+
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("Member not found"));
@@ -49,25 +76,29 @@ public class PresignedService {
 		boolean hasPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member).isPresent();
 
 		for (MultipartFile file : files) {
+			String originalFilename = Optional.ofNullable(file.getOriginalFilename()).orElse("default.jpg");
 			String extension = getExtension(file.getOriginalFilename());
 			String uuid = UUID.randomUUID().toString();
 			String key = "images/" + uuid + "." + extension;
 			String imageUrl = urlPrefix + key;
 
-			String presignedUrl = createPresignedUrl(key, file.getContentType());
+			String contentType = Optional.ofNullable(file.getContentType()).orElse("image/jpeg");
+			String presignedUrl = createPresignedUrl(key, contentType);
 
-			boolean uploadSuccess = uploadFileToS3(presignedUrl, file.getBytes());
-
+			boolean uploadSuccess = uploadFileToS3(presignedUrl, file.getBytes(), contentType);
 			if (uploadSuccess) {
 				Image image = Image.builder()
 					.url(imageUrl)
-					.isPrimary(!hasPrimary)  // 첫 업로드면 자동 대표 지정
+					.isPrimary(!hasPrimary)  // 첫 업로드 시 자동 대표 지정
 					.member(member)
 					.build();
-
 				imageRepository.save(image);
 				uploadResults.add(imageUrl);
-				hasPrimary = true;
+				if (!hasPrimary) {
+               		member.setProfileImage(image);
+                	memberRepository.save(member);
+					hasPrimary = true;
+				}
 			} else {
 				uploadResults.add("Failed to upload: " + file.getOriginalFilename());
 			}
@@ -91,14 +122,13 @@ public class PresignedService {
 		return presignedRequest.url().toString();
 	}
 
-	public boolean uploadFileToS3(String presignedUrl, byte[] fileData) {
+	public boolean uploadFileToS3(String presignedUrl, byte[] fileData, String contentType) {
 		try {
 			HttpURLConnection connection = (HttpURLConnection) new URL(presignedUrl).openConnection();
 			connection.setRequestMethod("PUT");
 			connection.setDoOutput(true);
-			connection.setRequestProperty("Content-Type", "image/jpeg");
+			connection.setRequestProperty("Content-Type", contentType);
 			connection.getOutputStream().write(fileData);
-
 			return connection.getResponseCode() == 200;
 		} catch (Exception e) {
 			e.printStackTrace();
