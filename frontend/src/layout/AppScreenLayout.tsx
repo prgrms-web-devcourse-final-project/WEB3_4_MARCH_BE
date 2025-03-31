@@ -6,10 +6,12 @@ import BottomTabBar from "./BottomTabBar";
 
 interface AppScreenLayoutProps extends AppScreenProps {
   children: ReactNode;
+  noBottomBar?: boolean;
 }
 
 const AppScreenLayout: FC<AppScreenLayoutProps> = ({
   children,
+  noBottomBar,
   ...appScreenProps
 }) => {
   return (
@@ -24,9 +26,11 @@ const AppScreenLayout: FC<AppScreenLayoutProps> = ({
         <div className="flex-1 overflow-auto px-4">{children}</div>
 
         {/* Bottom Navigation Bar */}
-        <div className="h-16 border-t border-gray-100 ">
-          <BottomTabBar />
-        </div>
+        {!noBottomBar && (
+          <div className="h-16 border-t border-gray-100 ">
+            <BottomTabBar />
+          </div>
+        )}
       </div>
     </AppScreen>
   );

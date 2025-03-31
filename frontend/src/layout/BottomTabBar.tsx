@@ -53,10 +53,10 @@ const BottomTabBar = () => {
       <NavItem
         icon={<User size={24} />}
         label="내 정보"
-        isActive={name === "ProfileActivity"}
+        isActive={name === "MyProfileActivity"}
         onClick={() =>
           replace(
-            "ProfileActivity",
+            "MyProfileActivity",
             {},
             {
               animate: false,

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { DumyPeople } from "./dumy";
 import { Heart, RefreshCw, X } from "lucide-react";
 import { cn } from "../../utils/classNaem";
+import { useFlow } from "../../stackflow/stackflow";
 
 type ProfileWithStatus = {
   profile: (typeof DumyPeople)[0];
@@ -114,6 +115,14 @@ export default function ExploreView() {
     }
   }, [currentIndex, profiles.length]);
 
+  const { push } = useFlow();
+
+  const handleProfileCardClick = () => {
+    push("ProfileDetailActivity", {
+      userId: profiles[currentIndex].profile.id.toString(),
+    });
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="relative flex-1 flex items-center justify-center overflow-hidden">
@@ -168,6 +177,7 @@ export default function ExploreView() {
 
               return (
                 <div
+                  onClick={handleProfileCardClick}
                   key={item.profile.id}
                   ref={isActive ? cardRef : null}
                   className={cn(
