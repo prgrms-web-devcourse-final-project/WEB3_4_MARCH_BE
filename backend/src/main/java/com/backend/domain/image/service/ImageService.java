@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.backend.domain.image.dto.ImageRegisterRequest;
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
@@ -26,22 +25,6 @@ public class ImageService {
     private final S3Client s3Client;
     private final String bucketName = "devcouse4-team06-bucket";
     private final String urlPrefix = "https://devcouse4-team06-bucket.s3.ap-northeast-2.amazonaws.com/";
-
-    @Transactional
-    public void registerImages(Long memberId, List<ImageRegisterRequest> requests) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // 이미지를 저장하는 로직 추가
-        for (ImageRegisterRequest request : requests) {
-            Image image = Image.builder()
-                .url(request.url())
-                .isPrimary(request.isPrimary())
-                .member(member)
-                .build();
-            imageRepository.save(image);
-        }
-    }
 
     @Transactional(readOnly = true)
     public List<ImageResponseDto> getImagesForMember(Long memberId) {

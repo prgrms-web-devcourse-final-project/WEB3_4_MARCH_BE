@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.backend.domain.image.dto.PresignedUrlRequest;
-import com.backend.domain.image.dto.PresignedUrlResponse;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
@@ -42,32 +40,6 @@ public class PresignedService {
 
 	@Value("${cloud.aws.s3.url-prefix}")
 	private String urlPrefix;
-
-	public List<PresignedUrlResponse> generatePresignedUrls(List<PresignedUrlRequest> requests) throws IOException {
-		List<PresignedUrlResponse> responses = new ArrayList<>();
-		for (PresignedUrlRequest req : requests) {
-			String extension = req.extension(); // 실제 파일의 확장자를 사용
-			String uuid = UUID.randomUUID().toString();
-			String key = "images/" + uuid + "." + extension;
-
-			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-				.bucket(bucketName)
-				.key(key)
-				.contentType("image/" + extension)
-				.build();
-
-			PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-				.putObjectRequest(putObjectRequest)
-				.signatureDuration(Duration.ofMinutes(10))
-				.build();
-
-			PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
-			String uploadUrl = presignedRequest.url().toString();
-			String imageUrl = urlPrefix + key;
-			responses.add(new PresignedUrlResponse(uploadUrl, imageUrl));
-		}
-		return responses;
-	}
 
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
 		Member member = memberRepository.findById(memberId)
