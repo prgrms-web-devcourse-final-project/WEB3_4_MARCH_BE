@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useMap } from "./contexts/MapContext";
 
 interface KakaoMapProps {
   width?: string;
@@ -14,7 +15,7 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
   level = 3,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<kakao.maps.KakaoMap | null>(null);
+  const { mapInstance, setMapInstance } = useMap();
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -26,7 +27,9 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
     };
 
     const map = new window.kakao.maps.Map(mapRef.current, options);
-    mapInstanceRef.current = map;
+
+    // Set map in context instead of local ref
+    setMapInstance(map);
 
     // Add controls
     const zoomControl = new window.kakao.maps.ZoomControl();
@@ -36,24 +39,24 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
     map.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
 
     return () => {
-      mapInstanceRef.current = null;
+      setMapInstance(null);
     };
-  }, [center.lat, center.lng, level]);
+  }, [center.lat, center.lng, level, setMapInstance]);
 
   // Update map center when the center prop changes
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstance) return;
 
     const newCenter = new window.kakao.maps.LatLng(center.lat, center.lng);
-    mapInstanceRef.current.setCenter(newCenter);
-  }, [center.lat, center.lng]);
+    mapInstance.setCenter(newCenter);
+  }, [center.lat, center.lng, mapInstance]);
 
   // Update map level when the level prop changes
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstance) return;
 
-    mapInstanceRef.current.setLevel(level);
-  }, [level]);
+    mapInstance.setLevel(level);
+  }, [level, mapInstance]);
 
   return <div ref={mapRef} style={{ width, height }} />;
 };
