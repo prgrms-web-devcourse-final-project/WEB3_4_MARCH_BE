@@ -5,7 +5,7 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.7.6":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.22.15, @babel/runtime@npm:^7.7.6":
   version: 7.27.0
   resolution: "@babel/runtime@npm:7.27.0"
   dependencies:
@@ -1364,6 +1364,7 @@ __metadata:
     lucide-react: "npm:^0.485.0"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
+    react-kakao-maps-sdk: "npm:^1.1.27"
     tailwindcss: "npm:^4.0.17"
     typescript: "npm:~5.7.2"
     vite: "npm:^6.2.0"
@@ -1538,6 +1539,13 @@ __metadata:
   version: 1.1.0
   resolution: "jsbn@npm:1.1.0"
   checksum: 10c0/4f907fb78d7b712e11dea8c165fe0921f81a657d3443dde75359ed52eb2b5d33ce6773d97985a089f09a65edd80b11cb75c767b57ba47391fee4c969f7215c96
+  languageName: node
+  linkType: hard
+
+"kakao.maps.d.ts@npm:^0.1.39":
+  version: 0.1.40
+  resolution: "kakao.maps.d.ts@npm:0.1.40"
+  checksum: 10c0/16eef0d9846311921ae3c5c020a8769ab8d1f894b2a6f1aef869a83648462982c2891bc8ea174665345290483bf73feb6ae264273cee38a40a1adbb17aa6862f
   languageName: node
   linkType: hard
 
@@ -1953,6 +1961,19 @@ __metadata:
   version: 3.2.2
   resolution: "react-fast-compare@npm:3.2.2"
   checksum: 10c0/0bbd2f3eb41ab2ff7380daaa55105db698d965c396df73e6874831dbafec8c4b5b08ba36ff09df01526caa3c61595247e3269558c284e37646241cba2b90a367
+  languageName: node
+  linkType: hard
+
+"react-kakao-maps-sdk@npm:^1.1.27":
+  version: 1.1.27
+  resolution: "react-kakao-maps-sdk@npm:1.1.27"
+  dependencies:
+    "@babel/runtime": "npm:^7.22.15"
+    kakao.maps.d.ts: "npm:^0.1.39"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18
+    react-dom: ^16.8 || ^17 || ^18
+  checksum: 10c0/1cc0dd855f1b8c0ba3d089ada352ecab8569d5a6cd9344baebc3161cf64d0670ff633a422636289e549b42da6b38997ddb7a4d3ddf6b616f93f9b2e96e04eae1
   languageName: node
   linkType: hard
 
