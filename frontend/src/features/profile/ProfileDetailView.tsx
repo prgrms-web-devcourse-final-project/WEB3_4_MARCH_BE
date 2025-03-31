@@ -1,7 +1,6 @@
-import { ArrowLeft, Heart, MessageSquare, Shield } from "lucide-react";
+import { Heart, MessageSquare, Shield } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../../utils/classNaem";
-import { useFlow } from "../../stackflow/stackflow";
 
 interface ProfileDetailProps {
   profile: {
@@ -15,9 +14,13 @@ interface ProfileDetailProps {
     location?: string;
     job?: string;
   };
+  isMyProfile?: boolean;
 }
 
-export default function ProfileDetailView({ profile }: ProfileDetailProps) {
+export default function ProfileDetailView({
+  profile,
+  isMyProfile,
+}: ProfileDetailProps) {
   const [liked, setLiked] = useState(false);
 
   const handleLike = (e: React.MouseEvent) => {
@@ -35,6 +38,11 @@ export default function ProfileDetailView({ profile }: ProfileDetailProps) {
     alert(`${profile.name}님을 차단했습니다.`);
   };
 
+  const handleEditProfile = () => {
+    // In a real app, this would navigate to the edit profile screen
+    alert("프로필 수정 화면으로 이동합니다.");
+  };
+
   return (
     <div className="flex flex-col bg-white mb-20 pt-2">
       {/* Profile photo with like button */}
@@ -45,17 +53,19 @@ export default function ProfileDetailView({ profile }: ProfileDetailProps) {
             style={{ backgroundImage: `url(${profile.image})` }}
           />
         </div>
-        <button
-          onClick={handleLike}
-          className={cn(
-            "absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center",
-            liked
-              ? "bg-red-500 text-white"
-              : "bg-white/80 text-gray-600 backdrop-blur-sm",
-          )}
-        >
-          <Heart size={24} className={liked ? "fill-white" : ""} />
-        </button>
+        {!isMyProfile && (
+          <button
+            onClick={handleLike}
+            className={cn(
+              "absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center",
+              liked
+                ? "bg-red-500 text-white"
+                : "bg-white/80 text-gray-600 backdrop-blur-sm",
+            )}
+          >
+            <Heart size={24} className={liked ? "fill-white" : ""} />
+          </button>
+        )}
       </div>
 
       {/* Profile info */}
@@ -107,25 +117,38 @@ export default function ProfileDetailView({ profile }: ProfileDetailProps) {
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="fixed bottom-0 w-full h-20 left-0 p-4 border-t border-gray-100 bg-white">
-        <div className="flex gap-3">
+      {isMyProfile && (
+        <div className="flex gap-3 mt-4">
           <button
-            onClick={handleChatRequest}
+            onClick={handleEditProfile}
             className="flex-1 py-3 bg-black text-white rounded-lg font-medium flex items-center justify-center"
           >
-            <MessageSquare size={18} className="mr-2" />
-            채팅 요청하기
-          </button>
-          <button
-            onClick={handleBlock}
-            className="py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium flex items-center justify-center"
-          >
-            <Shield size={18} className="mr-2" />
-            차단
+            프로필 수정
           </button>
         </div>
-      </div>
+      )}
+
+      {/* Action buttons */}
+      {!isMyProfile && (
+        <div className="fixed bottom-0 w-full h-20 left-0 p-4 border-t border-gray-100 bg-white">
+          <div className="flex gap-3">
+            <button
+              onClick={handleChatRequest}
+              className="flex-1 py-3 bg-black text-white rounded-lg font-medium flex items-center justify-center"
+            >
+              <MessageSquare size={18} className="mr-2" />
+              채팅 요청하기
+            </button>
+            <button
+              onClick={handleBlock}
+              className="py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium flex items-center justify-center"
+            >
+              <Shield size={18} className="mr-2" />
+              차단
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
