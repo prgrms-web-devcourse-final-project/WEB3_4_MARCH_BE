@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.domain.image.dto.ImageRegisterRequest;
 import com.backend.domain.image.dto.ImageResponseDto;
-import com.backend.domain.image.dto.ImageUpdateRequestDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
@@ -42,25 +41,6 @@ public class ImageService {
                 .build();
             imageRepository.save(image);
         }
-    }
-
-    @Transactional
-    public ImageResponseDto updateImage(Long imageId, ImageUpdateRequestDto requestDto) {
-        Image image = imageRepository.findById(imageId)
-            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
-        image.setIsPrimary(requestDto.getIsPrimary());
-
-        // 대표 이미지 변경인 경우, 기존 대표 이미지 해제
-        if (Boolean.TRUE.equals(requestDto.getIsPrimary())) {
-            Member member = image.getMember();
-            imageRepository.findByMemberAndIsPrimaryTrue(member)
-                .stream()
-                .filter(img -> !img.getId().equals(imageId))
-                .forEach(img -> img.setIsPrimary(false));
-            member.setProfileImage(image);
-        }
-        imageRepository.save(image);
-        return ImageResponseDto.from(image);
     }
 
     @Transactional(readOnly = true)
