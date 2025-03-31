@@ -1,4 +1,4 @@
-package com.backend.domain.chatroom.dto;
+package com.backend.domain.chatroom.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

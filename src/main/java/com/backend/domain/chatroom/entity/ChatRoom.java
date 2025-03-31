@@ -1,8 +1,8 @@
 package com.backend.domain.chatroom.entity;
 
-import com.backend.domain.chat.exception.ChatErrorCode;
-import com.backend.domain.chat.exception.ChatException;
 import com.backend.domain.chatrequest.entity.ChatRequest;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,7 +48,7 @@ public class ChatRoom {
      */
     public void validateBlocked() {
         if (this.is_blocked) {
-            throw new ChatException(ChatErrorCode.BLOCKED_MEMBER);
+            throw new GlobalException(GlobalErrorCode.BLOCKED_MEMBER);
         }
     }
 
@@ -63,7 +63,7 @@ public class ChatRoom {
         } else if (currentMemberId.equals(this.receiverId)) {
             return this.senderId;
         } else {
-            throw new ChatException(ChatErrorCode.NOT_FOUND_BY_ID);
+            throw new GlobalException(GlobalErrorCode.NOT_FOUND_BY_ID);
         }
     }
 }

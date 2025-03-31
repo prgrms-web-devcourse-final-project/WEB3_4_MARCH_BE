@@ -2,11 +2,15 @@ package com.backend.domain.chat.dto.response;
 
 import com.backend.domain.chat.entity.Chat;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessageResponse {
     private Long id;
     private Long chatroomId;
@@ -22,7 +26,6 @@ public class ChatMessageResponse {
                 .senderId(chat.getSender())
                 .chatContent(chat.getChatContent())
                 .sendTime(chat.getSendTime())
-                .isRead(chat.isRead())
                 .build();
     }
 }

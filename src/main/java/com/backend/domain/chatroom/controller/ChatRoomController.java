@@ -1,7 +1,7 @@
 package com.backend.domain.chatroom.controller;
 
-import com.backend.domain.chatroom.dto.ChatRoomRequest;
-import com.backend.domain.chatroom.dto.ChatRoomResponse;
+import com.backend.domain.chatroom.dto.request.ChatRoomRequest;
+import com.backend.domain.chatroom.dto.response.ChatRoomResponse;
 import com.backend.domain.chatroom.service.ChatRoomService;
 import com.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;

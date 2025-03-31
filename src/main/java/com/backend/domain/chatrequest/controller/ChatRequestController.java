@@ -1,7 +1,7 @@
 package com.backend.domain.chatrequest.controller;
 
 import com.backend.domain.chatrequest.service.ChatRequestService;
-import com.backend.domain.chatroom.dto.ChatRoomResponse;
+import com.backend.domain.chatroom.dto.response.ChatRoomResponse;
 import com.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
