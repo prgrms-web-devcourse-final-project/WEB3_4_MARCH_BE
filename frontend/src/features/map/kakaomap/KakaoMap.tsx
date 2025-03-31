@@ -20,6 +20,7 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
+    console.log(window.kakao);
     // Initialize the map
     const options = {
       center: new window.kakao.maps.LatLng(center.lat, center.lng),
