@@ -24,6 +24,8 @@ import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.response.GenericResponse;
+import com.backend.domain.image.entity.Image;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -110,11 +112,19 @@ public class MemberController {
         return ResponseEntity.ok().body(GenericResponse.of(responseDto));
     }
 
+    // 대표 프로필 이미지 변경
     @PatchMapping("/{memberId}/profile-image/primary")
     public ResponseEntity<GenericResponse<MemberResponseDto>> changePrimaryImage(
         @PathVariable Long memberId,
         @RequestParam Long imageId) {
         MemberResponseDto responseDto = imageService.changeRepresentativeImage(memberId, imageId);
         return ResponseEntity.ok(GenericResponse.of(responseDto));
+    }
+
+    // 이미지 조회
+    @GetMapping("/{memberId}/images")
+    public ResponseEntity<GenericResponse<List<Image>>> getMemberImages(@PathVariable Long memberId) {
+        List<Image> images = imageService.getImagesForMember(memberId);
+        return ResponseEntity.ok(GenericResponse.of(images));
     }
 }

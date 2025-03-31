@@ -50,6 +50,13 @@ public class ImageService {
         return MemberResponseDto.from(member);
     }
 
+    @Transactional(readOnly = true)
+    public List<Image> getImagesForMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        return imageRepository.findByMember(member);
+    }
+
     @Transactional
     public void registerImages(Long memberId, List<ImageRegisterRequest> requests) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
