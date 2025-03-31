@@ -1,3 +1,4 @@
+import ExploreView from "../features/explorer/ExplorerView";
 import AppScreenLayout from "../layout/AppScreenLayout";
 
 type ExploreActivityProps = {
@@ -5,7 +6,11 @@ type ExploreActivityProps = {
 };
 
 const ExploreActivity: React.FC<ExploreActivityProps> = ({ params: {} }) => {
-  return <AppScreenLayout>EXPLORER</AppScreenLayout>;
+  return (
+    <AppScreenLayout>
+      <ExploreView />
+    </AppScreenLayout>
+  );
 };
 
 export default ExploreActivity;
