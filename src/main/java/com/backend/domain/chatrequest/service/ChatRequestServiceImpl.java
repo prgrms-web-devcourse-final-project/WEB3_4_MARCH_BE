@@ -1,15 +1,15 @@
 package com.backend.domain.chatrequest.service;
 
-import com.backend.domain.chat.exception.ChatErrorCode;
-import com.backend.domain.chat.exception.ChatException;
 import com.backend.domain.chatrequest.dto.ChatRequestRequest;
 import com.backend.domain.chatrequest.dto.ChatRequestResponse;
 import com.backend.domain.chatrequest.entity.ChatRequest;
 import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.chatrequest.repository.ChatRequestRepository;
-import com.backend.domain.chatroom.dto.ChatRoomResponse;
+import com.backend.domain.chatroom.dto.response.ChatRoomResponse;
 import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.chatroom.repository.ChatRoomRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class ChatRequestServiceImpl implements ChatRequestService {
         Long receiverId = chatRequest.getReceiverId();
 
         if (chatRequestRepository.existsBySenderAndReceiver(senderId, receiverId)) {
-            throw new ChatException(ChatErrorCode.DUPLICATE_CHAT_REQUEST);
+            throw new GlobalException(GlobalErrorCode.DUPLICATE_CHAT_REQUEST);
         }
 
         ChatRequest request = ChatRequest.builder()
@@ -61,7 +61,7 @@ public class ChatRequestServiceImpl implements ChatRequestService {
     @Transactional
     public ChatRoomResponse acceptRequest(Long requestId) {
         ChatRequest request = chatRequestRepository.findById(requestId)
-                .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_FOUND_BY_REQUEST));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_BY_REQUEST));
 
         request.accept();
         chatRequestRepository.save(request);

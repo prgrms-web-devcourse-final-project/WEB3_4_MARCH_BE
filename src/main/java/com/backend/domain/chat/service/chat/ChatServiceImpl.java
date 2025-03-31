@@ -3,19 +3,20 @@ package com.backend.domain.chat.service.chat;
 import com.backend.domain.chat.dto.ChatMessage;
 import com.backend.domain.chat.dto.request.ChatMessageRequest;
 import com.backend.domain.chat.dto.response.ChatMessageResponse;
-import com.backend.domain.chat.dto.response.ChatRoomMessageResponse;
 import com.backend.domain.chat.entity.Chat;
-import com.backend.domain.chat.exception.ChatErrorCode;
-import com.backend.domain.chat.exception.ChatException;
 import com.backend.domain.chat.repository.ChatRepository;
 import com.backend.domain.chat.service.kafka.KafkaChatProducer;
 import com.backend.domain.chat.service.redis.RedisPublisher;
 import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.chatroom.repository.ChatRoomRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,21 +34,40 @@ public class ChatServiceImpl implements ChatService {
      * @return
      */
     @Override
-    public ChatMessageResponse sendMessage(ChatMessageRequest request) {
+    public void sendMessage(ChatMessageRequest request) {
 
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatroomId())
-                .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_FOUND_BY_ID));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_BY_ID));
 
-        Chat chat = Chat.builder()
-                .chatRoom(chatRoom)
-                .sender(request.getSenderId())
-                .chatContent(request.getContent())
+        ChatMessage chatMessage = ChatMessage
+                .builder()
+                .roomId(chatRoom.getId())
+                .senderId(chatRoom.getSenderId())
+                .receiverId(chatRoom.getReceiverId())
+                .senderName("")
+                .content(request.getContent())
                 .sendTime(LocalDateTime.now())
-                .isRead(false)
                 .build();
 
-        Chat savedChat = chatRepository.save(chat);
-        return ChatMessageResponse.from(savedChat);
+        redisPublisher.publish(chatMessage);
+        kafkaChatProducer.sendMessage(chatMessage);
+    }
+
+    /**
+     * Redis 전송용 DTO 생성 후 WebSocket으로 전송, 저장 / 비동기 처리 메소드입니다.
+     */
+    @Override
+    @Transactional
+    public void relayMessage(ChatMessage chatMessage) {
+
+        ChatRoom room = chatRoomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_BY_ID));
+
+        Chat chat = chatMessage.toEntity(room);
+
+        chatRepository.save(chat);
+
+        redisPublisher.publish(chatMessage);
     }
 
     /**
@@ -55,40 +75,17 @@ public class ChatServiceImpl implements ChatService {
      * receiverId를 memberId로 변경 후 페이징 예정입니다.
      */
     @Override
-    public ChatRoomMessageResponse getRoomMessage(Long chatRoomId, Long receiverId) {
-        List<ChatMessageResponse> messages = chatRepository
-                .findByChatRoomIdOrderBySendTimeAsc(chatRoomId)
-                .stream()
+    @Transactional
+    public List<ChatMessageResponse> getRoomMessage(Long roomId) {
+
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_BY_ID));
+
+        List<Chat> chats = chatRepository.findByChatRoomIdOrderBySendTimeAsc(roomId);
+
+        return chats.stream()
                 .map(ChatMessageResponse::from)
-                .toList();
+                .collect(Collectors.toList());
 
-        int unreadCount = chatRepository.countUnreadMessages(chatRoomId, receiverId);
-
-        return ChatRoomMessageResponse.builder()
-                .messages(messages)
-                .unreadCount(unreadCount)
-                .build();
-    }
-
-    /**
-     * Redis 전송용 DTO 생성 후 WebSocket으로 전송, 저장 / 비동기 처리 메소드입니다.
-     */
-    @Override
-    public void relayMessage(ChatMessageRequest request) {
-        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatroomId())
-                .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_FOUND_BY_ID));
-
-        Long receiverId = chatRoom.getAnotherUserId(request.getSenderId());
-
-        ChatMessage chatMessage = ChatMessage.builder()
-                .roomId(request.getChatroomId())
-                .senderId(request.getSenderId())
-                .receiverId(receiverId)
-                .content(request.getContent())
-                .sendTime(LocalDateTime.now())
-                .build();
-
-        redisPublisher.publish("chat", chatMessage);
-        kafkaChatProducer.sendMessage(request);
     }
 }

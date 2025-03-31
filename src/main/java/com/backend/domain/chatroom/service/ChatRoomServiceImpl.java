@@ -1,13 +1,15 @@
 package com.backend.domain.chatroom.service;
 
-import com.backend.domain.chat.exception.ChatErrorCode;
-import com.backend.domain.chat.exception.ChatException;
 import com.backend.domain.chatrequest.entity.ChatRequest;
 import com.backend.domain.chatrequest.repository.ChatRequestRepository;
-import com.backend.domain.chatroom.dto.ChatRoomResponse;
+import com.backend.domain.chatroom.dto.response.ChatRoomResponse;
 import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.chatroom.repository.ChatRoomRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +25,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
 
-        // TODO : Request 머지 후 ErrorCode 생성
         chatRoomRepository.findRoomByMembers(senderId, receiverId).ifPresent(
-                room -> {throw new ChatException(
-                        ChatErrorCode.DUPLICATE_CHAT_REQUEST);
+                room -> {throw new GlobalException(
+                        GlobalErrorCode.DUPLICATE_CHAT_REQUEST);
                 }
         );
 
-        // TODO : Request 머지 후 ErrorCode 생성
         ChatRequest chatRequest = chatRequestRepository.findRequestByMembers(senderId, receiverId)
-                .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_FOUND_BY_REQUEST));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_BY_REQUEST));
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .senderId(senderId)
@@ -46,5 +46,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
 
         return ChatRoomResponse.from(chatRoom);
+    }
+
+    @Override
+    public List<ChatRoomResponse> getChatRoomsForMember(Long memberId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findBySenderIdOrReceiverId(memberId, memberId);
+
+        return chatRooms.stream()
+                .map(ChatRoomResponse::from)
+                .collect(Collectors.toList());
     }
 }
