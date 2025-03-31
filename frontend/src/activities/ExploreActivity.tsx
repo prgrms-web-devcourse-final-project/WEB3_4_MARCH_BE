@@ -7,7 +7,7 @@ type ExploreActivityProps = {
 
 const ExploreActivity: React.FC<ExploreActivityProps> = ({ params: {} }) => {
   return (
-    <AppScreenLayout>
+    <AppScreenLayout title="CONNECT TO">
       <ExploreView />
     </AppScreenLayout>
   );

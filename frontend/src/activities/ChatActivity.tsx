@@ -5,7 +5,7 @@ type ChatActivityProps = {
 };
 
 const ChatActivity: React.FC<ChatActivityProps> = ({ params: {} }) => {
-  return <AppScreenLayout>CHAT</AppScreenLayout>;
+  return <AppScreenLayout title="CONNECT TO">CHAT</AppScreenLayout>;
 };
 
 export default ChatActivity;

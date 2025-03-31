@@ -7,7 +7,7 @@ type MyProfileActivityProps = {
 const MyProfileActivity: React.FC<MyProfileActivityProps> = ({
   params: {},
 }) => {
-  return <AppScreenLayout>MAP</AppScreenLayout>;
+  return <AppScreenLayout title="CONNECT TO">MAP</AppScreenLayout>;
 };
 
 export default MyProfileActivity;

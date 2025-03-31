@@ -18,7 +18,6 @@ interface ProfileDetailProps {
 }
 
 export default function ProfileDetailView({ profile }: ProfileDetailProps) {
-  const { pop } = useFlow();
   const [liked, setLiked] = useState(false);
 
   const handleLike = (e: React.MouseEvent) => {
@@ -36,28 +35,13 @@ export default function ProfileDetailView({ profile }: ProfileDetailProps) {
     alert(`${profile.name}님을 차단했습니다.`);
   };
 
-  const handleBackClick = () => {
-    pop();
-  };
-
   return (
-    <div className="flex flex-col bg-white mb-20">
-      {/* Header with back button */}
-      <div className="flex items-center h-14 px-4 border-b border-gray-100">
-        <button
-          onClick={handleBackClick}
-          className="p-2 -ml-2 text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h2 className="ml-2 text-lg font-medium">{profile.name}님의 프로필</h2>
-      </div>
-
+    <div className="flex flex-col bg-white mb-20 pt-2">
       {/* Profile photo with like button */}
       <div className="relative">
         <div className="aspect-[4/3] w-full bg-gray-100">
           <div
-            className="absolute inset-0 bg-center bg-cover"
+            className="absolute inset-0 bg-center bg-cover rounded-md"
             style={{ backgroundImage: `url(${profile.image})` }}
           />
         </div>

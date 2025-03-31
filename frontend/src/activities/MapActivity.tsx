@@ -5,7 +5,7 @@ type MapActivityProps = {
 };
 
 const MapActivity: React.FC<MapActivityProps> = ({ params: {} }) => {
-  return <AppScreenLayout>MAP</AppScreenLayout>;
+  return <AppScreenLayout title="CONNECT TO">MAP</AppScreenLayout>;
 };
 
 export default MapActivity;

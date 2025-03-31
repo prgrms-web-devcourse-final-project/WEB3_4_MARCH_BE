@@ -1,10 +1,33 @@
-import { Bell } from "lucide-react";
+import { useFlow } from "@stackflow/react/future";
+import { ArrowLeft, Bell } from "lucide-react";
 import type { FC } from "react";
 
-const TopBar: FC = () => {
+type TopBarProps = {
+  backable?: boolean;
+  title?: string;
+};
+
+const TopBar: FC<TopBarProps> = ({ backable, title }) => {
+  const { pop } = useFlow();
+
+  const handleBackClick = () => {
+    pop();
+  };
+
   return (
     <div className="flex items-center justify-between h-full bg-white z-10">
-      <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+      {backable ? (
+        <button
+          onClick={handleBackClick}
+          className="p-2 -ml-2 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft size={24} />
+        </button>
+      ) : (
+        <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+      )}
+
+      {title ? <div className="text-lg font-medium">{title}</div> : null}
 
       <button className="p-2 text-gray-600 hover:text-primary transition-colors">
         <Bell size={22} />

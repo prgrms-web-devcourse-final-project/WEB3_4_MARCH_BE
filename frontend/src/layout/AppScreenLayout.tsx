@@ -6,12 +6,16 @@ import BottomTabBar from "./BottomTabBar";
 
 interface AppScreenLayoutProps extends AppScreenProps {
   children: ReactNode;
+  title?: string;
   noBottomBar?: boolean;
+  backable?: boolean;
 }
 
 const AppScreenLayout: FC<AppScreenLayoutProps> = ({
   children,
   noBottomBar,
+  backable,
+  title,
   ...appScreenProps
 }) => {
   return (
@@ -19,7 +23,7 @@ const AppScreenLayout: FC<AppScreenLayoutProps> = ({
       <div className="relative h-[100vh] w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white">
         {/* Top Bar */}
         <div className="h-14 px-4 border-b border-gray-100">
-          <TopBar />
+          <TopBar backable={backable} title={title} />
         </div>
 
         {/* Content Area */}

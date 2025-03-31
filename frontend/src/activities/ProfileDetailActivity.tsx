@@ -25,7 +25,7 @@ const ProfileDetailActivity: React.FC<ProfileDetailActivityProps> = ({
   };
 
   return (
-    <AppScreenLayout noBottomBar>
+    <AppScreenLayout noBottomBar backable title="김민지님의 프로필">
       <ProfileDetailView profile={dummyProfile} />
     </AppScreenLayout>
   );
