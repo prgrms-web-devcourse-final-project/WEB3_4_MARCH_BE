@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.backend.domain.image.dto.ImageRegisterRequest;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
+import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 
@@ -21,22 +22,32 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
 
-    // 프로필 수정 시 대표 이미지 업데이트
     @Transactional
-    public void setPrimaryImage(Member member, Long imageId) {
-        // 현재 대표 이미지가 있으면 isPrimary를 false로 업데이트
+    public MemberResponseDto changeRepresentativeImage(Long memberId, Long newPrimaryImageId) {
+        // 회원 검증
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        // 새 대표 이미지가 해당 회원의 이미지인지 확인
+        Image newPrimaryImage = imageRepository.findById(newPrimaryImageId)
+            .filter(img -> img.getMember().getId().equals(memberId))
+            .orElseThrow(() -> new IllegalArgumentException("Image not found for member"));
+
+        // 기존 대표 이미지가 있다면 업데이트
         Optional<Image> existingPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member);
         existingPrimary.ifPresent(image -> {
             image.updateIsPrimary(false);
             imageRepository.save(image);
         });
 
-        // 선택한 이미지의 isPrimary를 true로 업데이트
-        Optional<Image> selectedImage = imageRepository.findById(imageId);
-        selectedImage.ifPresent(image -> {
-            image.updateIsPrimary(true);
-            imageRepository.save(image);
-        });
+        // 새 이미지를 대표로 지정
+        newPrimaryImage.updateIsPrimary(true);
+        imageRepository.save(newPrimaryImage);
+
+        // 회원 엔티티의 profileImage 업데이트
+        member.setProfileImage(newPrimaryImage);
+
+        return MemberResponseDto.from(member);
     }
 
     @Transactional

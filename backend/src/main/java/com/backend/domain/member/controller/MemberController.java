@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
@@ -34,6 +35,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PresignedService presignedService;
+    private final ImageService imageService;
 
     // 회원 가입 (카카오 로그인 이후)
     @PostMapping("/register")
@@ -106,5 +108,13 @@ public class MemberController {
 
         MemberResponseDto responseDto = memberService.updateLocation(memberId, latitude, longitude);
         return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+    }
+
+    @PatchMapping("/{memberId}/profile-image/primary")
+    public ResponseEntity<GenericResponse<MemberResponseDto>> changePrimaryImage(
+        @PathVariable Long memberId,
+        @RequestParam Long imageId) {
+        MemberResponseDto responseDto = imageService.changeRepresentativeImage(memberId, imageId);
+        return ResponseEntity.ok(GenericResponse.of(responseDto));
     }
 }
