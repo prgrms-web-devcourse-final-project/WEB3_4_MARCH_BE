@@ -70,7 +70,6 @@ public class MemberService {
                     .age(requestDto.age())
                     .height(requestDto.height())
                     .gender(requestDto.gender())
-                    .images(null)
                     .chatAble(true)
                     .latitude(requestDto.latitude())
                     .longitude(requestDto.longitude())
@@ -79,7 +78,6 @@ public class MemberService {
                     .build();
             return memberRepository.save(newMember);
         });
-        // imageService.registerImages(member.getId(), requestDto.images());
 
         return MemberInfoDto.from(member);
     }

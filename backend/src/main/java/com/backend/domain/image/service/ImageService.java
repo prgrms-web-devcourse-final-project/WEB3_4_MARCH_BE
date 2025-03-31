@@ -1,19 +1,22 @@
 package com.backend.domain.image.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.domain.image.dto.ImageRegisterRequest;
+import com.backend.domain.image.dto.ImageResponseDto;
+import com.backend.domain.image.dto.ImageUpdateRequestDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
-import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -21,75 +24,86 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
-
-    @Transactional
-    public MemberResponseDto changeRepresentativeImage(Long memberId, Long newPrimaryImageId) {
-        // 회원 검증
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // 새 대표 이미지가 해당 회원의 이미지인지 확인
-        Image newPrimaryImage = imageRepository.findById(newPrimaryImageId)
-            .filter(img -> img.getMember().getId().equals(memberId))
-            .orElseThrow(() -> new IllegalArgumentException("Image not found for member"));
-
-        // 기존 대표 이미지가 있다면 업데이트
-        Optional<Image> existingPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member);
-        existingPrimary.ifPresent(image -> {
-            image.updateIsPrimary(false);
-            imageRepository.save(image);
-        });
-
-        // 새 이미지를 대표로 지정
-        newPrimaryImage.updateIsPrimary(true);
-        imageRepository.save(newPrimaryImage);
-
-        // 회원 엔티티의 profileImage 업데이트
-        member.setProfileImage(newPrimaryImage);
-
-        return MemberResponseDto.from(member);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Image> getImagesForMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-        return imageRepository.findByMember(member);
-    }
+    private final S3Client s3Client;
+    private final String bucketName = "devcouse4-team06-bucket";
+    private final String urlPrefix = "https://devcouse4-team06-bucket.s3.ap-northeast-2.amazonaws.com/";
 
     @Transactional
     public void registerImages(Long memberId, List<ImageRegisterRequest> requests) {
-        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
-            .orElseThrow(() -> new RuntimeException("Member not found"));
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-        // 대표 이미지(isPrimary)가 정확히 1개 지정되었는지 검증
-        long primaryCount = requests.stream()
-            .filter(ImageRegisterRequest::isPrimary)
-            .count();
-        if (primaryCount != 1) {
-            throw new IllegalArgumentException("대표 이미지(isPrimary)는 반드시 1개만 지정되어야 합니다. 현재 지정된 개수: " + primaryCount);
-        }
-
-        // 기존 이미지 제거
-        imageRepository.deleteAll(imageRepository.findByMember(member));
-
-        // 새 이미지 리스트 생성
-        List<Image> images = requests.stream()
-            .map(req -> Image.builder()
-                .url(req.url())
-                .isPrimary(req.isPrimary())
+        // 이미지를 저장하는 로직 추가
+        for (ImageRegisterRequest request : requests) {
+            Image image = Image.builder()
+                .url(request.url())
+                .isPrimary(request.isPrimary())
                 .member(member)
-                .build())
-            .toList();
-
-        imageRepository.saveAll(images);
-
-        Image primaryImage = images.stream()
-            .filter(Image::getIsPrimary)
-            .findFirst()
-            .orElse(null);
-        if (primaryImage != null) {
-            member.setProfileImage(primaryImage);
+                .build();
+            imageRepository.save(image);
         }
+    }
+
+    @Transactional
+    public ImageResponseDto updateImage(Long imageId, ImageUpdateRequestDto requestDto) {
+        Image image = imageRepository.findById(imageId)
+            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+        image.setIsPrimary(requestDto.getIsPrimary());
+
+        // 대표 이미지 변경인 경우, 기존 대표 이미지 해제
+        if (Boolean.TRUE.equals(requestDto.getIsPrimary())) {
+            Member member = image.getMember();
+            imageRepository.findByMemberAndIsPrimaryTrue(member)
+                .stream()
+                .filter(img -> !img.getId().equals(imageId))
+                .forEach(img -> img.setIsPrimary(false));
+            member.setProfileImage(image);
+        }
+        imageRepository.save(image);
+        return ImageResponseDto.from(image);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageResponseDto> getImagesForMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        return member.getImages().stream()
+            .map(ImageResponseDto::from)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteImage(Long imageId) {
+        Image image = imageRepository.findById(imageId)
+            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+        deleteImageFromS3(image.getUrl());
+        imageRepository.delete(image);
+    }
+
+    private void deleteImageFromS3(String imageUrl) {
+        String key = imageUrl.replace(urlPrefix, "");
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+            .bucket(bucketName)
+            .key(key)
+            .build();
+        s3Client.deleteObject(deleteRequest);
+    }
+
+    @Transactional
+    public ImageResponseDto setPrimaryImage(Long imageId) {
+        Image image = imageRepository.findById(imageId)
+            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+        Member member = image.getMember();
+        // 기존 대표 이미지 해제 (자신 제외)
+        imageRepository.findByMemberAndIsPrimaryTrue(member)
+            .stream()
+            .filter(img -> !img.getId().equals(imageId))
+            .forEach(img -> img.setIsPrimary(false));
+        // 지정 이미지 대표로 설정
+        image.setIsPrimary(true);
+        member.setProfileImage(image);
+        imageRepository.save(image);
+        return ImageResponseDto.from(image);
     }
 }

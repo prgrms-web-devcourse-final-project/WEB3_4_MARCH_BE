@@ -2,7 +2,7 @@ package com.backend.domain.image.service;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +21,7 @@ import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -31,6 +32,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @RequiredArgsConstructor
 public class PresignedService {
 
+	private final S3Client s3Client;
 	private final S3Presigner s3Presigner;
 	private final ImageRepository imageRepository;
 	private final MemberRepository memberRepository;
@@ -40,7 +42,6 @@ public class PresignedService {
 
 	@Value("${cloud.aws.s3.url-prefix}")
 	private String urlPrefix;
-
 
 	public List<PresignedUrlResponse> generatePresignedUrls(List<PresignedUrlRequest> requests) throws IOException {
 		List<PresignedUrlResponse> responses = new ArrayList<>();
@@ -124,7 +125,8 @@ public class PresignedService {
 
 	public boolean uploadFileToS3(String presignedUrl, byte[] fileData, String contentType) {
 		try {
-			HttpURLConnection connection = (HttpURLConnection) new URL(presignedUrl).openConnection();
+			URI uri = new URI(presignedUrl);
+			HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
 			connection.setRequestMethod("PUT");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", contentType);

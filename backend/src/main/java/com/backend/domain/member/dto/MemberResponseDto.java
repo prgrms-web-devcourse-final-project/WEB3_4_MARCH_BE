@@ -32,7 +32,9 @@ public record MemberResponseDto(
                 member.getAge(),
                 member.getHeight(),
                 member.getProfileImage() != null ? ImageResponseDto.from(member.getProfileImage()) : null,
-                member.getImages().stream().map(ImageResponseDto::from).collect(Collectors.toList()),
+                member.getImages().stream()
+                    .map(ImageResponseDto::from)
+                    .collect(Collectors.toList()),
                 member.getLatitude(),
                 member.getLongitude()
         );

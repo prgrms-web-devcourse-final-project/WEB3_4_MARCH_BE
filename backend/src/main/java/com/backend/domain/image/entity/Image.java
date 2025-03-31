@@ -1,6 +1,7 @@
 package com.backend.domain.image.entity;
 
 import com.backend.domain.member.entity.Member;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,9 +40,10 @@ public class Image {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonIgnore
     private Member member;
 
-    public void updateIsPrimary(Boolean isPrimary) {
+    public void setIsPrimary(Boolean isPrimary) {
         this.isPrimary = isPrimary;
     }
 }
