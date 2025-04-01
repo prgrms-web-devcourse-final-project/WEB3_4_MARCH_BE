@@ -1,7 +1,7 @@
 package com.backend.domain.member.dto;
 
 import org.hibernate.validator.constraints.Length;
-
+import com.backend.global.auth.kakao.dto.KakaoUserInfoResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,8 +33,26 @@ public record MemberRegisterRequestDto(
         // @Size(min = 1, max = 5, message = "1~5개의 이미지가 필요합니다.")
         // List<ImageRegisterRequest> images,
 
-        // 위도, 경도 추가
+
+        // 위도, 경도
         Double latitude,
         Double longitude
 
-) {}
+) {
+        /**
+         * 카카오 사용자 정보로부터 회원가입 DTO 생성
+         */
+        public static MemberRegisterRequestDto fromKakao(KakaoUserInfoResponseDto dto) {
+                return new MemberRegisterRequestDto(
+                        dto.id(),
+                        dto.kakaoAccount().email(),
+                        dto.properties().nickname(),
+                        "UNKNOWN",     // 기본 성별
+                        0,             // 기본 나이
+                        0,             // 기본 키
+//                        new ArrayList<>(), // 빈 프로필 이미지 리스트
+                        null,          // 위도
+                        null           // 경도
+                );
+        }
+}

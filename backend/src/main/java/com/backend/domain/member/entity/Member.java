@@ -107,8 +107,11 @@ public class Member extends BaseEntity {
         this.longitude = longitude;
     }
 
-    public void updateKakaoToken(String accessToken, String refreshToken) {
+    public void updateAccessToken(String accessToken) {
         this.kakaoAccessToken = accessToken;
+
+    }
+    public void updateRefreshToken(String refreshToken) {
         this.kakaoRefreshToken = refreshToken;
     }
 

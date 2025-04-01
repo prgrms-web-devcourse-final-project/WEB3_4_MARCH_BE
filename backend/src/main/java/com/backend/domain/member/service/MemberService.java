@@ -152,4 +152,11 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public Member findByKakaoRefreshToken(String refreshToken) {
+
+        return memberRepository.findByKakaoRefreshToken(refreshToken).orElseThrow(() ->
+                new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
 }

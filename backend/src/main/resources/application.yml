@@ -1,19 +1,15 @@
 spring:
-  config:
-    import: optional:file:.env[.properties]
-  datasource:
-    url: jdbc:mysql://localhost:3306/meeting_app?serverTimezone=Asia/Seoul
-    username: root
-    password: 3251
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
+  profiles:
+    active: local
+  application:
+    name: backend
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
+<<<<<<< HEAD
     database-platform: org.hibernate.dialect.MySQL8Dialect
 server:
   port: 8080
@@ -24,3 +20,6 @@ cloud:
       bucket: devcouse4-team06-bucket
       region: ap-northeast-2
       url-prefix: https://devcouse4-team06-bucket.s3.ap-northeast-2.amazonaws.com/
+=======
+    show-sql: true
+>>>>>>> 18d8d1a (feat: 카카오 소셜 로그인 및 회원가입 기능 구현)

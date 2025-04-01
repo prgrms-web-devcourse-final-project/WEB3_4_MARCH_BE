@@ -53,7 +53,7 @@ public class SwaggerConfig {
     public GroupedOpenApi authApi() {
         return GroupedOpenApi.builder()
                 .group("Auth")
-                .pathsToMatch("/auth/**")
+                .pathsToMatch("/api/auth/**")
                 .build();
     }
 
