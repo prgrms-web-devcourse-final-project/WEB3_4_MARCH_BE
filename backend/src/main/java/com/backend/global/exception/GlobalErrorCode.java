@@ -24,6 +24,7 @@ public enum GlobalErrorCode {
 	ALREADY_REQUESTED(HttpStatus.BAD_REQUEST, 400, "이미 채팅요청을 보냈습니다."),
 	NOT_FOUND_CHAT_REQUEST(HttpStatus.NOT_FOUND, 404, "해당 채팅요청을 찾을 수 없습니다."),
 	ALREADY_PROCESSED_CHAT_REQUEST(HttpStatus.BAD_REQUEST, 400, "이미 처리된 채팅 요청입니다."),
+	DUPLICATE_CHAT_REQUEST(HttpStatus.BAD_REQUEST, 400, "이미 처리된 채팅 요청입니다."),
 
 	// 채팅 오류코드
 	NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, 404, "해당 채팅방을 찾을 수 없습니다."),

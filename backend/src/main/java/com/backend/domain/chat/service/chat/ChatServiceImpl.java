@@ -115,7 +115,8 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public List<ChatMessageResponse> getRoomMessage(Long roomId) {
 
-        ChatRoom room = chatRoomRepository.findById(roomId)
+        // 채팅방 있는지 확인
+        chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_CHATROOM));
 
         List<Chat> chats = chatRepository.findByChatRoomIdOrderBySendTimeAsc(roomId);
