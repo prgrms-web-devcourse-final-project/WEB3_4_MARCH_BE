@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.domain.image.dto.ImageResponseDto;
+import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
+import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.response.GenericResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,10 @@ public class ImageController {
 
     private final ImageService imageService;
     private final PresignedService presignedService;
+    private final ImageRepository imageRepository;
+    private final MemberRepository memberRepository;
+
+    private static final int MAX_IMAGES = 5;
 
     @PostMapping
     public ResponseEntity<GenericResponse<String>> addImages(
@@ -47,15 +53,19 @@ public class ImageController {
 
     // 이미지 삭제
     @DeleteMapping("/{imageId}")
-    public ResponseEntity<GenericResponse<String>> deleteImage(@PathVariable Long imageId) {
-        imageService.deleteImage(imageId);
+    public ResponseEntity<GenericResponse<String>> deleteImage(
+        @PathVariable Long memberId,
+        @PathVariable Long imageId) {
+        imageService.deleteImage(memberId, imageId);
         return ResponseEntity.ok(GenericResponse.of("Image deleted successfully"));
     }
 
     // 대표 이미지 변경
     @PatchMapping("/{imageId}/primary")
-    public ResponseEntity<GenericResponse<ImageResponseDto>> setPrimaryImage(@PathVariable Long imageId) {
-        ImageResponseDto updatedImage = imageService.setPrimaryImage(imageId);
+    public ResponseEntity<GenericResponse<ImageResponseDto>> setPrimaryImage(
+        @PathVariable Long memberId,
+        @PathVariable Long imageId) {
+        ImageResponseDto updatedImage = imageService.setPrimaryImage(memberId, imageId);
         return ResponseEntity.ok(GenericResponse.of(updatedImage));
     }
 }

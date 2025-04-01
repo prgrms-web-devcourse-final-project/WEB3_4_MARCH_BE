@@ -23,6 +23,8 @@ import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.service.MemberService;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
 
 import jakarta.validation.Valid;
@@ -41,10 +43,10 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<GenericResponse<MemberInfoDto>> registerMember(
         @RequestPart("member") MemberRegisterRequestDto requestDto,
-        @RequestPart("files") MultipartFile[] files) throws IOException {
+        @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
 
         if (files == null || files.length < 1 || files.length > 5) {
-            throw new IllegalArgumentException("이미지는 최소 1장 이상, 5장 이하로 등록해야 합니다.");
+            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
         }
 
         // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)

@@ -11,7 +11,11 @@ import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.exception.MemberErrorCode;
+import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -34,7 +38,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public List<ImageResponseDto> getImagesForMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         return member.getImages().stream()
             .map(ImageResponseDto::from)
@@ -42,17 +46,27 @@ public class ImageService {
     }
 
     @Transactional
-    public void deleteImage(Long imageId) {
-        Image image = imageRepository.findById(imageId)
-            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
-        Member member = image.getMember();
-        boolean isPrimary = image.getIsPrimary();
-        deleteImageFromS3(image.getUrl());
-        imageRepository.delete(image);
+    public void deleteImage(Long memberId, Long imageId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        if (isPrimary) {
+        Image image = imageRepository.findById(imageId)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.IMAGE_NOT_FOUND));
+
+        if (!image.getMember().getId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.UNAUTHORIZED_IMAGE_OPERATION);
+        }
+
+        member = image.getMember();
+
+        // 대표 이미지라면 먼저 profileImage 업데이트
+        if (image.getIsPrimary()) {
+            // 회원의 모든 이미지 중 현재 삭제 대상 이미지를 제외한 나머지를 가져옴
             List<Image> remainingImages = imageRepository.findByMember(member);
+            remainingImages.removeIf(img -> img.getId().equals(imageId));
+
             if (!remainingImages.isEmpty()) {
+                // ID가 가장 낮은 이미지를 새 대표 이미지로 선택
                 Image newPrimary = remainingImages.stream()
                     .min(Comparator.comparingLong(Image::getId))
                     .orElse(null);
@@ -60,13 +74,18 @@ public class ImageService {
                     newPrimary.setIsPrimary(true);
                     member.setProfileImage(newPrimary);
                     imageRepository.save(newPrimary);
-                    memberRepository.save(member);
                 }
             } else {
+                // 남은 이미지가 없다면 profileImage를 null로 설정
                 member.setProfileImage(null);
-                memberRepository.save(member);
             }
+            memberRepository.save(member);
         }
+
+        // S3에서 이미지 삭제
+        deleteImageFromS3(image.getUrl());
+        // DB에서 이미지 삭제
+        imageRepository.delete(image);
     }
 
     private void deleteImageFromS3(String imageUrl) {
@@ -79,9 +98,20 @@ public class ImageService {
     }
 
     @Transactional
-    public ImageResponseDto setPrimaryImage(Long imageId) {
+    public ImageResponseDto setPrimaryImage(Long memberId, Long imageId) {
         Image image = imageRepository.findById(imageId)
             .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+
+        // 소유자 검증
+        if (!image.getMember().getId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.UNAUTHORIZED_IMAGE_OPERATION);
+        }
+
+        // 요청한 이미지가 이미 대표 이미지인 경우
+        if (image.getIsPrimary()) {
+            throw new GlobalException(GlobalErrorCode.ALREADY_PRIMARY_IMAGE);
+        }
+
         Member member = image.getMember();
         // 기존 대표 이미지 해제 (자신 제외)
         imageRepository.findByMemberAndIsPrimaryTrue(member)

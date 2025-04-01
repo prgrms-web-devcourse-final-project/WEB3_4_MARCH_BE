@@ -16,7 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.exception.MemberErrorCode;
+import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -46,7 +50,13 @@ public class PresignedService {
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
 
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new IllegalArgumentException("Member not found"));
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		// 기존 이미지 개수 확인
+		List<Image> currentImages = imageRepository.findByMember(member);
+		if (currentImages.size() + files.size() > MAX_IMAGES) {
+			throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
+		}
 
 		List<String> uploadResults  = new ArrayList<>();
 		boolean hasPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member).isPresent();
