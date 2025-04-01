@@ -47,6 +47,15 @@ public class PresignedService {
 
 	private static final int MAX_IMAGES = 5;
 
+	/**
+	 * 전달받은 MultipartFile 리스트를 S3에 업로드하고, 업로드 성공한 이미지 URL들을 반환한다.
+	 * 또한, 업로드한 이미지를 DB에 등록하고, 첫 업로드 시 자동으로 대표 이미지로 지정한다.
+	 *
+	 * @param files 업로드할 MultipartFile 리스트
+	 * @param memberId 업로드할 회원의 ID
+	 * @return 업로드된 이미지 URL 리스트
+	 * @throws IOException 파일 바이트 변환 중 예외 발생 시
+	 */
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
 
 		Member member = memberRepository.findById(memberId)
@@ -92,6 +101,13 @@ public class PresignedService {
 		return uploadResults;
 	}
 
+	/**
+	 * S3 업로드를 위한 Presigned URL을 생성한다.
+	 *
+	 * @param key S3 저장용 키
+	 * @param contentType 파일의 MIME 타입
+	 * @return 생성된 Presigned URL 문자열
+	 */
 	public String createPresignedUrl(String key, String contentType) {
 		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 			.bucket(bucketName)
@@ -108,6 +124,14 @@ public class PresignedService {
 		return presignedRequest.url().toString();
 	}
 
+	/**
+	 * Presigned URL을 이용하여 S3에 파일 데이터를 업로드한다.
+	 *
+	 * @param presignedUrl S3에 업로드할 Presigned URL
+	 * @param fileData 업로드할 파일 데이터 바이트 배열
+	 * @param contentType 파일의 MIME 타입
+	 * @return 업로드 성공 여부 (200 응답일 경우 true)
+	 */
 	public boolean uploadFileToS3(String presignedUrl, byte[] fileData, String contentType) {
 		try {
 			URI uri = new URI(presignedUrl);

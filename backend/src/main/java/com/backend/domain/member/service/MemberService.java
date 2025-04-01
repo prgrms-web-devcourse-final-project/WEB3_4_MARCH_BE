@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.backend.domain.image.service.ImageService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -24,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final ImageService imageService;
 
     // 회원 정보 조회
     // Member 엔티티를 DTO로 변환해서 반환
@@ -43,9 +41,19 @@ public class MemberService {
                 .map(MemberInfoDto::from)
                 .collect(Collectors.toList());
     }
-
-    // 회원 가입 처리 (카카오 로그인 이후)
-    // 재가입 허용 처리 포함
+    /**
+     * 회원 가입을 처리한다.
+     *
+     * <p>
+     * 1. 이미 활성화된 회원(탈퇴하지 않은 회원)이 존재하는 경우, 중복 가입 예외를 발생시킨다.
+     * 2. 탈퇴된 회원인 경우, 회원 정보를 복구하여 재가입 처리한다.
+     * 3. 신규 회원인 경우, 회원 정보를 저장하고 생성된 회원 엔티티를 반환한다.
+     * </p>
+     *
+     * @param requestDto 회원 가입 요청 DTO (회원의 카카오 ID, 이메일, 닉네임, 성별, 나이, 키, 위치 등 정보 포함)
+     * @return 가입된 회원의 정보를 담은 MemberInfoDto 객체
+     * @throws MemberException 이미 가입된 회원일 경우 DUPLICATE_MEMBER 오류 발생
+     */
     @Transactional
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부

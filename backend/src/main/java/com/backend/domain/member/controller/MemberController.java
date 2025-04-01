@@ -39,7 +39,23 @@ public class MemberController {
     private final PresignedService presignedService;
     private final ImageService imageService;
 
-    // 회원 가입 (카카오 로그인 이후)
+    /**
+     * 회원 가입을 처리하는 엔드포인트이다.
+     *
+     * <p>
+     * 클라이언트로부터 회원 가입 정보와 1장 이상 5장 이하의 이미지 파일을 전달받아,
+     * 1. 회원 기본 정보를 등록한 후,
+     * 2. 이미지 파일들을 S3에 업로드하고, 해당 이미지들을 DB에 등록한다.
+     *    이때, 첫 번째 업로드된 이미지는 자동으로 대표 이미지로 지정된다.
+     * 3. 최종적으로 업로드된 이미지를 반영한 최신 회원 정보를 반환한다.
+     * </p>
+     *
+     * @param requestDto 회원 가입 요청 DTO (카카오 ID, 이메일, 닉네임, 성별, 나이, 키, 위치 등 정보 포함)
+     * @param files 업로드할 이미지 파일 배열 (1장 이상 5장 이하)
+     * @return 회원 가입에 성공한 회원의 최신 정보를 담은 응답 객체 (MemberInfoDto)
+     * @throws IOException 파일 처리 중 I/O 예외가 발생할 경우
+     * @throws GlobalException 이미지 파일 수가 1장 미만이거나 5장을 초과할 경우 IMAGE_COUNT_INVALID 오류 발생
+     */
     @PostMapping("/register")
     public ResponseEntity<GenericResponse<MemberInfoDto>> registerMember(
         @RequestPart("member") MemberRegisterRequestDto requestDto,

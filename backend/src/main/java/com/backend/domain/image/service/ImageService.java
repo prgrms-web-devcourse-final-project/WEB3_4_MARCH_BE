@@ -35,6 +35,12 @@ public class ImageService {
 
     private static final int MAX_IMAGES = 5;
 
+    /**
+     * 회원의 이미지 목록을 조회한다.
+     *
+     * @param memberId 조회할 회원의 ID
+     * @return 회원의 이미지 목록을 DTO 형태로 변환한 리스트
+     */
     @Transactional(readOnly = true)
     public List<ImageResponseDto> getImagesForMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -45,6 +51,14 @@ public class ImageService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * 회원의 특정 이미지를 삭제한다.
+     * 삭제 전, 회원 ID와 이미지 소유자가 일치하는지 검증하며,
+     * 대표 이미지인 경우, 남은 이미지 중 ID가 가장 낮은 이미지로 새 대표 이미지가 설정된다.
+     *
+     * @param memberId 요청한 회원 ID
+     * @param imageId 삭제할 이미지 ID
+     */
     @Transactional
     public void deleteImage(Long memberId, Long imageId) {
         Member member = memberRepository.findById(memberId)
@@ -97,10 +111,22 @@ public class ImageService {
         s3Client.deleteObject(deleteRequest);
     }
 
+    /**
+     * 회원의 특정 이미지를 대표 이미지로 설정한다.
+     * 요청자의 회원 ID와 이미지 소유자가 일치해야 하며,
+     * 만약 요청한 이미지가 이미 대표 이미지라면 예외가 발생한다.
+     *
+     * @param memberId 요청한 회원 ID
+     * @param imageId 대표로 설정할 이미지 ID
+     * @return 대표 이미지로 업데이트된 이미지의 DTO
+     */
     @Transactional
     public ImageResponseDto setPrimaryImage(Long memberId, Long imageId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
         Image image = imageRepository.findById(imageId)
-            .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.IMAGE_NOT_FOUND));
 
         // 소유자 검증
         if (!image.getMember().getId().equals(memberId)) {
@@ -112,7 +138,7 @@ public class ImageService {
             throw new GlobalException(GlobalErrorCode.ALREADY_PRIMARY_IMAGE);
         }
 
-        Member member = image.getMember();
+        member = image.getMember();
         // 기존 대표 이미지 해제 (자신 제외)
         imageRepository.findByMemberAndIsPrimaryTrue(member)
             .stream()
@@ -123,33 +149,5 @@ public class ImageService {
         member.setProfileImage(image);
         imageRepository.save(image);
         return ImageResponseDto.from(image);
-    }
-
-    @Transactional
-    public void addImages(Long memberId, List<String> imageUrls) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // 기존 이미지 개수 확인
-        List<Image> currentImages = imageRepository.findByMember(member);
-        if (currentImages.size() + imageUrls.size() > MAX_IMAGES) {
-            throw new IllegalArgumentException("이미지는 최대 5장까지만 등록할 수 있습니다.");
-        }
-
-        boolean hasPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member).isPresent();
-        // 새 이미지 DB에 저장
-        for (String imageUrl : imageUrls) {
-            Image image = Image.builder()
-                .url(imageUrl)
-                .isPrimary(!hasPrimary)  // 첫 업로드 시 자동 대표 지정
-                .member(member)
-                .build();
-            imageRepository.save(image);
-            if (!hasPrimary) {
-                member.setProfileImage(image);
-                memberRepository.save(member);
-                hasPrimary = true;
-            }
-        }
     }
 }
