@@ -1,9 +1,10 @@
 package com.backend.domain.member.dto;
 
-import com.backend.domain.image.entity.Image;
-import com.backend.domain.member.entity.Member;
-
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.backend.domain.image.dto.ImageResponseDto;
+import com.backend.domain.member.entity.Member;
 
 /**
  * API 응답 전용 DTO
@@ -17,7 +18,8 @@ public record MemberResponseDto(
         String gender,
         Integer age,
         Integer height,
-        List<Image> profileImage,
+        ImageResponseDto profileImage,
+        List<ImageResponseDto> images,
         Double latitude,
         Double longitude
 ) {
@@ -29,7 +31,10 @@ public record MemberResponseDto(
                 member.getGender(),
                 member.getAge(),
                 member.getHeight(),
-                member.getProfileImage(),
+                member.getProfileImage() != null ? ImageResponseDto.from(member.getProfileImage()) : null,
+                member.getImages().stream()
+                    .map(ImageResponseDto::from)
+                    .collect(Collectors.toList()),
                 member.getLatitude(),
                 member.getLongitude()
         );

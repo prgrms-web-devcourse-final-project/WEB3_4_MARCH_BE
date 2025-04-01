@@ -1,7 +1,8 @@
 package com.backend.global.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
 
 /**
  * GlobalException
@@ -18,6 +19,11 @@ public class GlobalException extends RuntimeException {
 
     public GlobalException(GlobalErrorCode globalErrorCode) {
         super(globalErrorCode.getMessage());
+        this.globalErrorCode = globalErrorCode;
+    }
+
+    public GlobalException(GlobalErrorCode globalErrorCode, String message) {
+        super(message);
         this.globalErrorCode = globalErrorCode;
     }
 

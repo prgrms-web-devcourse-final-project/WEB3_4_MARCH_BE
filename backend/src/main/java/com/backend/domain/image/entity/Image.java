@@ -1,28 +1,34 @@
 package com.backend.domain.image.entity;
 
 import com.backend.domain.member.entity.Member;
-import jakarta.persistence.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(name = "images")
 public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // 사용자 (회원)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    // 이미지 key
-    @Column(name = "`key`") // 백틱으로 감싸기 (MySQL용)
-    private String key;
 
     // 이미지 URL
     @Column(nullable = false)
@@ -32,8 +38,22 @@ public class Image {
     @Column(nullable = false)
     private Boolean isPrimary;
 
-    // 대표 이미지 설정 메서드
-    public void updatePrimary(boolean isPrimary) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @JsonIgnore
+    private Member member;
+
+    // URL 설정
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    // 회원 설정
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
+    public void setIsPrimary(Boolean isPrimary) {
         this.isPrimary = isPrimary;
     }
 }
