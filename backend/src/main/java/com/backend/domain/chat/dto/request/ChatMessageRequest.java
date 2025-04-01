@@ -5,6 +5,5 @@ import lombok.Getter;
 @Getter
 public class ChatMessageRequest {
     private Long chatroomId;
-    private Long senderId;
     private String content;
 }

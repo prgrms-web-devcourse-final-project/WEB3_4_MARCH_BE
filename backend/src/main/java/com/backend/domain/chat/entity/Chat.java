@@ -1,6 +1,7 @@
 package com.backend.domain.chat.entity;
 
 import com.backend.domain.chatroom.entity.ChatRoom;
+import com.backend.domain.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,8 +34,9 @@ public class Chat {
     @JoinColumn(name = "chatroom_id", nullable = false)
     private ChatRoom chatRoom;
 
-    @Column(name = "sender_id", nullable = false)
-    private Long sender;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private Member sender;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String chatContent;
@@ -45,7 +47,7 @@ public class Chat {
     @Column(name = "is_read", nullable = false)
     private boolean isRead;
 
-    public Chat(ChatRoom room, Long sender, String content, LocalDateTime sendTime) {
+    public Chat(ChatRoom room, Member sender, String content, LocalDateTime sendTime) {
         this.chatRoom = room;
         this.sender = sender;
         this.chatContent = content;

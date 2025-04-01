@@ -1,5 +1,6 @@
 package com.backend.domain.chatroom.dto.request;
 
+import com.backend.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoomRequest {
-    private Long senderId;
-    private Long receiverId;
+    private Member senderId;
+    private Member receiverId;
 }
