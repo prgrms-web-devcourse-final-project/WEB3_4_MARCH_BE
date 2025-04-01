@@ -43,6 +43,16 @@ public class Image {
     @JsonIgnore
     private Member member;
 
+    // URL 설정
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    // 회원 설정
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
     public void setIsPrimary(Boolean isPrimary) {
         this.isPrimary = isPrimary;
     }

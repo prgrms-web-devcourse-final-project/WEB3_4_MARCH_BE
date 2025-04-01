@@ -41,7 +41,10 @@ public class PresignedService {
 	@Value("${cloud.aws.s3.url-prefix}")
 	private String urlPrefix;
 
+	private static final int MAX_IMAGES = 5;
+
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
+
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("Member not found"));
 

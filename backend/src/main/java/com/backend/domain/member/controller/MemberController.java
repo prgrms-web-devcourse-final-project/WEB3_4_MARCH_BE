@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
@@ -34,12 +35,17 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PresignedService presignedService;
+    private final ImageService imageService;
 
     // 회원 가입 (카카오 로그인 이후)
     @PostMapping("/register")
     public ResponseEntity<GenericResponse<MemberInfoDto>> registerMember(
         @RequestPart("member") MemberRegisterRequestDto requestDto,
         @RequestPart("files") MultipartFile[] files) throws IOException {
+
+        if (files == null || files.length < 1 || files.length > 5) {
+            throw new IllegalArgumentException("이미지는 최소 1장 이상, 5장 이하로 등록해야 합니다.");
+        }
 
         // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
         MemberInfoDto memberInfo = memberService.registerMember(requestDto);

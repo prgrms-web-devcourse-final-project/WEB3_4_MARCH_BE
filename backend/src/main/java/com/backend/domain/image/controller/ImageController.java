@@ -30,9 +30,10 @@ public class ImageController {
     private final PresignedService presignedService;
 
     @PostMapping
-    public ResponseEntity<GenericResponse<String>> registerImages(
+    public ResponseEntity<GenericResponse<String>> addImages(
         @PathVariable Long memberId,
         @RequestPart("files") MultipartFile[] files) throws IOException {
+
         presignedService.uploadFiles(java.util.Arrays.asList(files), memberId);
         return ResponseEntity.ok(GenericResponse.of("이미지 등록 완료"));
     }
