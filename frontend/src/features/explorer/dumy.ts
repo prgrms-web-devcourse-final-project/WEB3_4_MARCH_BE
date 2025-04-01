@@ -1,0 +1,42 @@
+export const DumyPeople = [
+  {
+    id: 1,
+    name: "지민",
+    age: 27,
+    bio: "여행과 독서를 좋아하는 디자이너입니다. 같이 카페 투어 하실 분?",
+    interests: ["여행", "독서", "카페", "디자인"],
+    image: "/placeholder.svg?height=400&width=300",
+  },
+  {
+    id: 2,
+    name: "수진",
+    age: 25,
+    bio: "영화 보는 것을 좋아하고 주말에는 등산을 즐겨요. 비슷한 취미를 가진 분과 대화하고 싶어요.",
+    interests: ["영화", "등산", "요리", "사진"],
+    image: "/placeholder.svg?height=400&width=300",
+  },
+  {
+    id: 3,
+    name: "민준",
+    age: 29,
+    bio: "음악 프로듀서로 일하고 있어요. 음악과 예술에 관심 있는 분들과 대화하고 싶습니다.",
+    interests: ["음악", "공연", "미술", "카페"],
+    image: "/placeholder.svg?height=400&width=300",
+  },
+  {
+    id: 4,
+    name: "서연",
+    age: 26,
+    bio: "IT 회사에서 일하는 개발자입니다. 코딩과 함께 요가를 즐기는 이중생활 중이에요.",
+    interests: ["코딩", "요가", "넷플릭스", "여행"],
+    image: "/placeholder.svg?height=400&width=300",
+  },
+  {
+    id: 5,
+    name: "현우",
+    age: 28,
+    bio: "마케팅 회사에서 일하고 있어요. 주말에는 자전거 타는 것을 좋아합니다.",
+    interests: ["자전거", "마케팅", "와인", "요리"],
+    image: "/placeholder.svg?height=400&width=300",
+  },
+];
