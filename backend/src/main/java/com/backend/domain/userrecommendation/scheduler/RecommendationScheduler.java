@@ -1,5 +1,7 @@
 package com.backend.domain.userrecommendation.scheduler;
 
+import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.userrecommendation.service.UserRecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
