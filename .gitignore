@@ -45,3 +45,5 @@ backend/env
 # .gitignore yml 로컬 프로필 설정
 **/application-local.yml
 
+# Redis 영속성
+/backend/infra/redis/data/

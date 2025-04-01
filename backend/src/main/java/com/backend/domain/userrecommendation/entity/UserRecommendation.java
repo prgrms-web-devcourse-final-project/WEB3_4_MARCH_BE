@@ -1,5 +1,6 @@
 package com.backend.domain.userrecommendation.entity;
 
+import com.backend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

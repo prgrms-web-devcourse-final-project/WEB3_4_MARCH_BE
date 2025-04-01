@@ -1,14 +1,17 @@
 package com.backend.domain.userrecommendation.service;
 
+import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.userrecommendation.dto.response.RecommendedUserDto;
 import com.backend.domain.userrecommendation.entity.UserRecommendation;
 import com.backend.domain.userrecommendation.repository.UserRecommendationRepository;
+import com.backend.global.redis.service.RedisGeoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,77 +20,58 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserRecommendationService {
 
+    private final RedisGeoService redisGeoService;
     private final MemberRepository memberRepository;
-    private final UserKeywordRepository userKeywordRepository;
     private final UserRecommendationRepository userRecommendationRepository;
     private final BlockUserRepository blockUserRepository;
 
     @Transactional
     public List<RecommendedUserDto> generateRecommendations(Member me) {
 
-        // 이전 추천 유저 ID 목록을 먼저 조회
-        Set<Long> previouslyRecommendedIds = userRecommendationRepository.findAllByReceivingUser(me);
+        // 차단 유저 ID 목록 조회
+        List<Long> blockedUserIds = blockUserRepository.findBlockedUserIds(me);
 
-        // 위치 기반 10km 이내 유저 조회
-        List<Member> nearbyUsers = memberRepository.findNearbyMembers(me.getLatitude(), me.getLongitude());
+        // 이미 추천받았던 유저 ID 목록 조회
+        Set<Long> recommendedIds = userRecommendationRepository.findAllByReceivingUser(me);
 
-        // 내 키워드 ID 목록
-        List<Long> myKeywordIds = userKeywordRepository.findByUser(me).stream()
-                .map(k -> k.getKeyword().getId())
-                .toList();
+        // Redis에서 10km 반경 내 전체 사용자 ID 목록 조회
+        List<Long> geoIds = redisGeoService.findNearByUserIds(me.getLatitude(), me.getLongitude(), 10.0, Integer.MAX_VALUE);
 
-        // 차단 유저 ID 목록
-        Set<Long> blockedUserIds = blockUserRepository.findByUser(me).stream()
-                .map(b -> b.getBlockedUser().getId())
-                .collect(Collectors.toSet());
+        // DB에서 유저 정보 조회
+        List<Member> candidates = memberRepository.findAllById(geoIds);
 
-        // 공통 키워드 개수 기준 필터링 및 정렬
-        List<RecommendedUserDto> result = nearbyUsers.stream()
-                // 본인 id 제외
+        // 조건 필터링
+        List<Member> filtered = candidates.stream()
                 .filter(u -> !u.getId().equals(me.getId()))
-                // 차단 id 제외
                 .filter(u -> !blockedUserIds.contains(u.getId()))
-                // 이전에 추천된 유저 제외
-                .filter(u -> !previouslyRecommendedIds.contains(u.getId()))
-                // 각 유저와의 공통 키워드 개수 계산 후 함께 리턴
-                .map(u -> {
-                    List<Long> otherKeywordIds = userKeywordRepository.findByUser(u).stream()
-                            .map(k -> k.getKeyword().getId())
-                            .toList();
+                .filter(u -> !recommendedIds.contains(u.getId()))
+                .collect(Collectors.toList());
 
-                    long keywordCnt = otherKeywordIds.stream()
-                            .filter(myKeywordIds::contains)
-                            .count();
+        Collections.shuffle(filtered);
 
-                    return new AbstractMap.SimpleEntry<>(u, keywordCnt);
-                })
-                // 공통 키워드가 1개 이상 있는 경우만 필터링
-                .filter(e -> e.getValue() > 0)
-                // 공통 키워드 수 기준으로 내림차순 정렬
-                .sorted((a,b) -> Long.compare(b.getValue(), a.getValue()))
-                // 최대 10명까지만 추천
+        List<Member> selected = filtered.stream()
                 .limit(10)
-                .map(e -> {
-                    Member user = e.getKey();
-
-                    userRecommendationRepository.save(
-                            UserRecommendation.builder()
-                                    .receivingUser(me)
-                                    .recommendedUser(user)
-                                    .recommendedDate(LocalDateTime.now())
-                                    .build()
-                    );
-
-                    return RecommendedUserDto.builder()
-                            .id(user.getId())
-                            .nickname(user.getNickname())
-                            .latitude(user.getLatitude())
-                            .longitude(user.getLongitude())
-                            .build();
-                })
                 .toList();
 
-        return result;
+        List<UserRecommendation> records = selected.stream()
+                .map(user -> UserRecommendation.builder()
+                        .receivingUser(me)
+                        .recommendedUser(user)
+                        .recommendedDate(LocalDateTime.now())
+                        .build())
+                .toList();
+        userRecommendationRepository.saveAll(records);
+
+        return selected.stream()
+                .map(user -> RecommendedUserDto.builder()
+                        .id(user.getId())
+                        .nickname(user.getNickname())
+                        .latitude(user.getLatitude())
+                        .longitude(user.getLongitude())
+                        .build())
+                .toList();
+
+
     }
 
 

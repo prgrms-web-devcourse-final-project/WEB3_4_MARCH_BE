@@ -1,5 +1,6 @@
 package com.backend.domain.userrecommendation.controller;
 
+import com.backend.domain.member.entity.Member;
 import com.backend.domain.userrecommendation.dto.response.RecommendedUserDto;
 import com.backend.domain.userrecommendation.service.UserRecommendationService;
 import com.backend.global.response.GenericResponse;
