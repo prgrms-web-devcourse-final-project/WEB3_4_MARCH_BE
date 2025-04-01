@@ -73,6 +73,11 @@ public class ImageService {
 
         member = image.getMember();
 
+        List<Image> currentImages = imageRepository.findByMember(member);
+        if (currentImages.size() <= 1) {
+            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID, "최소 1장의 이미지는 유지되어야 합니다.");
+        }
+
         // 대표 이미지라면 먼저 profileImage 업데이트
         if (image.getIsPrimary()) {
             // 회원의 모든 이미지 중 현재 삭제 대상 이미지를 제외한 나머지를 가져옴
