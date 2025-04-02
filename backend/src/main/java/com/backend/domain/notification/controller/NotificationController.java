@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import com.backend.domain.notification.dto.NotificationDto;
 import com.backend.domain.notification.entity.Notification;
 import com.backend.domain.notification.entity.NotificationType;
 import com.backend.domain.notification.service.NotificationService;
+import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.response.GenericResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -50,9 +53,14 @@ public class NotificationController {
      * @return 해당 사용자의 알림 목록
      */
     @GetMapping
-    public ResponseEntity<GenericResponse<List<NotificationDto>>> getNotifications(@PathVariable("member_id") Long memberId) {
+    public ResponseEntity<GenericResponse<List<NotificationDto>>> getNotifications(
+        @PathVariable("member_id") Long memberId,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        notificationService.softDeleteNotification(1L);
+        if (!userDetails.getMemberId().equals(memberId)) {
+            throw new AccessDeniedException("자신의 알림만 조회할 수 있습니다.");
+        }
+
         List<Notification> notifications = notificationService.getNotificationsForMember(memberId);
         List<NotificationDto> dtos = notifications.stream()
                 .map(NotificationDto::from)
