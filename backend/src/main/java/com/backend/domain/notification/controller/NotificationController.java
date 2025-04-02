@@ -40,18 +40,6 @@ public class NotificationController {
     }
 
     /**
-     * 테스트용: 특정 사용자의 하드코딩된 알림 목록을 조회한다.
-     *
-     * @param memberId 알림 수신자 ID
-     * @return 하드코딩된 알림 목록을 포함한 응답 객체
-     */
-    @GetMapping("/test")
-    public ResponseEntity<GenericResponse<List<NotificationDto>>> getTestNotifications(@PathVariable("member_id") Long memberId) {
-        List<NotificationDto> dtos = notificationService.getTestNotifications(memberId);
-        return ResponseEntity.ok(GenericResponse.of(dtos));
-    }
-
-    /**
      * 특정 알림을 읽음 상태로 업데이트한다.
      *
      * @param notificationId 알림 ID
