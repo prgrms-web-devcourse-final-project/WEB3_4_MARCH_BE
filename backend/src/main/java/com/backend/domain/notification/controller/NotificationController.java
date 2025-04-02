@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.domain.notification.dto.NotificationDto;
 import com.backend.domain.notification.entity.Notification;
+import com.backend.domain.notification.entity.NotificationType;
 import com.backend.domain.notification.service.NotificationService;
 import com.backend.global.response.GenericResponse;
 
@@ -23,6 +25,23 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    /**
+     * test notification DB 생성
+     */
+    @PostMapping("/test")
+    public String test() {
+
+        notificationService.sendNotification(1L, NotificationType.LIKE, 2L);
+        notificationService.sendNotification(1L, NotificationType.BLOCK, 3L);
+        notificationService.sendNotification(2L, NotificationType.REQUEST, 3L);
+        notificationService.sendNotification(2L, NotificationType.LIKE, 4L);
+        notificationService.sendNotification(3L, NotificationType.BLOCK, 4L);
+        notificationService.sendNotification(3L, NotificationType.REQUEST, 5L);
+        notificationService.sendNotification(4L, NotificationType.LIKE, 5L);
+        notificationService.sendNotification(4L, NotificationType.BLOCK, 6L);
+        notificationService.sendNotification(5L, NotificationType.REQUEST, 6L);
+        return "DB 등록이 완료되었습니다.";
+    }
 
     /**
      * 특정 사용자의 알림 목록을 조회한다.
