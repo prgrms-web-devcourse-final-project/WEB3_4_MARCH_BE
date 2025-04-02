@@ -2,8 +2,7 @@ package com.backend.global.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.*;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,18 +22,29 @@ public class SwaggerConfig {
                         .description("6팀 March의 백엔드 API 명세서입니다.")
                         .version("v1.0.0"))
                 .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
+                .addSecurityItem(new SecurityRequirement().addList("kakaoOAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("cookieAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.APIKEY)
                                 .in(SecurityScheme.In.COOKIE)
-                                .name("accessToken")));
+                                .name("accessToken"))
+                        .addSecuritySchemes("kakaoOAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.OAUTH2)
+                                .flows(new OAuthFlows()
+                                        .authorizationCode(new OAuthFlow()
+                                                .authorizationUrl("https://kauth.kakao.com/oauth/authorize")
+                                                .tokenUrl("https://kauth.kakao.com/oauth/token")
+                                                .scopes(new Scopes()
+                                                        .addString("profile_nickname", "사용자 닉네임")
+                                                        .addString("profile_image", "프로필 이미지")
+                                                        .addString("account_email", "이메일"))))));
     }
 
     // 전체 API
     @Bean
     public GroupedOpenApi baseApi() {
         return GroupedOpenApi.builder()
-                .group("api")
+                .group("Total Api")
                 .pathsToMatch("/**")
                 .build();
     }
