@@ -85,7 +85,7 @@ public class MemberController {
         return ResponseEntity.ok().body(GenericResponse.of(responseDto));
     }
 
-    // 닉네임 검색
+    // 닉네임으로 회원 검색
     @GetMapping("/search")
     public ResponseEntity<GenericResponse<List<MemberInfoDto>>> searchMembersByNickname(@RequestParam String nickname) {
         List<MemberInfoDto> members = memberService.searchByNickname(nickname);
