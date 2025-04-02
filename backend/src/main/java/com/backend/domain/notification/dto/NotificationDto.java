@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class NotificationDto {
     
     private Long id;                 // 알림 ID
+    private Long senderId;         // 알림 수신자 ID
     private Long receiverId;         // 알림 수신자 ID
     private NotificationType type;   // 알림 유형 (LIKE, REQUEST, BLOCK 등)
     private String message;          // 알림 메시지
@@ -33,6 +34,7 @@ public class NotificationDto {
     public static NotificationDto from(Notification notification) {
         return new NotificationDto(
             notification.getId(),
+            notification.getSender().getId(),
             notification.getReceiver().getId(),
             notification.getType(),
             notification.getMessage(),

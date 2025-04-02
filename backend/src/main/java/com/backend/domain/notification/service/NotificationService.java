@@ -1,6 +1,7 @@
 package com.backend.domain.notification.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -28,6 +29,10 @@ public class NotificationService {
      * 좋아요, 대화요청, 차단 등의 이벤트 발생 시, 해당 이벤트에 대한 알림을 생성하여 저장한다.
      * <p>
      * 이 메서드는 아직 완성되지 않은 이벤트(좋아요, 대화요청, 차단)에서 호출되어,
+     * 다음과 같이 사용
+     * notificationService.sendNotification(receiverId, NotificationType.LIKE, senderId);
+     * notificationService.sendNotification(receiverId, NotificationType.BLOCK, senderId);
+     * notificationService.sendNotification(receiverId, NotificationType.REQUEST, senderId);
      * 알림 타입과 메시지를 인자로 받아 알림을 DB에 저장한다.
      * </p>
      *
@@ -66,9 +71,10 @@ public class NotificationService {
 
         Notification notification = Notification.builder()
                 .receiver(receiver)
+                .sender(sender)
                 .type(type)
                 .message(message)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now(ZoneId.of("UTC")))
                 .isRead(false)
                 .build();
         notificationRepository.save(notification);
