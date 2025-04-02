@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.notification.entity.Notification;
 import com.backend.domain.notification.entity.NotificationType;
@@ -41,7 +40,7 @@ public class NotificationService {
      * @param receiverId 알림을 받을 사용자 ID
      * @param type 이벤트 유형 (LIKE, REQUEST, BLOCK)
      * @param senderId 이벤트를 발생시킨 발신자 ID
-     * @throws MemberException 수신자 또는 발신자가 존재하지 않을 경우 예외 발생
+     * @throws GlobalException 수신자 또는 발신자가 존재하지 않을 경우 예외 발생
      */
     @Transactional
     public void sendNotification(Long receiverId, NotificationType type, Long senderId) {
