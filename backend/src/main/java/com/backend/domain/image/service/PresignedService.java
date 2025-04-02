@@ -1,5 +1,21 @@
 package com.backend.domain.image.service;
 
+import com.backend.domain.image.entity.Image;
+import com.backend.domain.image.repository.ImageRepository;
+import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.repository.MemberRepository;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -8,26 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.backend.domain.image.entity.Image;
-import com.backend.domain.image.repository.ImageRepository;
-import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.exception.MemberErrorCode;
-import com.backend.domain.member.exception.MemberException;
-import com.backend.domain.member.repository.MemberRepository;
-import com.backend.global.exception.GlobalErrorCode;
-import com.backend.global.exception.GlobalException;
-
-import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 
 @Service
@@ -59,7 +55,7 @@ public class PresignedService {
 	public List<String> uploadFiles(List<MultipartFile> files, Long memberId) throws IOException {
 
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
 		// 기존 이미지 개수 확인
 		List<Image> currentImages = imageRepository.findByMember(member);

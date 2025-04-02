@@ -26,7 +26,7 @@ public enum GlobalErrorCode {
 
 
 	// 멤버 오류코드
-	NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, 404, "해당 유저를 찾을 수 없습니다."),
+	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "해당 유저를 찾을 수 없습니다."),
 	DUPLICATE_MEMBER(HttpStatus.CONFLICT, 409, "이미 등록된 회원입니다."),
 
 	// 정리 필요

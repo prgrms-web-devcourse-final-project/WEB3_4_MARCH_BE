@@ -1,25 +1,21 @@
 package com.backend.domain.image.service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.exception.MemberErrorCode;
-import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 ;
 
@@ -44,7 +40,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public List<ImageResponseDto> getImagesForMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         return member.getImages().stream()
             .map(ImageResponseDto::from)
@@ -62,7 +58,7 @@ public class ImageService {
     @Transactional
     public void deleteImage(Long memberId, Long imageId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         Image image = imageRepository.findById(imageId)
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.IMAGE_NOT_FOUND));
@@ -128,7 +124,7 @@ public class ImageService {
     @Transactional
     public ImageResponseDto setPrimaryImage(Long memberId, Long imageId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         Image image = imageRepository.findById(imageId)
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.IMAGE_NOT_FOUND));

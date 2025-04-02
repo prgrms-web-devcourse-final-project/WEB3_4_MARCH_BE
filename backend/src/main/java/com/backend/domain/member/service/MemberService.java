@@ -1,21 +1,19 @@
 package com.backend.domain.member.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.exception.MemberErrorCode;
-import com.backend.domain.member.exception.MemberException;
 import com.backend.domain.member.repository.MemberRepository;
-
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,7 @@ public class MemberService {
         return memberRepository.findById(memberId)
                 .filter(member -> !member.isDeleted())
                 .map(MemberInfoDto::from)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     // 닉네임으로 조회
@@ -52,13 +50,13 @@ public class MemberService {
      *
      * @param requestDto 회원 가입 요청 DTO (회원의 카카오 ID, 이메일, 닉네임, 성별, 나이, 키, 위치 등 정보 포함)
      * @return 가입된 회원의 정보를 담은 MemberInfoDto 객체
-     * @throws MemberException 이미 가입된 회원일 경우 DUPLICATE_MEMBER 오류 발생
+     * @throws GlobalException 이미 가입된 회원일 경우 DUPLICATE_MEMBER 오류 발생
      */
     @Transactional
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부
         if (memberRepository.existsByKakaoIdAndIsDeletedFalse(requestDto.kakaoId())) {
-            throw new MemberException(MemberErrorCode.DUPLICATE_MEMBER);
+            throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
         }
 
         // 2. 탈퇴한 회원이면 복구
@@ -67,7 +65,7 @@ public class MemberService {
                 existing.rejoin(requestDto);
                 return existing;
             } else {
-                throw new MemberException(MemberErrorCode.DUPLICATE_MEMBER);
+                throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
             }
         }).orElseGet(() -> {
             // 3. 신규 등록
@@ -143,20 +141,20 @@ public class MemberService {
     // 카카오 ID 기반 조회
     public Member getByKakaoId(Long kakaoId) {
         return memberRepository.findByKakaoIdAndIsDeletedFalse(kakaoId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     // (탈퇴회원 제외)회원 PK 기준 Entity 조회 (공통 메서드)
     public Member getMemberEntity(Long memberId) {
         return memberRepository.findByIdAndIsDeletedFalse(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public Member findByKakaoRefreshToken(String refreshToken) {
 
         return memberRepository.findByKakaoRefreshToken(refreshToken).orElseThrow(() ->
-                new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+                new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
 }

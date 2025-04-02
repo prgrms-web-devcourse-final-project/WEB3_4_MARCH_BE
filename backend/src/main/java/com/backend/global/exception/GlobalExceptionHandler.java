@@ -1,6 +1,5 @@
 package com.backend.global.exception;
 
-import com.backend.domain.member.exception.MemberException;
 import com.backend.global.auth.exception.JwtException;
 import com.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,18 +48,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(GenericResponse.fail(HttpStatus.BAD_REQUEST.value(), errorMessages.toString()));
-    }
-
-    /**
-     * Member 도메인 예외 처리
-     */
-    @ExceptionHandler(MemberException.class)
-    public ResponseEntity<GenericResponse<?>> handleMemberException(MemberException ex, HttpServletRequest request) {
-        int statusCode = ex.getHttpStatus().value();
-        String fullMessage = String.format("[%s] %s (path: %s)", ex.getErrorCode(), ex.getMessage(), request.getRequestURI());
-
-        return ResponseEntity.status(ex.getHttpStatus())
-                .body(GenericResponse.fail(statusCode, fullMessage));
     }
 
     /**
