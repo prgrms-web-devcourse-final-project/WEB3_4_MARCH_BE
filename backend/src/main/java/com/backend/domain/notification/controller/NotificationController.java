@@ -48,9 +48,10 @@ public class NotificationController {
      * @return 읽음 처리 완료 메시지
      */
     @PatchMapping("/{notification_Id}/read")
-    public ResponseEntity<GenericResponse<String>> markAsRead(@PathVariable Long notificationId) {
+    public ResponseEntity<GenericResponse<String>> markAsRead(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
         notificationService.markAsRead(notificationId);
-        return ResponseEntity.ok(GenericResponse.of("알림을 읽음 처리했습니다."));
+        long count = notificationService.getUnreadNotificationCount(memberId);
+        return ResponseEntity.ok(GenericResponse.of("알림을 읽음 처리했습니다. 남은 알림 갯수 : " + count + "개"));
     }
 
     /**
@@ -63,7 +64,8 @@ public class NotificationController {
     public ResponseEntity<GenericResponse<String>> markAllAsRead(
         @PathVariable("member_id") Long memberId) {
         notificationService.markAllAsRead(memberId);
-        return ResponseEntity.ok(GenericResponse.of("모든 알림을 읽음 처리했습니다."));
+        long count = notificationService.getUnreadNotificationCount(memberId);
+        return ResponseEntity.ok(GenericResponse.of("모든 알림을 읽음 처리했습니다. 남은 알림 갯수 : " + count + "개"));
     }
 
     /**
@@ -73,9 +75,10 @@ public class NotificationController {
      * @return 읽음 처리 완료 메시지
      */
     @PatchMapping("/{notification_Id}/delete")
-    public ResponseEntity<GenericResponse<String>> softDeleteNotification(@PathVariable Long notificationId) {
+    public ResponseEntity<GenericResponse<String>> softDeleteNotification(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
         notificationService.softDeleteNotification(notificationId);
-        return ResponseEntity.ok(GenericResponse.of("알림을 삭제했습니다."));
+        long count = notificationService.getUnreadNotificationCount(memberId);
+        return ResponseEntity.ok(GenericResponse.of("알림을 삭제했습니다. 남은 알림 갯수 : " + count + "개"));
     }
 
     /**
@@ -88,6 +91,7 @@ public class NotificationController {
     public ResponseEntity<GenericResponse<String>> deleteAllNotifications(
         @PathVariable("member_id") Long memberId) {
         notificationService.deleteAllNotifications(memberId);
-        return ResponseEntity.ok(GenericResponse.of("모든 알림을 삭제 처리했습니다."));
+        long count = notificationService.getUnreadNotificationCount(memberId);
+        return ResponseEntity.ok(GenericResponse.of("모든 알림을 삭제 처리했습니다. 남은 알림 갯수 : " + count + "개"));
     }
 }

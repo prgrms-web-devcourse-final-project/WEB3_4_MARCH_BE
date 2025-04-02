@@ -139,4 +139,13 @@ public class NotificationService {
         notifications.forEach(Notification::softDeleteNotification);
     }
 
+    /**
+     * 특정 사용자의 삭제되지 않은 모든 알림을 삭제 처리(soft delete)한다.
+     *
+     * @param memberId 알림 수신자 ID
+     * @return 남은 알림 갯수
+     */
+    public long getUnreadNotificationCount(Long memberId) {
+        return notificationRepository.countByReceiverIdAndIsReadFalseAndIsDeletedFalse(memberId);
+    }
 }
