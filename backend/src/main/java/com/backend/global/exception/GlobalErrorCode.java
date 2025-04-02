@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum GlobalErrorCode {
 
-	INVALID_REQUEST(HttpStatus.BAD_REQUEST, 400, "잘못된 요청입니다."),
-	SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "서버 오류가 발생했습니다."),
 
 	// 이미지 도메인 세부 에러
 	IMAGE_COUNT_INVALID(HttpStatus.BAD_REQUEST, 400, "이미지는 1장 이상 5장 이하로 등록해야 합니다."),
@@ -30,7 +28,20 @@ public enum GlobalErrorCode {
 
 	// 멤버 오류코드
 	NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, 404, "해당 유저를 찾을 수 없습니다."),
-	DUPLICATE_MEMBER(HttpStatus.CONFLICT, 409, "이미 등록된 회원입니다.");
+	DUPLICATE_MEMBER(HttpStatus.CONFLICT, 409, "이미 등록된 회원입니다."),
+
+	// 정리 필요
+	SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "서버 오류가 발생했습니다."),
+	INVALID_REQUEST(HttpStatus.BAD_REQUEST, 400, "잘못된 요청입니다."),
+	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 401-1, "유효하지 않은 토큰입니다."),
+	TOKEN_REISSUE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 401-2, "토큰 갱신에 실패했습니다."),
+	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 402, "토큰이 만료되었습니다."),
+	UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, 403, "지원하지 않는 JWT 입니다."),
+	REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "리프레시 토큰이 존재하지 않습니다."),
+	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500-1, "멤버를 찾을 수 없습니다.");
+
+
+
 
 
 	private final HttpStatus httpStatus;

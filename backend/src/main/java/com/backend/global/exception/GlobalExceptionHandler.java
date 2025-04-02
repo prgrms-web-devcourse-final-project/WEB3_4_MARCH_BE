@@ -1,8 +1,10 @@
 package com.backend.global.exception;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.backend.domain.member.exception.MemberException;
+import com.backend.global.auth.exception.JwtException;
+import com.backend.global.response.GenericResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,11 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.backend.domain.member.exception.MemberException;
-import com.backend.global.response.GenericResponse;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GlobalExceptionHandler
@@ -72,6 +71,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(GenericResponse.fail(ex.getStatus(), ex.getMessage()));
+    }
+
+    /**
+     * JWT 예외 처리
+     */
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<GenericResponse<?>> handleJwtException(JwtException ex) {
+        GlobalErrorCode errorCode = ex.getGlobalErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(GenericResponse.fail(errorCode.getHttpStatus().value(), errorCode.getMessage()));
     }
 
     /**
