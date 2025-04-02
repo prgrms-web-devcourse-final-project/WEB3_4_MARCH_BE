@@ -86,8 +86,9 @@ public class NotificationService {
      * @param memberId 알림 수신자 ID
      * @return 알림 목록
      */
+    @Transactional(readOnly = true)
     public List<Notification> getNotificationsForMember(Long memberId) {
-        return notificationRepository.findByReceiverIdOrderByCreatedAtDesc(memberId);
+        return notificationRepository.findByReceiverIdAndIsDeletedFalseOrderByCreatedAtDesc(memberId);
     }
 
     /**
@@ -98,7 +99,19 @@ public class NotificationService {
     @Transactional
     public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED)); // 필요에 따라 다른 예외 사용
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED)); // 필요에 따라 다른 예외 사용
         notification.markAsRead();
+    }
+
+    /**
+     * 특정 알림을 삭제 상태로 업데이트한다.
+     *
+     * @param notificationId 알림 ID
+     */
+    @Transactional
+    public void softDeleteNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED));
+        notification.softDeleteNotification();
     }
 }

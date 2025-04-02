@@ -33,6 +33,7 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<GenericResponse<List<NotificationDto>>> getNotifications(@PathVariable("member_id") Long memberId) {
 
+        notificationService.softDeleteNotification(1L);
         List<Notification> notifications = notificationService.getNotificationsForMember(memberId);
         List<NotificationDto> dtos = notifications.stream()
                 .map(NotificationDto::from)

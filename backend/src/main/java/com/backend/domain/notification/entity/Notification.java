@@ -58,10 +58,20 @@ public class Notification {
     @Column(nullable = false)
     private boolean isRead;
 
+    // 읽음 여부
+    @Column(nullable = false)
+    private boolean isDeleted;
+
     /**
      * 알림을 읽음 상태로 변경한다.
      */
     public void markAsRead() {
         this.isRead = true;
+    }
+    /**
+     * 알림을 삭제 상태로 변경한다.
+     */
+    public void softDeleteNotification() {
+        this.isDeleted = true;
     }
 }

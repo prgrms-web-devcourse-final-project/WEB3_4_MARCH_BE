@@ -24,6 +24,7 @@ public class NotificationDto {
     private String message;          // 알림 메시지
     private LocalDateTime createdAt; // 알림 생성 시각
     private boolean isRead;          // 읽음 여부
+    private boolean isDeleted;          // 읽음 여부
 
     /**
      * Notification 엔티티를 NotificationDto로 변환한다.
@@ -39,7 +40,8 @@ public class NotificationDto {
             notification.getType(),
             notification.getMessage(),
             notification.getCreatedAt(),
-            notification.isRead()
+            notification.isRead(),
+            notification.isDeleted()
         );
     }
 }
