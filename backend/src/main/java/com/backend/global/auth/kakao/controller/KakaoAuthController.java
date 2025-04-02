@@ -121,7 +121,7 @@ public class KakaoAuthController {
         }
 
         String newAccessToken = tokenProvider.createAccessToken(memberId);
-        return ResponseEntity.ok(LoginResponseDto.of(newAccessToken, memberId, refreshToken));
+        return ResponseEntity.ok(LoginResponseDto.of(newAccessToken, memberId, refreshToken,true));
     }
     
 }
