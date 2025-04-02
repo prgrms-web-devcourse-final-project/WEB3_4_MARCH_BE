@@ -81,7 +81,7 @@ public class NotificationService {
     }
 
     /**
-     * 특정 사용자의 알림 목록을 조회한다.
+     * 특정 사용자의 삭제되지 않은 알림 목록을 조회한다.
      *
      * @param memberId 알림 수신자 ID
      * @return 알림 목록
@@ -104,6 +104,18 @@ public class NotificationService {
     }
 
     /**
+     * 특정 사용자의 읽지 않은 알림들을 모두 읽음 처리한다.
+     *
+     * @param memberId 알림 수신자 ID
+     */
+    @Transactional
+    public void markAllAsRead(Long memberId) {
+        List<Notification> unreadNotifications =
+            notificationRepository.findByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(memberId);
+        unreadNotifications.forEach(Notification::markAsRead);
+    }
+
+    /**
      * 특정 알림을 삭제 상태로 업데이트한다.
      *
      * @param notificationId 알림 ID
@@ -114,4 +126,17 @@ public class NotificationService {
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED));
         notification.softDeleteNotification();
     }
+
+    /**
+     * 특정 사용자의 삭제되지 않은 모든 알림을 삭제 처리(soft delete)한다.
+     *
+     * @param memberId 알림 수신자 ID
+     */
+    @Transactional
+    public void deleteAllNotifications(Long memberId) {
+        List<Notification> notifications =
+            notificationRepository.findByReceiverIdAndIsDeletedFalseOrderByCreatedAtDesc(memberId);
+        notifications.forEach(Notification::softDeleteNotification);
+    }
+
 }

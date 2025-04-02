@@ -47,9 +47,47 @@ public class NotificationController {
      * @param notificationId 알림 ID
      * @return 읽음 처리 완료 메시지
      */
-    @PatchMapping("/{notificationId}/read")
+    @PatchMapping("/{notification_Id}/read")
     public ResponseEntity<GenericResponse<String>> markAsRead(@PathVariable Long notificationId) {
         notificationService.markAsRead(notificationId);
         return ResponseEntity.ok(GenericResponse.of("알림을 읽음 처리했습니다."));
+    }
+
+    /**
+     * 특정 사용자의 읽지 않은 모든 알림을 읽음 처리한다.
+     *
+     * @param memberId 알림 수신자 ID (경로 변수 "member_id")
+     * @return 모든 알림 읽음 처리 완료 메시지
+     */
+    @PatchMapping("/read-all")
+    public ResponseEntity<GenericResponse<String>> markAllAsRead(
+        @PathVariable("member_id") Long memberId) {
+        notificationService.markAllAsRead(memberId);
+        return ResponseEntity.ok(GenericResponse.of("모든 알림을 읽음 처리했습니다."));
+    }
+
+    /**
+     * 특정 알림을 삭제 상태로 업데이트한다.
+     *
+     * @param notificationId 알림 ID
+     * @return 읽음 처리 완료 메시지
+     */
+    @PatchMapping("/{notification_Id}/delete")
+    public ResponseEntity<GenericResponse<String>> softDeleteNotification(@PathVariable Long notificationId) {
+        notificationService.softDeleteNotification(notificationId);
+        return ResponseEntity.ok(GenericResponse.of("알림을 삭제했습니다."));
+    }
+
+    /**
+     * 특정 사용자의 삭제되지 않은 모든 알림을 삭제 처리(soft delete)한다.
+     *
+     * @param memberId 알림 수신자 ID (경로 변수 "member_id")
+     * @return 모든 알림 삭제 처리 완료 메시지
+     */
+    @PatchMapping("/delete-all")
+    public ResponseEntity<GenericResponse<String>> deleteAllNotifications(
+        @PathVariable("member_id") Long memberId) {
+        notificationService.deleteAllNotifications(memberId);
+        return ResponseEntity.ok(GenericResponse.of("모든 알림을 삭제 처리했습니다."));
     }
 }
