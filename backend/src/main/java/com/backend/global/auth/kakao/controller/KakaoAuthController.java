@@ -2,7 +2,6 @@ package com.backend.global.auth.kakao.controller;
 
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
-import com.backend.global.auth.exception.JwtException;
 import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.service.CookieService;
 import com.backend.global.auth.kakao.service.KakaoAuthService;
@@ -10,6 +9,7 @@ import com.backend.global.auth.kakao.service.RedisRefreshTokenService;
 import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -80,11 +80,11 @@ public class KakaoAuthController {
         Long memberId = tokenProvider.parseToken(refreshToken).get("id", Long.class);
 
         if (!tokenProvider.validateToken(refreshToken)) {
-            throw new JwtException(GlobalErrorCode.INVALID_TOKEN);
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
 
         if (redisRefreshTokenService.isValid(memberId, refreshToken)) {
-            throw new JwtException(GlobalErrorCode.TOKEN_EXPIRED);
+            throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         }
 
         LoginResponseDto newToken = kakaoAuthService.reissueTokens(refreshToken);
@@ -116,11 +116,11 @@ public class KakaoAuthController {
         Long memberId = userDetails.getMemberId(); // 인증 정보에서 ID 추출
 
         if (!tokenProvider.validateToken(refreshToken)) {
-            throw new JwtException(GlobalErrorCode.INVALID_TOKEN);
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
 
         if (!redisRefreshTokenService.isValid(memberId, refreshToken)) {
-            throw new JwtException(GlobalErrorCode.TOKEN_EXPIRED);
+            throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         }
 
         String newAccessToken = tokenProvider.createAccessToken(memberId);

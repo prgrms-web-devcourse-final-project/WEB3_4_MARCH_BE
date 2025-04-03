@@ -1,6 +1,7 @@
 package com.backend.global.auth.kakao.util;
 
 import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -75,9 +76,9 @@ public class TokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new com.backend.global.auth.exception.JwtException(GlobalErrorCode.TOKEN_EXPIRED);
+            throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
-            throw new com.backend.global.auth.exception.JwtException(GlobalErrorCode.INVALID_TOKEN);
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
     }
 

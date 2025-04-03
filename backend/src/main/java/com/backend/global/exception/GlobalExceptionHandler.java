@@ -1,6 +1,5 @@
 package com.backend.global.exception;
 
-import com.backend.global.auth.exception.JwtException;
 import com.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -53,23 +52,30 @@ public class GlobalExceptionHandler {
     /**
      * Global 예외 처리
      */
+//    @ExceptionHandler(GlobalException.class)
+//    public ResponseEntity<GenericResponse<?>> handleGlobalException(GlobalException ex, HttpServletRequest request) {
+//        return ResponseEntity
+//                .status(ex.getStatus())
+//                .body(GenericResponse.fail(ex.getStatus(), ex.getMessage()));
+//    }
     @ExceptionHandler(GlobalException.class)
-    public ResponseEntity<GenericResponse<?>> handleGlobalException(GlobalException ex, HttpServletRequest request) {
-        return ResponseEntity
-                .status(ex.getStatus())
-                .body(GenericResponse.fail(ex.getStatus(), ex.getMessage()));
-    }
-
-    /**
-     * JWT 예외 처리
-     */
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<GenericResponse<?>> handleJwtException(JwtException ex) {
+    public ResponseEntity<GenericResponse<?>> handleGlobalException(GlobalException ex) {
         GlobalErrorCode errorCode = ex.getGlobalErrorCode();
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(GenericResponse.fail(errorCode.getHttpStatus().value(), errorCode.getMessage()));
     }
+
+    /**
+     * JWT 예외 처리
+     */
+//    @ExceptionHandler(JwtException.class)
+//    public ResponseEntity<GenericResponse<?>> handleJwtException(JwtException ex) {
+//        GlobalErrorCode errorCode = ex.getGlobalErrorCode();
+//        return ResponseEntity
+//                .status(errorCode.getHttpStatus())
+//                .body(GenericResponse.fail(errorCode.getHttpStatus().value(), errorCode.getMessage()));
+//    }
 
     /**
      * 예외가 명시되지 않은 모든 예외 처리

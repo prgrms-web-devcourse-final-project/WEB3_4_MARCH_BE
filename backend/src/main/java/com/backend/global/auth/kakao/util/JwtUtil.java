@@ -1,11 +1,9 @@
 package com.backend.global.auth.kakao.util;
 
-import com.backend.global.auth.exception.JwtException;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
+import com.backend.global.exception.GlobalException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -83,9 +81,9 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new JwtException(GlobalErrorCode.TOKEN_EXPIRED);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtException(GlobalErrorCode.INVALID_TOKEN);
+            throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
+        } catch (MalformedJwtException | SecurityException | UnsupportedJwtException | IllegalArgumentException e) {
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
     }
 
