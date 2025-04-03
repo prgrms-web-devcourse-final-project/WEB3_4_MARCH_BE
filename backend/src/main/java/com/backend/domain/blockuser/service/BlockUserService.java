@@ -33,7 +33,7 @@ public class BlockUserService {
             throw new GlobalException(GlobalErrorCode.INVALID_BLOCK_SELF);
         }
 
-        if (blockUserRepository.exitsByBlockerAndBlockedUser(blocker, blockedUser)) {
+        if (blockUserRepository.existsByBlockerAndBlocked(blocker, blockedUser)) {
             throw new GlobalException(GlobalErrorCode.USER_ALREADY_BLOCKED);
         }
 
@@ -53,7 +53,7 @@ public class BlockUserService {
         Member blocker = blockerIdExists(blockerId);
         Member blockedUser = blockedIdExists(blockedId);
 
-        BlockUser blockUserEntity = blockUserRepository.findByBlockerAndBlockedUser(blocker, blockedUser).orElseThrow(
+        BlockUser blockUserEntity = blockUserRepository.findByBlockerAndBlocked(blocker, blockedUser).orElseThrow(
                 () -> new GlobalException(GlobalErrorCode.ALREADY_UNBLOCK)
         );
 
