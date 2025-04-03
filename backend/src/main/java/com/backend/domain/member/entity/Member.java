@@ -45,7 +45,8 @@ public class Member extends BaseEntity {
     private Image profileImage;
 
     @Column(nullable = false)
-    private Boolean chatAble = true;
+    @Builder.Default
+    private boolean chatAble = true;
 
     private Double latitude;
 
@@ -57,6 +58,7 @@ public class Member extends BaseEntity {
     // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     // 카카오에서 받아온 데이터를 저장하는 정적 팩토리 메서드
