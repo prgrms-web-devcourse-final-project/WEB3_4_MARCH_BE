@@ -1,6 +1,7 @@
 package com.backend.global.auth.kakao.util;
 
 import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -34,6 +35,12 @@ public class TokenProvider {
 
     private long refreshTokenExpiration;
 
+    @Value("${spring.security.jwt.access-token.expiration}")
+    private long accessTokenTTL; // ms
+
+    @Value("${spring.security.jwt.refresh-token.expiration}")
+    private long refreshTokenTTL; // ms
+
     // JWT 서명을 위한 Key 생성
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
@@ -41,24 +48,29 @@ public class TokenProvider {
     }
 
     // 액세스 토큰 생성 (30분 TTL)
-    public String createAccessToken(Long memberId) {
-        return createToken(memberId, Duration.ofMinutes(30));
+    public String createAccessToken(Long memberId, String role) {
+        return createToken(memberId, role, Duration.ofMillis(accessTokenTTL));
     }
 
     // 리프레시 토큰 생성 (14일 TTL)
     public String createRefreshToken(Long memberId) {
-        return createToken(memberId, Duration.ofDays(14));
+        return createToken(memberId, null, Duration.ofMillis(refreshTokenTTL));
     }
 
     // JWT 생성 (공통 로직)
-    public String createToken(Long memberId, Duration ttl) {
+    public String createToken(Long memberId, String role, Duration ttl) {
         Date now = new Date();
-        return Jwts.builder()
-                .claim("id", memberId) // member primary key
+        var builder = Jwts.builder()
+                .claim("id", memberId)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ttl.toMillis()))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256);
+
+        if (role != null) {
+            builder.claim("role", role);
+        }
+
+        return builder.compact();
     }
 
     // 토큰에서 사용자 ID 추출
@@ -69,25 +81,18 @@ public class TokenProvider {
     // 토큰 유효성 검사 결과(만료 or 변조 여부 확인)를 TokenStatus enum으로 반환
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new com.backend.global.auth.exception.JwtException(GlobalErrorCode.TOKEN_EXPIRED);
+            throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
-            throw new com.backend.global.auth.exception.JwtException(GlobalErrorCode.INVALID_TOKEN);
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
     }
 
     // JWT 파싱
     public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
     }
 
 }

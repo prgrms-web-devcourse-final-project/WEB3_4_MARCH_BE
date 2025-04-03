@@ -33,12 +33,12 @@ public enum GlobalErrorCode {
 	// 정리 필요
 	SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "서버 오류가 발생했습니다."),
 	INVALID_REQUEST(HttpStatus.BAD_REQUEST, 400, "잘못된 요청입니다."),
-	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 4011, "유효하지 않은 토큰입니다."),
-	TOKEN_REISSUE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 4012, "토큰 갱신에 실패했습니다."),
-	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 402, "토큰이 만료되었습니다."),
-	UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, 403, "지원하지 않는 JWT 입니다."),
+	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유효하지 않은 토큰입니다."),
+	TOKEN_REISSUE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 401, "토큰 갱신에 실패했습니다."),
+	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 401, "토큰이 만료되었습니다."),
+	UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, 401, "지원하지 않는 JWT 입니다."),
 	REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "리프레시 토큰이 존재하지 않습니다."),
-	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "멤버를 찾을 수 없습니다.");
+	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "멤버를 찾을 수 없습니다.");
 
 
 

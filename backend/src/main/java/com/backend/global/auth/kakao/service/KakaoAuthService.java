@@ -125,7 +125,7 @@ public class KakaoAuthService {
         }
 
         // 4. JWT access, refresh 토큰 생성
-        String accessToken = tokenProvider.createAccessToken(member.getId());
+        String accessToken = tokenProvider.createAccessToken(member.getId(), "ROLE_USER");
         String refreshToken = tokenProvider.createRefreshToken(member.getId());
 
         // 5. Redis에 리프레시 토큰 저장 (중복 로그인 방지)
