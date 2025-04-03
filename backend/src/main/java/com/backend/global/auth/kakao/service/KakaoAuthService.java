@@ -136,7 +136,7 @@ public class KakaoAuthService {
         cookieService.addRefreshTokenToCookie(refreshToken, response);
 
         // 7. 응답 DTO 반환
-        return LoginResponseDto.of(accessToken, member.getId(), refreshToken, isRegistered);
+        return LoginResponseDto.of(accessToken, kakaoId, isRegistered ? member.getId() : null, refreshToken, isRegistered);
     }
 
     /**
@@ -156,7 +156,7 @@ public class KakaoAuthService {
             member.updateRefreshToken(newToken.refreshToken());
         }
 
-        return LoginResponseDto.of(newToken.accessToken(), member.getId(), newToken.refreshToken(), true);
+        return LoginResponseDto.of(newToken.accessToken(), member.getKakaoId(), member.getId(), newToken.refreshToken(), true);
 
     }
 }

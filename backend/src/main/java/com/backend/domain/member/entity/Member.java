@@ -97,7 +97,7 @@ public class Member extends BaseEntity {
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
-        List<Image> images, Boolean chatAble,
+                              List<Image> images, Boolean chatAble,
                               Double latitude, Double longitude) {
         this.nickname = nickname;
         this.age = age;
@@ -113,6 +113,7 @@ public class Member extends BaseEntity {
         this.kakaoAccessToken = accessToken;
 
     }
+
     public void updateRefreshToken(String refreshToken) {
         this.kakaoRefreshToken = refreshToken;
     }

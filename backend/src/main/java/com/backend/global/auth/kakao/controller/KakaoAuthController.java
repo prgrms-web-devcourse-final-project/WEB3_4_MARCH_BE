@@ -1,5 +1,7 @@
 package com.backend.global.auth.kakao.controller;
 
+import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.exception.JwtException;
 import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.service.CookieService;
@@ -33,6 +35,7 @@ public class KakaoAuthController {
     private final CookieService cookieService;
     private final RedisRefreshTokenService redisRefreshTokenService;
     private final TokenProvider tokenProvider;
+    private final MemberService memberService;
 
     @Value("${client.base-url}")
     private String clientBaseUrl;
@@ -121,7 +124,11 @@ public class KakaoAuthController {
         }
 
         String newAccessToken = tokenProvider.createAccessToken(memberId);
-        return ResponseEntity.ok(LoginResponseDto.of(newAccessToken, memberId, refreshToken,true));
+
+        // 필요한 kakaoId 조회
+        Member member = memberService.getByKakaoId(memberId);
+        return ResponseEntity.ok(LoginResponseDto.of(newAccessToken, member.getKakaoId(), memberId
+                , refreshToken, true));
     }
-    
+
 }
