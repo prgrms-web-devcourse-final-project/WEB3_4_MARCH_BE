@@ -29,7 +29,7 @@ public class BlockUser {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_id", nullable = false)
-    private Member blockedUser;
+    private Member blocked;
 
     @Column(name = "blocked_at")
     private LocalDateTime blockedAt;

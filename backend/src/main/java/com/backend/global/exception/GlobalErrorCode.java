@@ -44,7 +44,8 @@ public enum GlobalErrorCode {
 	BLOCKER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-1, "차단자 유저가 존재하지 않습니다."),
 	BLOCKED_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-2, "차단 대상 유저가 존재하지 않습니다."),
 	INVALID_BLOCK_SELF(HttpStatus.BAD_REQUEST, 400-1, "자기 자신을 차단할 수 없습니다."),
-	USER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, 400-2, "이미 차단한 유저입니다.");
+	USER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, 400-2, "이미 차단한 유저입니다."),
+	ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다.");
 
 
 

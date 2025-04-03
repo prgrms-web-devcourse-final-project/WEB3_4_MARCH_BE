@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BlockUserRequest {
 
-    @JsonProperty("blocker_id")
-    private Long blockerId;
-
     @JsonProperty("blocked_id")
     private Long blockedId;
 }
