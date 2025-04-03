@@ -4,7 +4,8 @@ import com.backend.domain.chat.dto.ChatMessage;
 import com.backend.domain.chat.dto.request.ChatMessageRequest;
 import com.backend.domain.chat.dto.response.ChatMessageResponse;
 import com.backend.domain.member.entity.Member;
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public interface ChatService {
     // 클라이언트 메시지 발송 처리
@@ -14,5 +15,5 @@ public interface ChatService {
     void relayMessage(ChatMessage chatMessage);
 
     // 채팅방 메시지 조회
-    List<ChatMessageResponse> getRoomMessage(Long roomId);
+    Slice<ChatMessageResponse> getRoomMessage(Long roomId, Long currentMemberId, Pageable pageable);
 }

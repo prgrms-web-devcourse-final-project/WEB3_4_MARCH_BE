@@ -1,6 +1,9 @@
 package com.backend.global.config;
 
+import com.backend.domain.chat.handler.StompHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -13,7 +16,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  */
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final StompHandler stompHandler;
 
     /**
      * WebSocket 연결을 위한 STOMP 엔드포인트를 등록합니다.
@@ -34,7 +40,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/api/sub");
-        config.setApplicationDestinationPrefixes("/api/pub"); // 구독 경로
+        config.enableSimpleBroker("/sub");
+        config.setApplicationDestinationPrefixes("/pub"); // 구독 경로
+    }
+
+    /**
+     * 메시지 브로커 구성을 설정합니다.
+     * - interceptors: JWT 토큰을 검증하고, 유효한 경우 SecurityContext에 인증 정보를 설정
+     * - 이후 메시지 처리에서 해당 인증 정보를 사용할 수 있도록 합니다.
+     */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompHandler);
     }
 }

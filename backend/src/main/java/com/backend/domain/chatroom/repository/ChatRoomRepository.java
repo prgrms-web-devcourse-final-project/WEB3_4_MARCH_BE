@@ -4,22 +4,47 @@ import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.member.entity.Member;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     /**
      * 두 사용자가 참여 중인 채팅방이 이미 존재하는지 확인합니다.
-     * - A → B, 또는 B → A 형태의 양방향 모두 체크합니다.
+     * - A -> B 또는 B -> A 형태의 양방향 모두를 체크합니다.
+     * - 예: (sender = A, receiver = B) OR (sender = B, receiver = A)
      *
-     * @param member1 첫 번째 사용자
-     * @param member2 두 번째 사용자
-     * @return 존재하는 채팅방 (없으면 Optional.empty())
+     * @param sender1 첫 번째 경우의 sender
+     * @param receiver1 첫 번째 경우의 receiver
+     * @param sender2 두 번째 경우의 sender (역방향)
+     * @param receiver2 두 번째 경우의 receiver (역방향)
+     * @return 존재하는 채팅방이 있다면 Optional로 반환, 없으면 Optional.empty()
      */
-    Optional<ChatRoom> findBySenderAndReceiverOrReceiverAndSender(Member sender1, Member receiver1, Member sender2, Member receiver2);
+    Optional<ChatRoom> findBySenderAndReceiverOrReceiverAndSender(
+            Member sender1, Member receiver1,
+            Member sender2, Member receiver2
+    );
 
-    // 내가 참여 중인 채팅방(보낸 사람 or 받은 사람)을 모두 조회하는 쿼리
-    // TODO : 인증 처리 완료 되면 Member 수정
-    List<ChatRoom> findBySenderIdOrReceiverId(Long senderId, Long receiverId);
+    /**
+     * 특정 사용자가 참여 중인 채팅방 목록을 페이징하여 조회합니다.
+     * - sender 또는 receiver가 해당 사용자일 경우 모두 포함됩니다.
+     * - sender, receiver를 fetch join 하여 Lazy 로딩 예외를 방지합니다.
+     * - countQuery를 별도로 지정하여 페이지 계산이 가능하도록 합니다.
+     *
+     * @param memberId 조회할 사용자 ID
+     * @param pageable 페이징 정보
+     * @return 사용자가 참여 중인 채팅방 페이지 객체
+     */
+    @Query(
+            value = "SELECT cr FROM ChatRoom cr " +
+                    "JOIN FETCH cr.sender " +
+                    "JOIN FETCH cr.receiver " +
+                    "WHERE cr.sender.id = :memberId OR cr.receiver.id = :memberId",
+            countQuery = "SELECT COUNT(cr) FROM ChatRoom cr " +
+                    "WHERE cr.sender.id = :memberId OR cr.receiver.id = :memberId"
+    )
+    Page<ChatRoom> findAllWithMembers(@Param("memberId") Long memberId, Pageable pageable);
 }
