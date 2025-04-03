@@ -34,6 +34,8 @@ public class ChatMessage {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime sendTime;
 
+    private MessageType type;
+
     /**
      * ChatMessage DTO를 Chat 엔티티로 변환합니다.
      * - DB 저장 시 사용됩니다.
@@ -50,6 +52,4 @@ public class ChatMessage {
                 this.sendTime != null ? this.sendTime : LocalDateTime.now()
         );
     }
-
-
 }
