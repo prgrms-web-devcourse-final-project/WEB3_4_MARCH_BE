@@ -4,6 +4,7 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -49,10 +51,14 @@ public class JwtUtil {
         return REFRESH_TOKEN_EXPIRATION_TIME;
     }
 
+
     // secretKey를 기반으로 Key key를 초기화
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+//        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        log.debug("🔑 key hash: {}", Arrays.hashCode(key.getEncoded()));
+
     }
 
 
@@ -61,7 +67,7 @@ public class JwtUtil {
                 .setSubject(email)
                 .claim("id", memberId)
                 .claim("email", email)
-                .claim("role", "ROLE_USER")
+                .claim("role", "ROLE_USER") //사용자의 권한(권리/역할)을 설정 (ROLE_USER면 일반 사용자)
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(key)
                 .compact();
@@ -81,8 +87,10 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
+            log.error("JWT 검증 실패: {}", e.getMessage());
             throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         } catch (MalformedJwtException | SecurityException | UnsupportedJwtException | IllegalArgumentException e) {
+            log.error("JWT 검증 실패: {}", e.getMessage());
             throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
     }

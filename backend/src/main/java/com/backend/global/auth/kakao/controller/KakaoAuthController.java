@@ -123,7 +123,12 @@ public class KakaoAuthController {
             throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         }
 
-        String newAccessToken = tokenProvider.createAccessToken(memberId);
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(Object::toString)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INVALID_TOKEN));
+
+        String newAccessToken = tokenProvider.createAccessToken(memberId, role);
 
         // 필요한 kakaoId 조회
         Member member = memberService.getByKakaoId(memberId);
