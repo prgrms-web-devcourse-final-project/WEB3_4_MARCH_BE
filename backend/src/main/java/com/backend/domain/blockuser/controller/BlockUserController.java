@@ -28,8 +28,8 @@ public class BlockUserController {
             @AuthenticationPrincipal CustomUserDetails loginUser,
             @RequestBody BlockUserRequest request
     ) {
-        blockUserService.blockUser(loginUser,request.getBlockedId());
 
+        blockUserService.blockUser(loginUser, request.getBlockedId());
         return GenericResponse.ok("회원 차단에 성공했습니다");
     }
 
