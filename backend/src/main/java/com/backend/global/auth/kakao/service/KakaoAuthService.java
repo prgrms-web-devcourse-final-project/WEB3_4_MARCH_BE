@@ -1,5 +1,9 @@
 package com.backend.global.auth.kakao.service;
 
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
@@ -12,12 +16,10 @@ import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * 카카오 인가 코드를 받아 회원 정보를 조회하고 JWT 토큰을 발급하는 인증 서비스
