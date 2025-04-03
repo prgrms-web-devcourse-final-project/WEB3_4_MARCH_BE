@@ -1,10 +1,11 @@
 package com.backend.global.auth.kakao.service;
 
+import java.util.Optional;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.member.service.MemberService;
@@ -14,8 +15,6 @@ import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.util.JwtUtil;
 import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
-import com.backend.global.exception.GlobalErrorCode;
-import com.backend.global.exception.GlobalException;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -97,20 +96,34 @@ public class KakaoAuthService {
         Long kakaoId = kakaoUserInfo.id();
 
         // 3. 해당 kakaoId가 등록된 사용자인지 확인 (회원인지 아닌지 확인)
-        Member member = memberRepository.findByKakaoId(kakaoId).orElse(null);
+//        Member member = memberRepository.findByKakaoId(kakaoId).orElse(null);
+        Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoId);
+        boolean isRegistered = optionalMember.isPresent();
+        Member member;
 
-        if (member == null) {
-            // 3-1. 신규 사용자라면 registerMember 호출
-            MemberRegisterRequestDto registerDto = MemberRegisterRequestDto.fromKakao(kakaoUserInfo);
-            memberService.registerMember(registerDto);
-
-            // 등록 후 다시 조회
-            member = memberRepository.findByKakaoId(kakaoId)
-                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_REGISTRATION_FAILED));
-        } else {
-            // 3-2. 기존 회원이면 카카오 토큰 업데이트
+        if (isRegistered) {
+            // 3-1. 기존 회원이면 토큰 업데이트
+            member = optionalMember.get();
             member.updateAccessToken(kakaoAccessToken);
             member.updateRefreshToken(kakaoRefreshToken);
+        } else {
+            // 3-2. 신규 회원 → 아직 DB에는 등록하지 않음 (회원가입 전 단계)
+            // 이후 /members/register 에서 최종 등록 예정
+            // 신규 유저면 DB에 등록하지 않고 member 객체만 생성
+            member = Member.ofKakaoUser(
+                    kakaoId,
+                    kakaoUserInfo.kakaoAccount().email(),
+                    kakaoUserInfo.properties().nickname()
+
+            );
+            /* 방법2: builder를 해서 선택적으로 필드에 값을 넣고 객체로 데이터를 넘겨주는 방법
+            member = Member.builder()
+                    .kakaoId(kakaoId)
+                    .nickname(kakaoUserInfo.properties().nickname())
+                    .email(kakaoUserInfo.kakaoAccount().email())
+                    .build();
+
+             */
         }
 
         // 4. JWT access, refresh 토큰 생성
@@ -125,7 +138,7 @@ public class KakaoAuthService {
         cookieService.addRefreshTokenToCookie(refreshToken, response);
 
         // 7. 응답 DTO 반환
-        return LoginResponseDto.of(accessToken, member.getId(), refreshToken);
+        return LoginResponseDto.of(accessToken, kakaoId, isRegistered ? member.getId() : null, refreshToken, isRegistered);
     }
 
     /**
@@ -145,7 +158,7 @@ public class KakaoAuthService {
             member.updateRefreshToken(newToken.refreshToken());
         }
 
-        return LoginResponseDto.of(newToken.accessToken(), member.getId(), newToken.refreshToken());
+        return LoginResponseDto.of(newToken.accessToken(), member.getKakaoId(), member.getId(), newToken.refreshToken(), true);
 
     }
 }
