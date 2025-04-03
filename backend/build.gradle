@@ -47,6 +47,23 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce:lettuce-core' //// 기본 Redis 클라이언트
     implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0")
+
+    // WebSocket + STOMP
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // JSON 변환
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Netty 추가 (lettuce 내부에서 사용하는데 명시적으로 추가하면 안정적)
+    implementation 'io.netty:netty-all:4.1.100.Final'
+
+    implementation platform("software.amazon.awssdk:bom:2.25.28") // BOM으로 관리
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:regions'
 }
 
 tasks.named('test') {
