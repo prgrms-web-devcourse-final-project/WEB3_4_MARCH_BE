@@ -45,11 +45,11 @@ public class KafkaChatConsumer {
         try {
             // 채팅방 조회
             ChatRoom room = chatRoomRepository.findById(chatMessage.getRoomId())
-                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_CHATROOM));
+                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.CHATROOM_NOT_FOUND));
 
             // 발신자 조회
             Member sender = memberRepository.findById(chatMessage.getSenderId())
-                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_MEMBER));
+                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
             // Chat 엔티티로 변환 및 저장
             Chat chat = chatMessage.toEntity(room, sender);
