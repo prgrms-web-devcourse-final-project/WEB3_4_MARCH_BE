@@ -45,8 +45,10 @@ public enum GlobalErrorCode {
 	BLOCKED_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-2, "차단 대상 유저가 존재하지 않습니다."),
 	INVALID_BLOCK_SELF(HttpStatus.BAD_REQUEST, 400-1, "자기 자신을 차단할 수 없습니다."),
 	USER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, 400-2, "이미 차단한 유저입니다."),
-	ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다.");
+	ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다."),
 
+	// 권한 없는 유저 오류코드
+	TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다.");
 
 
 
