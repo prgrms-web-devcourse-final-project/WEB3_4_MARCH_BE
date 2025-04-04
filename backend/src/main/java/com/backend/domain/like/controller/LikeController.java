@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.backend.domain.like.dto.MemberProfileDto;
+import com.backend.domain.like.dto.LikeMemberProfileDto;
 import com.backend.domain.like.service.LikeService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,15 +30,15 @@ public class LikeController {
 
     // 내가 좋아요한 목록 조회
     @GetMapping("/I-Like-U")
-    public ResponseEntity<List<MemberProfileDto>> getLikedProfilesBySender(@RequestParam Long senderId) {
-        List<MemberProfileDto> profiles = likeService.getLikedProfilesBySender(senderId);
+    public ResponseEntity<List<LikeMemberProfileDto>> getLikedProfilesBySender(@RequestParam Long senderId) {
+        List<LikeMemberProfileDto> profiles = likeService.getLikedProfilesBySender(senderId);
         return ResponseEntity.ok(profiles);
     }
 
     // 나를 좋아한 목록 조회
     @GetMapping("/U-Like-Me")
-    public ResponseEntity<List<MemberProfileDto>> getLikerProfilesByReceiver(@RequestParam Long receiverId) {
-        List<MemberProfileDto> profiles = likeService.getLikerProfilesByReceiver(receiverId);
+    public ResponseEntity<List<LikeMemberProfileDto>> getLikerProfilesByReceiver(@RequestParam Long receiverId) {
+        List<LikeMemberProfileDto> profiles = likeService.getLikerProfilesByReceiver(receiverId);
         return ResponseEntity.ok(profiles);
     }
 }

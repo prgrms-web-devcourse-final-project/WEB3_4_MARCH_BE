@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PresignedUrlResponse {
-    private String uploadUrl;
-    private String imageUrl;
+public class ProfileImageDto {
+    private Long id;
+    private String url;
 }
