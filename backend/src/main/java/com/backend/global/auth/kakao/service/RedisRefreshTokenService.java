@@ -33,6 +33,7 @@ public class RedisRefreshTokenService {
      * @param memberId 사용자 ID
      * @param token 요청에서 받은 리프레시 토큰
      * @return 토큰이 일치하면 true
+     * 화이트리스트 방식: Redis에 허용된 refreshToken만 저장하고, 요청이 들어오면 이 토큰이 존재하는지 확인하는 구조
      */
     public boolean isValid(Long memberId, String token) {
         String storedToken = redisTemplate.opsForValue().get(getKey(memberId));

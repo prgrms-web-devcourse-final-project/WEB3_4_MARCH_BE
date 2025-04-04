@@ -31,6 +31,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // DTO 변환은 서비스에서 map(MemberInfoDto::from) 사용
     List<Member> findByNicknameContaining(String nickname);
 
-    Optional<Member> findByKakaoRefreshToken(String kakaoRefreshToken);
-
 }
