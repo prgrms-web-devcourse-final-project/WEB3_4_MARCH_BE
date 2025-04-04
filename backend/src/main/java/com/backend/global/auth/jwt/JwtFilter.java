@@ -2,6 +2,7 @@ package com.backend.global.auth.jwt;
 
 import com.backend.global.auth.kakao.service.CookieService;
 import com.backend.global.auth.kakao.util.JwtUtil;
+import com.backend.global.auth.kakao.util.TokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 /**
@@ -25,6 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CookieService cookieService;
+    private final TokenProvider tokenProvider;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -35,7 +39,9 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = cookieService.getAccessTokenFromCookie(request);
 
         // 2. 토큰이 존재하고 유효하면
-        if (token != null && jwtUtil.validateToken(token)) {
+        if (token != null) {
+            tokenProvider.validateToken(token); // 유효성 검사 (예외 발생 시 중단)
+
             // 2-1. JWT로부터 인증(Authentication) 객체 생성
             Authentication authentication = jwtUtil.getAuthentication(token);
 

@@ -113,7 +113,6 @@ public class KakaoAuthService {
                     kakaoUserInfo.properties().nickname(),
                     Role.ROLE_TEMP_USER
             );
-            log.info("생성된 Member 임시 객체: {}", member);
 
             memberRepository.save(member); // id 부여 목적
         }
@@ -125,7 +124,7 @@ public class KakaoAuthService {
         String refreshToken = tokenProvider.createRefreshToken(member.getId());
 
         // 5. Redis에 리프레시 토큰 저장 (중복 로그인 방지)
-        long ttl = jwtUtil.getRefreshTokenExpirationTime();
+        long ttl = tokenProvider.getRefreshTokenTTL();
         redisRefreshTokenService.saveRefreshToken(member.getId(), refreshToken, ttl);
 
         // 6. 리프레시 토큰을 쿠키에 저장
@@ -151,7 +150,7 @@ public class KakaoAuthService {
         String newRefreshToken = tokenProvider.createRefreshToken(member.getId());
 
         // Redis 저장 (기존 토큰 갱신)
-        long ttl = jwtUtil.getRefreshTokenExpirationTime();
+        long ttl = tokenProvider.getRefreshTokenTTL();
         redisRefreshTokenService.saveRefreshToken(member.getId(), newRefreshToken, ttl);
 
         return LoginResponseDto.of(newAccessToken, member.getKakaoId(), member.getId(), newRefreshToken, true);

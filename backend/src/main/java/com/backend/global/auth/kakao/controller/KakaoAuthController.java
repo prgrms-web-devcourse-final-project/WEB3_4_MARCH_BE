@@ -85,11 +85,7 @@ public class KakaoAuthController {
     public ResponseEntity<LoginResponseDto> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
-
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-        }
-
+        tokenProvider.validateToken(refreshToken);
         Long memberId = tokenProvider.parseToken(refreshToken).get("id", Long.class);
 
         if (!redisRefreshTokenService.isValid(memberId, refreshToken)) {
@@ -128,9 +124,7 @@ public class KakaoAuthController {
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
         Long memberId = userDetails.getMemberId(); // 인증 정보에서 ID 추출
 
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-        }
+        tokenProvider.validateToken(refreshToken);
 
         if (!redisRefreshTokenService.isValid(memberId, refreshToken)) {
             throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);

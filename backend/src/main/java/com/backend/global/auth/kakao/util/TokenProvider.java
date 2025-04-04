@@ -9,10 +9,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.time.Duration;
 import java.util.Date;
@@ -36,6 +38,7 @@ public class TokenProvider {
     private long accessTokenTTL; // ms
 
     @Value("${spring.security.jwt.refresh-token.expiration}")
+    @Getter
     private long refreshTokenTTL; // ms
 
     private Key signingKey;
@@ -78,10 +81,9 @@ public class TokenProvider {
     }
 
     // 토큰 유효성 검사 결과(만료 or 변조 여부 확인)를 TokenStatus enum으로 반환
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token);
-            return true;
         } catch (ExpiredJwtException e) {
             throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
