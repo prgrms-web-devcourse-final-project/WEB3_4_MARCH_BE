@@ -1,21 +1,5 @@
 package com.backend.domain.member.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
@@ -26,9 +10,14 @@ import com.backend.domain.member.service.MemberService;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -71,6 +60,8 @@ public class MemberController {
         // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
         //    여기서는 List<MultipartFile>가 필요하므로 배열을 List로 변환합니다.
         presignedService.uploadFiles(java.util.Arrays.asList(files), memberInfo.id());
+
+        // 액서스 토큰, 저장
 
         // 3. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
         MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());

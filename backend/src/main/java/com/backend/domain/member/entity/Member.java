@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@ToString
 public class Member extends BaseEntity {
 
     @Id
@@ -51,6 +52,7 @@ public class Member extends BaseEntity {
 
     private Double longitude;
 
+    // 멤버 엔티티에 카카오 토큰을들 저장을 할 필요는 없다.
     @Column(name = "kakao_access_token")
     private String kakaoAccessToken;
 

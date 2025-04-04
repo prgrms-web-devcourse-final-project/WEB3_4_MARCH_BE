@@ -86,7 +86,7 @@ public class KakaoAuthService {
      */
     // 회원 조회 및 회원가입
     public LoginResponseDto processLogin(String code, HttpServletResponse response) {
-        // 1. 인가 코드로 accessToken, refreshToken 발급받기
+        // 1. 인가 코드로 카카오 accessToken, refreshToken 발급받기
         KakaoTokenResponseDto kakaoTokenDto = getTokenFromKakao(code);
         String kakaoAccessToken = kakaoTokenDto.accessToken();
         String kakaoRefreshToken = kakaoTokenDto.refreshToken();
@@ -114,8 +114,11 @@ public class KakaoAuthService {
                     kakaoId,
                     kakaoUserInfo.kakaoAccount().email(),
                     kakaoUserInfo.properties().nickname()
-
             );
+
+            log.info("생성된 Member 객체: {}", member);
+
+
             /* 방법2: builder를 해서 선택적으로 필드에 값을 넣고 객체로 데이터를 넘겨주는 방법
             member = Member.builder()
                     .kakaoId(kakaoId)
@@ -126,7 +129,9 @@ public class KakaoAuthService {
              */
         }
 
-        // 4. JWT access, refresh 토큰 생성
+        log.info("생성된 Member 객체: {}", member);
+
+        // 4. JWT access, refresh 토큰 생성>>>>> null값에 대한 액세스토큰이 생성이 된다. >> 엔티티 세이브 할때 같이 하는게 맞고.
         String accessToken = tokenProvider.createAccessToken(member.getId(), "ROLE_USER");
         String refreshToken = tokenProvider.createRefreshToken(member.getId());
 
