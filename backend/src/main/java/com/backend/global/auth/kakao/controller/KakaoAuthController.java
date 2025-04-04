@@ -1,14 +1,5 @@
 package com.backend.global.auth.kakao.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.kakao.dto.LoginResponseDto;
@@ -20,11 +11,14 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 카카오 소셜 로그인 인증을 처리하는 컨트롤러 클래스
@@ -58,7 +52,10 @@ public class KakaoAuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
+        // 여기에 추가. if를 써서 최초 가입이다. => redirect 처리
         LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
+        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
+        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
         return ResponseEntity.ok(loginResult);
     }
 
@@ -68,16 +65,17 @@ public class KakaoAuthController {
      */
     @GetMapping("/callback")
     public ResponseEntity<GenericResponse<LoginResponseDto>> loginCallback(@RequestParam String code, HttpServletResponse response) {
-        LoginResponseDto login = kakaoAuthService.processLogin(code, response);
+        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
 
-        cookieService.addAccessTokenToCookie(login.accessToken(), response);
-        cookieService.addRefreshTokenToCookie(login.refreshToken(), response);
+        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
+        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
 
-        return ResponseEntity.ok(GenericResponse.of(login, "로그인 성공"));
+        return ResponseEntity.ok(GenericResponse.of(loginResult, "로그인 성공"));
     }
 
     /**
-     * 리프레시 토큰을 통해 새로운 액세스 토큰 재발급
+     * 이미 로그인된 상태에서 액세스 토큰이 만료되었을 때 사용하는 API
+     * 기존 리프레시 토큰을 통해 새로운 액세스 토큰 재발급
      */
     @PostMapping("/reissue")
     public ResponseEntity<LoginResponseDto> reissue(HttpServletRequest request, HttpServletResponse response) {

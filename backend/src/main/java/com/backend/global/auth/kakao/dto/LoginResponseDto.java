@@ -18,10 +18,10 @@ public record LoginResponseDto(
     /**
      * 응답 객체 생성 메서드
      *
-     * @param accessToken  발급된 액세스 토큰
+     * @param accessToken  발급된 JWT 액세스 토큰
      * @param kakaoId      카카오 회원 ID (String으로 변환)
      * @param memberId     멤버 ID (PK)
-     * @param refreshToken 발급된 리프레시 토큰
+     * @param refreshToken 발급된 JWT 리프레시 토큰
      * @param isRegistered 기존 회원 여부
      * @return 응답 DTO
      */

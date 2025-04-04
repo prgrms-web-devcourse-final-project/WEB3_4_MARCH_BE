@@ -79,8 +79,6 @@ public class MemberService {
                     .chatAble(true)
                     .latitude(requestDto.latitude())
                     .longitude(requestDto.longitude())
-                    .kakaoAccessToken(null)
-                    .kakaoRefreshToken(null)
                     .build();
             return memberRepository.save(newMember);
         });

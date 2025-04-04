@@ -47,12 +47,12 @@ public class TokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 액세스 토큰 생성 (30분 TTL)
+    // JWT 액세스 토큰 생성 (30분 TTL)
     public String createAccessToken(Long memberId, String role) {
         return createToken(memberId, role, Duration.ofMillis(accessTokenTTL));
     }
 
-    // 리프레시 토큰 생성 (14일 TTL)
+    // JWT 리프레시 토큰 생성 (14일 TTL)
     public String createRefreshToken(Long memberId) {
         return createToken(memberId, null, Duration.ofMillis(refreshTokenTTL));
     }

@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 리프레시 토큰과 액세스 토큰을 쿠키에 저장하고, 추출하고, 삭제하는 서비스
+ * JWT 리프레시 토큰과 액세스 토큰을 쿠키에 저장하고, 추출하고, 삭제하는 서비스
  * 내부적으로 CookieUtil을 사용함
  */
 @Slf4j

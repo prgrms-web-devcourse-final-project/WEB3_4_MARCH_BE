@@ -5,7 +5,6 @@ import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.global.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Entity
@@ -52,37 +51,22 @@ public class Member extends BaseEntity {
 
     private Double longitude;
 
-    // 멤버 엔티티에 카카오 토큰을들 저장을 할 필요는 없다.
-    @Column(name = "kakao_access_token")
-    private String kakaoAccessToken;
-
-    @Column(name = "kakao_refresh_token")
-    private String kakaoRefreshToken;
-
     // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    // 카카오에서 받아온 데이터를 저장하는 정적 팩토리 메서드
-    public static Member ofKakaoUser(Long kakaoId, String email, String nickname) {
-        return Member.builder()
-                .kakaoId(kakaoId)
-                .email(email)
-                .nickname(nickname)
-                .age(0)
-                .height(0)
-                .gender("UNKNOWN")
-                .chatAble(true)
-                .build();
-    }
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+
+
 
     @Builder
     public Member(Long kakaoId, String email, String nickname,
                   Integer age, Integer height, String gender,
                   List<Image> images, Boolean chatAble,
-                  Double latitude, Double longitude,
-                  String kakaoAccessToken, String kakaoRefreshToken) {
+                  Double latitude, Double longitude,Role role) {
 
         this.kakaoId = kakaoId;
         this.email = email;
@@ -94,8 +78,17 @@ public class Member extends BaseEntity {
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.kakaoAccessToken = kakaoAccessToken;
-        this.kakaoRefreshToken = kakaoRefreshToken;
+        this.role = role;
+    }
+
+    // 카카오에서 받아온 데이터를 저장하는 정적 팩토리 메서드
+    public static Member ofKakaoUser(Long kakaoId, String email, String nickname, Role role) {
+        Member member = new Member();
+        member.kakaoId = kakaoId;
+        member.email = email;
+        member.nickname = nickname;
+        member.role = role;
+        return member;
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
@@ -109,15 +102,6 @@ public class Member extends BaseEntity {
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
-    }
-
-    public void updateAccessToken(String accessToken) {
-        this.kakaoAccessToken = accessToken;
-
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.kakaoRefreshToken = refreshToken;
     }
 
     // 회원 탈퇴(soft delete)

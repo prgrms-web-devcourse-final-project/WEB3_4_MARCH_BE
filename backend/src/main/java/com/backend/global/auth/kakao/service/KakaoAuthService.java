@@ -1,12 +1,7 @@
 package com.backend.global.auth.kakao.service;
 
-import java.util.Optional;
-
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.kakao.dto.KakaoTokenResponseDto;
@@ -15,10 +10,16 @@ import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.util.JwtUtil;
 import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Optional;
+
 
 /**
  * 카카오 인가 코드를 받아 회원 정보를 조회하고 JWT 토큰을 발급하는 인증 서비스
@@ -47,6 +48,9 @@ public class KakaoAuthService {
 
     // 쿠키 관련 서비스 및 유틸
     private final CookieService cookieService;
+
+    @Value("${client.base-url}")
+    private String clientBaseUrl;
 
     /**
      * 카카오 로그인 인가 요청 URL 반환
@@ -96,7 +100,6 @@ public class KakaoAuthService {
         Long kakaoId = kakaoUserInfo.id();
 
         // 3. 해당 kakaoId가 등록된 사용자인지 확인 (회원인지 아닌지 확인)
-//        Member member = memberRepository.findByKakaoId(kakaoId).orElse(null);
         Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoId);
         boolean isRegistered = optionalMember.isPresent();
         Member member;
@@ -104,8 +107,18 @@ public class KakaoAuthService {
         if (isRegistered) {
             // 3-1. 기존 회원이면 토큰 업데이트
             member = optionalMember.get();
-            member.updateAccessToken(kakaoAccessToken);
-            member.updateRefreshToken(kakaoRefreshToken);
+
+            // 4. 기존 회원이면 JWT 발급
+            String accessToken = tokenProvider.createAccessToken(member.getId(), member.getRole().name());
+            String refreshToken = tokenProvider.createRefreshToken(member.getId());
+
+            // 5. Redis에 RefreshToken 저장
+            long ttl = jwtUtil.getRefreshTokenExpirationTime();
+            redisRefreshTokenService.saveRefreshToken(member.getId(), refreshToken, ttl);
+
+            // 6. 응답 DTO 반환
+            return LoginResponseDto.of(accessToken, kakaoId, member.getId(), refreshToken, true);
+
         } else {
             // 3-2. 신규 회원 → 아직 DB에는 등록하지 않음 (회원가입 전 단계)
             // 이후 /members/register 에서 최종 등록 예정
@@ -113,57 +126,37 @@ public class KakaoAuthService {
             member = Member.ofKakaoUser(
                     kakaoId,
                     kakaoUserInfo.kakaoAccount().email(),
-                    kakaoUserInfo.properties().nickname()
+                    kakaoUserInfo.properties().nickname(),
+                    Role.ROLE_TEMP_USER  // 임시 회원 권한 부여
             );
 
-            log.info("생성된 Member 객체: {}", member);
+            log.info("생성된 Member 임시 객체: {}", member);
+            memberRepository.save(member); // id 부여 목적
 
-
-            /* 방법2: builder를 해서 선택적으로 필드에 값을 넣고 객체로 데이터를 넘겨주는 방법
-            member = Member.builder()
-                    .kakaoId(kakaoId)
-                    .nickname(kakaoUserInfo.properties().nickname())
-                    .email(kakaoUserInfo.kakaoAccount().email())
-                    .build();
-
-             */
+            return LoginResponseDto.of(null, kakaoId, null, null, false); // JWT 없이 isRegistered=false
         }
-
-        log.info("생성된 Member 객체: {}", member);
-
-        // 4. JWT access, refresh 토큰 생성>>>>> null값에 대한 액세스토큰이 생성이 된다. >> 엔티티 세이브 할때 같이 하는게 맞고.
-        String accessToken = tokenProvider.createAccessToken(member.getId(), "ROLE_USER");
-        String refreshToken = tokenProvider.createRefreshToken(member.getId());
-
-        // 5. Redis에 리프레시 토큰 저장 (중복 로그인 방지)
-        long ttl = jwtUtil.getRefreshTokenExpirationTime();
-        redisRefreshTokenService.saveRefreshToken(member.getId(), refreshToken, ttl);
-
-        // 6. 리프레시 토큰을 쿠키에 저장
-        cookieService.addRefreshTokenToCookie(refreshToken, response);
-
-        // 7. 응답 DTO 반환
-        return LoginResponseDto.of(accessToken, kakaoId, isRegistered ? member.getId() : null, refreshToken, isRegistered);
     }
 
     /**
      * 카카오 리프레시 토큰을 통해 accessToken 재발급
      */
-    public LoginResponseDto reissueTokens(String refreshToken) {
-        Member member = memberService.findByKakaoRefreshToken(refreshToken);
+    public LoginResponseDto reissueTokens(String kakaoRefreshToken) {
+        Member member = memberService.findByKakaoRefreshToken(kakaoRefreshToken);
 
-        KakaoTokenResponseDto newToken = webClient.post()
-                .uri(kakaoAuthUtil.getKakaoTokenReissueUrl(refreshToken))
+        KakaoTokenResponseDto newKakaoToken = webClient.post()
+                .uri(kakaoAuthUtil.getKakaoTokenReissueUrl(kakaoRefreshToken))
                 .retrieve()
                 .bodyToMono(KakaoTokenResponseDto.class)
                 .block();
 
-        member.updateAccessToken(newToken.accessToken());
-        if (newToken.refreshToken() != null) {
-            member.updateRefreshToken(newToken.refreshToken());
-        }
+        // JWT 토큰 재발급
+        String newAccessToken = tokenProvider.createAccessToken(member.getId(), member.getRole().name());
+        String newRefreshToken = tokenProvider.createRefreshToken(member.getId());
 
-        return LoginResponseDto.of(newToken.accessToken(), member.getKakaoId(), member.getId(), newToken.refreshToken(), true);
+        long ttl = jwtUtil.getRefreshTokenExpirationTime();
+        redisRefreshTokenService.saveRefreshToken(member.getId(), newRefreshToken, ttl);
+
+        return LoginResponseDto.of(newAccessToken, member.getKakaoId(), member.getId(), newRefreshToken, true);
 
     }
 }
