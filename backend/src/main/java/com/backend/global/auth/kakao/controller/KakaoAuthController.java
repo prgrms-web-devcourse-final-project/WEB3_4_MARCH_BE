@@ -55,6 +55,7 @@ public class KakaoAuthController {
 
     /**
      * 로그인 API (인가코드로 로그인 및 회원가입 처리)
+     * 	프론트에서 code 받아 백엔드로 POST
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
@@ -65,15 +66,16 @@ public class KakaoAuthController {
     /**
      * 프론트 리다이렉트용 콜백 핸들러
      * 로그인 후 콜백 요청 처리 (액세스/리프레시 토큰을 쿠키에 설정)
+     * 	카카오 서버가 직접 리다이렉트
      */
     @GetMapping("/callback")
     public ResponseEntity<GenericResponse<LoginResponseDto>> loginCallback(@RequestParam String code, HttpServletResponse response) {
-        LoginResponseDto login = kakaoAuthService.processLogin(code, response);
+        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
 
-        cookieService.addAccessTokenToCookie(login.accessToken(), response);
-        cookieService.addRefreshTokenToCookie(login.refreshToken(), response);
+        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
+        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
 
-        return ResponseEntity.ok(GenericResponse.of(login, "로그인 성공"));
+        return ResponseEntity.ok(GenericResponse.of(loginResult, "로그인 성공"));
     }
 
     /**
@@ -83,19 +85,24 @@ public class KakaoAuthController {
     public ResponseEntity<LoginResponseDto> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
 
-        Long memberId = tokenProvider.parseToken(refreshToken).get("id", Long.class);
 
         if (!tokenProvider.validateToken(refreshToken)) {
             throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
 
-        if (redisRefreshTokenService.isValid(memberId, refreshToken)) {
+        Long memberId = tokenProvider.parseToken(refreshToken).get("id", Long.class);
+
+        if (!redisRefreshTokenService.isValid(memberId, refreshToken)) {
             throw new GlobalException(GlobalErrorCode.TOKEN_EXPIRED);
         }
 
         LoginResponseDto newToken = kakaoAuthService.reissueTokens(refreshToken);
 
-        cookieService.addRefreshTokenToCookie(newToken.refreshToken(), response);
+        // 리프레시 토큰이 갱신되었다면 쿠키에 반영
+        if (newToken.refreshToken() != null) {
+            cookieService.addRefreshTokenToCookie(newToken.refreshToken(), response);
+        }
+
         return ResponseEntity.ok(newToken);
     }
 

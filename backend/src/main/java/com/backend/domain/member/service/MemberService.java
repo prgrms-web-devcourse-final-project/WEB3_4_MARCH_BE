@@ -5,6 +5,7 @@ import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
@@ -39,6 +40,7 @@ public class MemberService {
                 .map(MemberInfoDto::from)
                 .collect(Collectors.toList());
     }
+
     /**
      * 회원 가입을 처리한다.
      *
@@ -46,6 +48,7 @@ public class MemberService {
      * 1. 이미 활성화된 회원(탈퇴하지 않은 회원)이 존재하는 경우, 중복 가입 예외를 발생시킨다.
      * 2. 탈퇴된 회원인 경우, 회원 정보를 복구하여 재가입 처리한다.
      * 3. 신규 회원인 경우, 회원 정보를 저장하고 생성된 회원 엔티티를 반환한다.
+     * 4. 기본 정보와 이미지 등록 후, 회원은 ROLE_USER로 승격된다.
      * </p>
      *
      * @param requestDto 회원 가입 요청 DTO (회원의 카카오 ID, 이메일, 닉네임, 성별, 나이, 키, 위치 등 정보 포함)
@@ -63,6 +66,7 @@ public class MemberService {
         Member member = memberRepository.findByKakaoId(requestDto.kakaoId()).map(existing -> {
             if (existing.isDeleted()) {
                 existing.rejoin(requestDto);
+                existing.updateRole(Role.ROLE_USER);
                 return existing;
             } else {
                 throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
@@ -79,11 +83,15 @@ public class MemberService {
                     .chatAble(true)
                     .latitude(requestDto.latitude())
                     .longitude(requestDto.longitude())
-                    .kakaoAccessToken(null)
-                    .kakaoRefreshToken(null)
+                    .role(Role.ROLE_USER)
                     .build();
             return memberRepository.save(newMember);
         });
+
+        // 임시 신규 회원이라면 ROLE_USER(추가 데이터를 다 입력한 정규 회원)으로 승격 처리
+        if (member.getRole() == Role.ROLE_TEMP_USER) {
+            member.updateRole(Role.ROLE_USER);
+        }
 
         return MemberInfoDto.from(member);
     }
@@ -150,11 +158,12 @@ public class MemberService {
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
-    @Transactional(readOnly = true)
-    public Member findByKakaoRefreshToken(String refreshToken) {
-
-        return memberRepository.findByKakaoRefreshToken(refreshToken).orElseThrow(() ->
-                new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+    // 멤버 전환 메서드
+    @Transactional
+    public void upgradeToUserRole(Long memberId) {
+        Member member = getMemberEntity(memberId);
+        if (member.getRole() == Role.ROLE_TEMP_USER) {
+            member.updateRole(Role.ROLE_USER);
+        }
     }
-
 }

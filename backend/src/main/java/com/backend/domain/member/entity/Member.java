@@ -51,11 +51,8 @@ public class Member extends BaseEntity {
 
     private Double longitude;
 
-    @Column(name = "kakao_access_token")
-    private String kakaoAccessToken;
-
-    @Column(name = "kakao_refresh_token")
-    private String kakaoRefreshToken;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
@@ -63,7 +60,7 @@ public class Member extends BaseEntity {
     private boolean isDeleted = false;
 
     // 카카오에서 받아온 데이터를 저장하는 정적 팩토리 메서드
-    public static Member ofKakaoUser(Long kakaoId, String email, String nickname) {
+    public static Member ofKakaoUser(Long kakaoId, String email, String nickname, Role role) {
         return Member.builder()
                 .kakaoId(kakaoId)
                 .email(email)
@@ -72,6 +69,7 @@ public class Member extends BaseEntity {
                 .height(0)
                 .gender("UNKNOWN")
                 .chatAble(true)
+                .role(role)
                 .build();
     }
 
@@ -80,7 +78,7 @@ public class Member extends BaseEntity {
                   Integer age, Integer height, String gender,
                   List<Image> images, Boolean chatAble,
                   Double latitude, Double longitude,
-                  String kakaoAccessToken, String kakaoRefreshToken) {
+                  Role role) {
 
         this.kakaoId = kakaoId;
         this.email = email;
@@ -92,8 +90,7 @@ public class Member extends BaseEntity {
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.kakaoAccessToken = kakaoAccessToken;
-        this.kakaoRefreshToken = kakaoRefreshToken;
+        this.role = role;
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
@@ -109,15 +106,6 @@ public class Member extends BaseEntity {
         this.longitude = longitude;
     }
 
-    public void updateAccessToken(String accessToken) {
-        this.kakaoAccessToken = accessToken;
-
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.kakaoRefreshToken = refreshToken;
-    }
-
     // 회원 탈퇴(soft delete)
     public void withdraw() {
         this.isDeleted = true;
@@ -131,6 +119,11 @@ public class Member extends BaseEntity {
         this.height = requestDto.height();
         this.gender = requestDto.gender();
         this.isDeleted = false;
+    }
+
+    // 멤버 권한 전환
+    public void updateRole(Role role) {
+        this.role = role;
     }
 
     public void setProfileImage(Image image) {

@@ -1,12 +1,7 @@
 package com.backend.global.auth.kakao.service;
 
-import java.util.Optional;
-
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.kakao.dto.KakaoTokenResponseDto;
@@ -15,10 +10,14 @@ import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.util.JwtUtil;
 import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Optional;
 
 /**
  * 카카오 인가 코드를 받아 회원 정보를 조회하고 JWT 토큰을 발급하는 인증 서비스
@@ -102,10 +101,8 @@ public class KakaoAuthService {
         Member member;
 
         if (isRegistered) {
-            // 3-1. 기존 회원이면 토큰 업데이트
+            // 3-1. 기존 회원 정보 조회
             member = optionalMember.get();
-            member.updateAccessToken(kakaoAccessToken);
-            member.updateRefreshToken(kakaoRefreshToken);
         } else {
             // 3-2. 신규 회원 → 아직 DB에는 등록하지 않음 (회원가입 전 단계)
             // 이후 /members/register 에서 최종 등록 예정
@@ -113,21 +110,18 @@ public class KakaoAuthService {
             member = Member.ofKakaoUser(
                     kakaoId,
                     kakaoUserInfo.kakaoAccount().email(),
-                    kakaoUserInfo.properties().nickname()
-
+                    kakaoUserInfo.properties().nickname(),
+                    Role.ROLE_TEMP_USER
             );
-            /* 방법2: builder를 해서 선택적으로 필드에 값을 넣고 객체로 데이터를 넘겨주는 방법
-            member = Member.builder()
-                    .kakaoId(kakaoId)
-                    .nickname(kakaoUserInfo.properties().nickname())
-                    .email(kakaoUserInfo.kakaoAccount().email())
-                    .build();
+            log.info("생성된 Member 임시 객체: {}", member);
 
-             */
+            memberRepository.save(member); // id 부여 목적
         }
 
+
         // 4. JWT access, refresh 토큰 생성
-        String accessToken = tokenProvider.createAccessToken(member.getId(), "ROLE_USER");
+        // JWT 토큰 발급 시 권한은 member.getRole() 기준으로 생성
+        String accessToken = tokenProvider.createAccessToken(member.getId(), member.getRole().name());
         String refreshToken = tokenProvider.createRefreshToken(member.getId());
 
         // 5. Redis에 리프레시 토큰 저장 (중복 로그인 방지)
@@ -139,26 +133,28 @@ public class KakaoAuthService {
 
         // 7. 응답 DTO 반환
         return LoginResponseDto.of(accessToken, kakaoId, isRegistered ? member.getId() : null, refreshToken, isRegistered);
+
     }
 
     /**
      * 카카오 리프레시 토큰을 통해 accessToken 재발급
      */
     public LoginResponseDto reissueTokens(String refreshToken) {
-        Member member = memberService.findByKakaoRefreshToken(refreshToken);
+        // JWT에서 memberId 추출
+        Long memberId = tokenProvider.extractMemberId(refreshToken);
 
-        KakaoTokenResponseDto newToken = webClient.post()
-                .uri(kakaoAuthUtil.getKakaoTokenReissueUrl(refreshToken))
-                .retrieve()
-                .bodyToMono(KakaoTokenResponseDto.class)
-                .block();
+        // 회원 조회 (DB에서 기본 정보만)
+        Member member = memberService.getMemberEntity(memberId);
 
-        member.updateAccessToken(newToken.accessToken());
-        if (newToken.refreshToken() != null) {
-            member.updateRefreshToken(newToken.refreshToken());
-        }
+        // 새로운 JWT 토큰 발급
+        String newAccessToken = tokenProvider.createAccessToken(member.getId(), member.getRole().name());
+        String newRefreshToken = tokenProvider.createRefreshToken(member.getId());
 
-        return LoginResponseDto.of(newToken.accessToken(), member.getKakaoId(), member.getId(), newToken.refreshToken(), true);
+        // Redis 저장 (기존 토큰 갱신)
+        long ttl = jwtUtil.getRefreshTokenExpirationTime();
+        redisRefreshTokenService.saveRefreshToken(member.getId(), newRefreshToken, ttl);
+
+        return LoginResponseDto.of(newAccessToken, member.getKakaoId(), member.getId(), newRefreshToken, true);
 
     }
 }
