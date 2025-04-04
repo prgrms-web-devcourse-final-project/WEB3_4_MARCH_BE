@@ -9,6 +9,7 @@ import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
+import com.backend.global.redis.service.RedisGeoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final RedisGeoService redisGeoService;
 
     // 회원 정보 조회
     // Member 엔티티를 DTO로 변환해서 반환
@@ -85,8 +87,15 @@ public class MemberService {
                     .longitude(requestDto.longitude())
                     .role(Role.ROLE_USER)
                     .build();
-            return memberRepository.save(newMember);
+
+            Member savedMember = memberRepository.save(newMember);
+
+            // redis내에서 회원위치정보 저장.
+            redisGeoService.addLocation(newMember.getId(), newMember.getLatitude(), newMember.getLongitude());
+
+            return savedMember;
         });
+
 
         // 임시 신규 회원이라면 ROLE_USER(추가 데이터를 다 입력한 정규 회원)으로 승격 처리
         if (member.getRole() == Role.ROLE_TEMP_USER) {
@@ -138,6 +147,10 @@ public class MemberService {
     public MemberResponseDto withdraw(Long memberId) {
         Member member = getMemberEntity(memberId);
         member.withdraw();
+
+        // redis내에서 회원 위치 정보삭제
+        redisGeoService.removeLocation(memberId);
+
         return MemberResponseDto.from(member);
     }
 
@@ -166,4 +179,5 @@ public class MemberService {
             member.updateRole(Role.ROLE_USER);
         }
     }
+
 }

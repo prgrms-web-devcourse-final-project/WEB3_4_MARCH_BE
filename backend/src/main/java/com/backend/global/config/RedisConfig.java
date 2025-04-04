@@ -3,10 +3,12 @@ package com.backend.global.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableRedisRepositories
@@ -28,9 +30,19 @@ public class RedisConfig {
 
     // RedisTemplate 등록 - Redis와 상호작용할 수 있는 템플릿 객체
     @Bean
+    @Primary
     public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
+
+        // key, value를 모두 문자열로 직렬화/역직렬화할 수 있게 도와주는 객체
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
+        // Redis에 저장될 key와 value를 전부 문자열(String) 형식으로 변환해서 저장되도록 설정
+        template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(stringSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(stringSerializer);
         return template;
     }
 }
