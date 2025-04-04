@@ -5,6 +5,8 @@ import com.backend.domain.blockuser.entity.BlockUser;
 import com.backend.domain.blockuser.repository.BlockUserRepository;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.notification.entity.NotificationType;
+import com.backend.domain.notification.service.NotificationService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
@@ -20,6 +22,7 @@ public class BlockUserService {
 
     private final BlockUserRepository blockUserRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void blockUser(CustomUserDetails loginUser, Long blockedId) {
@@ -41,6 +44,8 @@ public class BlockUserService {
                 .blocker(blocker)
                 .blocked(blockedUser)
                 .build();
+
+        notificationService.sendNotification(blockedId, NotificationType.BLOCK, blockerId);
 
         blockUserRepository.save(blockUser);
     }

@@ -1,7 +1,7 @@
 package com.backend.global.config;
 
-import java.util.List;
-
+import com.backend.global.auth.jwt.JwtFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,9 +16,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.backend.global.auth.jwt.JwtFilter;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 
 /**
