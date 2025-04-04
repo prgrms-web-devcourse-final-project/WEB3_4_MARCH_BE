@@ -1,7 +1,9 @@
 package com.backend.domain.member.dto;
 
 import org.hibernate.validator.constraints.Length;
+
 import com.backend.global.auth.kakao.dto.KakaoUserInfoResponseDto;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -29,12 +31,7 @@ public record MemberRegisterRequestDto(
         @NotNull(message = "키를 입력해주세요.")
         Integer height,
 
-        // @NotNull(message = "이미지는 필수입니다.")
-        // @Size(min = 1, max = 5, message = "1~5개의 이미지가 필요합니다.")
-        // List<ImageRegisterRequest> images,
-
-
-        // 위도, 경도
+        // 위도, 경도 추가
         Double latitude,
         Double longitude
 
