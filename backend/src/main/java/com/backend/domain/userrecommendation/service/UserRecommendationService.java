@@ -1,10 +1,14 @@
 package com.backend.domain.userrecommendation.service;
 
+import com.backend.domain.blockuser.repository.BlockUserRepository;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.userrecommendation.dto.response.RecommendedUserDto;
 import com.backend.domain.userrecommendation.entity.UserRecommendation;
 import com.backend.domain.userrecommendation.repository.UserRecommendationRepository;
+import com.backend.global.auth.model.CustomUserDetails;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ public class UserRecommendationService {
 
     @Transactional
     public List<RecommendedUserDto> generateRecommendations(Member me) {
+
 
         // 차단 유저 ID 목록 조회
         List<Long> blockedUserIds = blockUserRepository.findBlockedUserIds(me);
@@ -70,8 +75,12 @@ public class UserRecommendationService {
                         .longitude(user.getLongitude())
                         .build())
                 .toList();
+    }
 
-
+    public Member returnMember(CustomUserDetails loginUser) {
+        return memberRepository.findById(loginUser.getMemberId()).orElseThrow(
+                () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
+        );
     }
 
 

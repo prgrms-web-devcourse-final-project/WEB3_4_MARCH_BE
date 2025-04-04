@@ -1,6 +1,7 @@
 package com.backend.domain.userrecommendation.controller;
 
 import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.userrecommendation.dto.response.RecommendedUserDto;
 import com.backend.domain.userrecommendation.service.UserRecommendationService;
 import com.backend.global.auth.model.CustomUserDetails;
@@ -20,12 +21,16 @@ public class UserRecommendationController {
 
     private final UserRecommendationService userRecommendationService;
 
+    private final MemberRepository memberRepository;
+
+
     @PostMapping("/daily-recommend")
     public GenericResponse<List<RecommendedUserDto>> dailyRecommend(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+            @AuthenticationPrincipal CustomUserDetails loginUser
+    ) {
 
-        Member member = customUserDetails.getMember();
-        List<RecommendedUserDto> list = userRecommendationService.generateRecommendations(member);
+        Member me = userRecommendationService.returnMember(loginUser);
+        List<RecommendedUserDto> list = userRecommendationService.generateRecommendations(me);
 
         return GenericResponse.ok(list, "사용자 추천이 성공되었습니다.");
     }

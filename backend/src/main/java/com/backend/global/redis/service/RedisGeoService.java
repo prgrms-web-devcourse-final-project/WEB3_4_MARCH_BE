@@ -39,6 +39,15 @@ public class RedisGeoService {
     }
 
     /**
+     * 회원이 탈퇴시 redis에 회원위치정보를 삭제하는 메서드
+     *
+     * @param memberId
+     */
+    public void removeLocation(Long memberId) {
+        redisTemplate.opsForZSet().remove(GEO_KEY, memberId.toString());
+    }
+
+    /**
      * 특정 위치 기준으로 반경 내 사용자 ID 리스트를 조회
      *
      * - GEORADIUS 명령어 기반
