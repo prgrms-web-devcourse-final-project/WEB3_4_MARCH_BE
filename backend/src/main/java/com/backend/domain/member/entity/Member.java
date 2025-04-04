@@ -6,6 +6,8 @@ import com.backend.global.base.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -144,8 +146,8 @@ public class Member extends BaseEntity {
         this.profileImage = image;
     }
 
-    // Lazy 프록시 간의 비교에서 문제를 줄이기 위한
-    // equals, hashcode 메서드
+    // Lazy 로딩된 프록시 간의 비교 문제를 방지하기 위해, equals()와 hashCode()는 id 값만을 기준으로 비교합니다.
+    // 이 방식은 실제 엔티티가 아닌 프록시 객체라도 동일한 id를 가진 경우 동일한 객체로 인식하게 합니다.
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
