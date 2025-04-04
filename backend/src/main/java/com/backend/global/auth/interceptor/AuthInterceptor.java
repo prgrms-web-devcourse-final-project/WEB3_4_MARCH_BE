@@ -1,5 +1,7 @@
 package com.backend.global.auth.interceptor;
 
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
@@ -18,7 +20,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
-                             Object handler) throws Exception {
+                             Object handler) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -30,11 +32,11 @@ public class AuthInterceptor implements HandlerInterceptor {
 
             // TEMP_USER가 추가정보 입력이 아닌 다른 API에 접근하면 차단
             if (isTempUser && !requestURI.startsWith("/api/members/register")) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "추가 정보 입력이 필요합니다.");
-                return false;
+                // 예외 발생
+                throw new GlobalException(GlobalErrorCode.TEMP_USER_ACCESS_DENIED);
             }
         }
 
-        return true; // 통과
+        return true;
     }
 }
