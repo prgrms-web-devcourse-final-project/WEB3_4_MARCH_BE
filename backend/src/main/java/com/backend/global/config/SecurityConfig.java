@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/members/register",
-                                "/api/members/*/notifications/test"
+                                "/api/members/*/notifications/**",
+                                "/api/likes/**"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
