@@ -43,4 +43,5 @@ out/
 backend/env
 
 # .gitignore yml 로컬 프로필 설정
-application-local.yml
+**/application-local.yml
+

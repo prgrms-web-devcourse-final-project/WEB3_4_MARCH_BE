@@ -11,7 +11,6 @@ import java.util.List;
  * Spring Security의 Authentication 객체 내부에 저장될 사용자 정보 클래스
  * 사용자 ID, 이메일, 권한 목록을 담고 있으며, 인증된 사용자 정보를 표현함
  */
-
 public class CustomUserDetails implements UserDetails {
     @Getter
     private final Long memberId;
