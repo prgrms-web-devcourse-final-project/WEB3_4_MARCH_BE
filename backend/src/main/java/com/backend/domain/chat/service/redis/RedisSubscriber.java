@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  * Redis로부터 수신된 채팅 메시지를 WebSocket을 통해 구독자에게 전달하는 클래스입니다.
@@ -32,7 +31,7 @@ public class RedisSubscriber {
         log.info("📨 Redis 메시지 수신됨: {}", message);
 
         try {
-            String destination = "/api/sub/chat/" + message.getRoomId();
+            String destination = "/sub/chat/" + message.getRoomId();
 
             // 🔽 JSON 직렬화된 메시지 로그 출력
             log.info("📬 WebSocket 전송 전 메시지(JSON): {}", objectMapper.writeValueAsString(message));

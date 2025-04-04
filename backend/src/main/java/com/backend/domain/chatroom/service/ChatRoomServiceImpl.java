@@ -13,6 +13,7 @@ import com.backend.global.exception.GlobalException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public Page<ChatRoomResponse> getChatRoomsForMember(Long memberId, Pageable pageable) {
         Page<ChatRoom> chatRooms = chatRoomRepository.findAllWithMembers(memberId, pageable);
+
+        for (ChatRoom chatRoom : chatRooms) {
+            Hibernate.initialize(chatRoom.getSender());
+            Hibernate.initialize(chatRoom.getReceiver());
+        }
 
         return chatRooms.map(chatRoom -> {
             int unreadCount = redisUnreadService.getUnreadCount(memberId, chatRoom.getId());

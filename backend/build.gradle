@@ -64,6 +64,9 @@ dependencies {
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:auth'
     implementation 'software.amazon.awssdk:regions'
+
+    // Spring Security Messaging 의존성
+    implementation 'org.springframework.security:spring-security-messaging:'
 }
 
 tasks.named('test') {

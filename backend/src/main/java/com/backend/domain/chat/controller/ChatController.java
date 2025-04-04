@@ -6,7 +6,6 @@ import com.backend.domain.chat.service.chat.ChatService;
 import com.backend.domain.chatroom.service.ChatRoomService;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
-import com.backend.global.auth.kakao.util.SecurityUtil;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
@@ -17,6 +16,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,8 +53,11 @@ public class ChatController {
             @RequestParam(defaultValue = "20") int size
     ) {
 
-        // 로그인 사용자 ID 추출
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+//        // 로그인 사용자 ID 추출
+//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+
+        // TODO : 테스트 끝나고 수정
+        Long currentMemberId = 1L;
 
         // 최신순으로 조회
         Pageable pageable = PageRequest.of(page, size, Sort.by("sendTime").descending());
@@ -70,13 +73,15 @@ public class ChatController {
      * @param chatMessageRequest 클라이언트로부터 수신한 메시지 요청 DTO
      */
     @MessageMapping("/{roomId}/message")
-    public void sendMessage(ChatMessageRequest chatMessageRequest) {
+    public void sendMessage(@Payload ChatMessageRequest chatMessageRequest) {
+//        // 로그인 사용자 ID 추출
+//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
-        // 로그인 사용자 ID 추출
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        // TODO : 테스트 끝나고 수정
+        Long currentMemberId = 1L;
 
         Member sender = memberRepository.findById(currentMemberId)
-                        .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         chatService.sendMessage(chatMessageRequest, sender);
     }

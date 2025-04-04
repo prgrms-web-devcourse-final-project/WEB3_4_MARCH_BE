@@ -7,86 +7,98 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    #chat {
-      width: 400px;
-      height: 300px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      overflow-y: scroll;
-      margin-bottom: 10px;
-    }
-    #messageInput {
-      width: 300px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { width: 400px; height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; margin-bottom: 10px; }
+    #messageInput { width: 300px; }
+    .message { margin-bottom: 8px; }
+    .sender { font-weight: bold; margin-right: 4px; }
   </style>
 </head>
 <body>
 <h2>WebSocket Chat Test</h2>
-<!-- 채팅방 번호 입력 및 연결/해제 버튼 -->
 <div>
-  <label for="roomId">Room ID:</label>
+  <label for="roomId">채팅방 번호:</label>
   <input type="text" id="roomId" value="1" />
-  <button onclick="connect()">Connect</button>
-  <button onclick="disconnect()">Disconnect</button>
+  <label for="senderId">내 사용자 ID:</label>
+  <input type="text" id="senderId" value="1" />
+  <button onclick="connect()">연결</button>
+  <button onclick="disconnect()">나가기</button>
 </div>
-<!-- 채팅 메시지를 표시할 영역 -->
 <div id="chat"></div>
-<!-- 메시지 입력 및 전송 버튼 -->
 <div>
-  <input type="text" id="messageInput" placeholder="Type your message here..." />
-  <button onclick="sendMessage()">Send</button>
+  <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
+  <button onclick="sendMessage()">전송</button>
 </div>
 <script>
   var stompClient = null;
   var subscription = null;
 
-  // WebSocket 연결 함수
   function connect() {
+    // 연결 전에 roomId와 senderId 최신값 읽기
     var roomId = document.getElementById("roomId").value;
-    // /ws 엔드포인트로 SockJS 연결 생성
-    var socket = new SockJS('/ws');
+    var senderId = document.getElementById("senderId").value;
+
+    // 이미 연결되어 있으면 중복 연결 방지
+    if (stompClient && stompClient.connected) {
+      console.log("이미 연결되어 있습니다.");
+      return;
+    }
+
+    var socket = new SockJS("/ws");
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
-      console.log('Connected: ' + frame);
-      // 연결 후 구독할 경로 설정
-      // 구독 경로는 WebSocketConfig에서 설정한 "/sub" 프리픽스를 사용하여 구성합니다.
-      subscription = stompClient.subscribe('/sub/chat/room/' + roomId, function(messageOutput) {
-        showMessage(JSON.parse(messageOutput.body));
+      console.log("WebSocket 연결 성공!", frame);
+      // 동적으로 구독 경로 구성: /sub/chat/{roomId}
+      subscription = stompClient.subscribe("/sub/chat/" + roomId, function(message) {
+        var receivedMessage = JSON.parse(message.body);
+        console.log("받은 메시지:", receivedMessage);
+        showMessage(receivedMessage);
       });
     });
   }
 
-  // WebSocket 연결 해제 함수
   function disconnect() {
-    if (stompClient !== null) {
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+    if (stompClient) {
       stompClient.disconnect();
+      stompClient = null;
     }
     console.log("Disconnected");
   }
 
-  // 메시지 전송 함수
   function sendMessage() {
     var roomId = document.getElementById("roomId").value;
-    var message = document.getElementById("messageInput").value;
-    // 채팅 메시지 요청 객체 생성
+    var senderId = document.getElementById("senderId").value;
+    var messageText = document.getElementById("messageInput").value;
     var chatMessageRequest = {
-      chatroomId: roomId,
-      content: message
+      chatroomId: roomId,  // 서버 DTO가 'chatroomId'로 받도록
+      senderId: senderId,
+      content: messageText,
+      type: "CHAT"
     };
-    // /pub 프리픽스를 사용하여 메시지 발행
-    // 컨트롤러의 @MessageMapping("/{roomId}/message")에 매핑됩니다.
+
+    if (!stompClient || !stompClient.connected) {
+      console.error("WebSocket 연결이 아직 완료되지 않았습니다.");
+      return;
+    }
+    // 발행 경로 구성: /pub/{roomId}/message
     stompClient.send("/pub/" + roomId + "/message", {}, JSON.stringify(chatMessageRequest));
   }
 
-  // 수신한 메시지를 화면에 표시하는 함수
   function showMessage(message) {
     var chat = document.getElementById("chat");
     var messageElement = document.createElement("div");
-    messageElement.innerText = message.content;
+    messageElement.className = "message";
+    var senderElement = document.createElement("span");
+    senderElement.className = "sender";
+    senderElement.innerText = message.senderId + ": ";
+    var contentElement = document.createElement("span");
+    contentElement.innerText = message.content;
+    messageElement.appendChild(senderElement);
+    messageElement.appendChild(contentElement);
     chat.appendChild(messageElement);
   }
 </script>

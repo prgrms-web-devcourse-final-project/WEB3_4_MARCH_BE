@@ -3,10 +3,22 @@ package com.backend.domain.member.entity;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.global.base.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -130,5 +142,20 @@ public class Member extends BaseEntity {
 
     public void setProfileImage(Image image) {
         this.profileImage = image;
+    }
+
+    // Lazy 프록시 간의 비교에서 문제를 줄이기 위한
+    // equals, hashcode 메서드
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Member)) return false;
+        Member member = (Member) o;
+        return id != null && id.equals(member.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }

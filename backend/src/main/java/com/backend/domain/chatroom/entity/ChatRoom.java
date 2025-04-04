@@ -19,12 +19,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Slf4j
 public class ChatRoom {
 
     @Id
@@ -53,17 +55,25 @@ public class ChatRoom {
      * @return 현재 참여자가 아닌 다른 참여자 (sender 또는 receiver)
      * @throws GlobalException 만약 currentMemberId가 sender나 receiver에 해당하지 않는 경우 예외를 발생시킵니다.
      */
-    public Member getAnotherMember(Member currentMemberId) {
+    public Member getAnotherMember(Member currentMember) {
 
-        if (currentMemberId.equals(this.sender)) {
+        log.info("currentMember id: {}", currentMember.getId());
+        log.info("this.sender id: {}", this.sender.getId());
+        log.info("this.receiver id: {}", this.receiver.getId());
+
+        if (currentMember.equals(this.sender)) {
+            log.info("this.receiver id: {}", this.receiver.getId());
             // 현재 참여자가 sender라면, 상대방은 receiver
             return this.receiver;
 
-        } else if (currentMemberId.equals(this.receiver)) {
+        } else if (currentMember.equals(this.receiver)) {
+            log.info("this.sender id: {}", this.sender.getId());
             // 현재 참여자가 receiver라면, 상대방은 sender
             return this.sender;
 
         } else {
+            log.error("currentMember does not match sender or receiver. currentMember: {}, sender: {}, receiver: {}",
+                    currentMember, this.sender, this.receiver);
             // currentMemberId가 sender 또는 receiver가 아닌 경우, 에러 발생
             throw new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);
         }

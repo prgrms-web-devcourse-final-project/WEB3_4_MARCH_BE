@@ -27,7 +27,8 @@ public enum GlobalErrorCode {
 	DUPLICATE_CHAT_REQUEST(HttpStatus.BAD_REQUEST, 400, "이미 처리된 채팅 요청입니다."),
 
 	// 채팅 오류코드
-	NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, 404, "해당 채팅방을 찾을 수 없습니다."),
+	CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "해당 채팅방을 찾을 수 없습니다."),
+	CHATROOM_FORBIDDEN(HttpStatus.FORBIDDEN, 403, "채팅방에 접근할 수 없습니다."),
 
 	// 멤버 오류코드
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "해당 유저를 찾을 수 없습니다."),
@@ -41,22 +42,26 @@ public enum GlobalErrorCode {
 	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 401, "토큰이 만료되었습니다."),
 	UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, 401, "지원하지 않는 JWT 입니다."),
 	REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "리프레시 토큰이 존재하지 않습니다."),
-	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500-1, "멤버를 찾을 수 없습니다."),
+	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "멤버를 찾을 수 없습니다."),
+	AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, 401, "인증된 사용자 정보를 가져올 수 없습니다."),
+	TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "Authorization 헤더가 존재하지 않거나 형식이 올바르지 않습니다."),
+    KAFKA_SEND_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Kafka 메시지 전송 실패."),
 
-	// 차단회원 오류코드
-	BLOCKER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-1, "차단자 유저가 존재하지 않습니다."),
-	BLOCKED_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-2, "차단 대상 유저가 존재하지 않습니다."),
-	INVALID_BLOCK_SELF(HttpStatus.BAD_REQUEST, 400-1, "자기 자신을 차단할 수 없습니다."),
-	USER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, 400-2, "이미 차단한 유저입니다."),
-	ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다."),
+    // 차단회원 오류코드
+    BLOCKER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-1, "차단자 유저가 존재하지 않습니다."),
+    BLOCKED_USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404-2, "차단 대상 유저가 존재하지 않습니다."),
+    INVALID_BLOCK_SELF(HttpStatus.BAD_REQUEST, 400-1, "자기 자신을 차단할 수 없습니다."),
+    USER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, 400-2, "이미 차단한 유저입니다."),
+    ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다."),
 
-	// 권한 없는 유저 오류코드
-	TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다.");
-
-
+    // 권한 없는 유저 오류코드
+    TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다.");
 
 
-	private final HttpStatus httpStatus;
+
+
+
+    private final HttpStatus httpStatus;
 	private final int code;
 	private final String message;
 }

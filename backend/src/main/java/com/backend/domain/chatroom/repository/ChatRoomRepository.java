@@ -2,7 +2,6 @@ package com.backend.domain.chatroom.repository;
 
 import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.member.entity.Member;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,13 +37,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
      * @param pageable 페이징 정보
      * @return 사용자가 참여 중인 채팅방 페이지 객체
      */
-    @Query(
-            value = "SELECT cr FROM ChatRoom cr " +
-                    "JOIN FETCH cr.sender " +
-                    "JOIN FETCH cr.receiver " +
-                    "WHERE cr.sender.id = :memberId OR cr.receiver.id = :memberId",
-            countQuery = "SELECT COUNT(cr) FROM ChatRoom cr " +
-                    "WHERE cr.sender.id = :memberId OR cr.receiver.id = :memberId"
-    )
+    @Query("SELECT DISTINCT cr FROM ChatRoom cr " +
+            "JOIN FETCH cr.sender " +
+            "JOIN FETCH cr.receiver " +
+            "WHERE cr.id = :chatRoomId")
     Page<ChatRoom> findAllWithMembers(@Param("memberId") Long memberId, Pageable pageable);
 }

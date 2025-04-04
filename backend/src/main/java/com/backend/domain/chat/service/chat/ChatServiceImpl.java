@@ -17,6 +17,7 @@ import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * - 메세지 저장
  * - 채팅방 메시지 조회
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
@@ -48,10 +50,16 @@ public class ChatServiceImpl implements ChatService {
      * @param sender 현재 로그인한 사용자 (메시지 전송자)
      */
     @Override
+    @Transactional
     public void sendMessage(ChatMessageRequest request, Member sender) {
 
+        log.info("chatroomId from request: {}", request.getChatroomId());
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatroomId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.CHATROOM_NOT_FOUND));
+
+        if (!chatRoom.hasParticipant(sender)) {
+            throw new GlobalException(GlobalErrorCode.CHATROOM_FORBIDDEN);
+        }
 
         // 수신자 찾기
         Member receiver = chatRoom.getAnotherMember(sender);
@@ -68,6 +76,10 @@ public class ChatServiceImpl implements ChatService {
                 .content(request.getContent())
                 .sendTime(LocalDateTime.now())
                 .build();
+
+        // DB에 채팅 메시지 저장 (Chat 엔티티로 변환 후 저장)
+        Chat chat = chatMessage.toEntity(chatRoom, sender);
+        chatRepository.save(chat);
 
         // 메시지 발행 (Redis), 메시지 저장 (Kafka)
         redisPublisher.publish(chatMessage);

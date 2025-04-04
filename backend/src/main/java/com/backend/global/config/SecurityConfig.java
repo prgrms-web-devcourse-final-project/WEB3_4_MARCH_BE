@@ -1,7 +1,7 @@
 package com.backend.global.config;
 
-import com.backend.global.auth.jwt.JwtFilter;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +16,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.backend.global.auth.jwt.JwtFilter;
+
+import lombok.RequiredArgsConstructor;
 
 
 /**
@@ -54,7 +56,14 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/members/register",
                                 "/api/members/*/notifications/**",
-                                "/api/likes/**"
+                                "/api/likes/**",
+                                "/chat-test.html",
+                                "/page-list-test.html",
+                                "/js/**",
+                                "/ws/**",
+                                "/favicon.ico",
+                                "/error",
+                                "/api/chat/chatrooms/**"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
