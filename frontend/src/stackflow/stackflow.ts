@@ -9,7 +9,7 @@ import ChatActivity from "../activities/ChatActivity";
 import MyProfileActivity from "../activities/MyProfileActivity";
 import ProfileDetailActivity from "../activities/ProfileDetailActivity";
 import { LoginActivity } from "../activities/LoginActivity";
-
+import { ProfileSetupActivity } from "../activities/ProfileSetupActivity";
 export const { Stack, useFlow } = stackflow({
   transitionDuration: 350,
   activities: {
@@ -19,6 +19,7 @@ export const { Stack, useFlow } = stackflow({
     ChatActivity,
     MyProfileActivity,
     ProfileDetailActivity,
+    ProfileSetupActivity,
   },
   plugins: [
     basicRendererPlugin(),
@@ -38,6 +39,7 @@ export const { Stack, useFlow } = stackflow({
         ChatActivity: "/chat",
         MyProfileActivity: "/profile",
         ProfileDetailActivity: "/profile/:userId",
+        ProfileSetupActivity: "/profile-setup",
       },
       fallbackActivity: () => "LoginActivity",
     }),

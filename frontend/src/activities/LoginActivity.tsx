@@ -1,12 +1,17 @@
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Logo } from "../components/Logo";
 import { KaKaoLoginButton } from "../components/KaKaoLoginButton";
+import AppScreenLayout from "../layout/AppScreenLayout";
+import { useFlow } from "../stackflow/stackflow";
 
 export const LoginActivity = () => {
-  const handleKaKaoLoginClick = () => {};
+  const { push } = useFlow();
+  const handleKaKaoLoginClick = () => {
+    push("ProfileSetupActivity", {});
+  };
 
   return (
-    <AppScreen>
+    <AppScreenLayout noTopBar noBottomBar>
       <div className="h-[100vh] flex flex-col items-center justify-between bg-white p-6">
         {/* Top logo area */}
         <div className="w-full flex justify-center mt-12">
@@ -34,6 +39,6 @@ export const LoginActivity = () => {
           </p>
         </div>
       </div>
-    </AppScreen>
+    </AppScreenLayout>
   );
 };

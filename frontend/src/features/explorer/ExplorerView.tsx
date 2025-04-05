@@ -130,7 +130,7 @@ export default function ExploreView() {
         {showEndCard && (
           <div className="w-full max-w-sm bg-white rounded-xl shadow-lg overflow-hidden z-20 animate-fade-in">
             <div className="aspect-[3/4] relative bg-gradient-to-br from-primary/10 to-primary/30 flex flex-col items-center justify-center p-6 text-center">
-              <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center mb-6">
                 <RefreshCw size={32} className="text-primary" />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-3">

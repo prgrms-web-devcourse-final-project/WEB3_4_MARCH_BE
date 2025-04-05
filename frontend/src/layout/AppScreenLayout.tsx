@@ -8,6 +8,7 @@ import { cn } from "../utils/classNaem";
 interface AppScreenLayoutProps extends AppScreenProps {
   children: ReactNode;
   title?: string;
+  noTopBar?: boolean;
   noBottomBar?: boolean;
   backable?: boolean;
   wideScreen?: boolean;
@@ -15,6 +16,7 @@ interface AppScreenLayoutProps extends AppScreenProps {
 
 const AppScreenLayout: FC<AppScreenLayoutProps> = ({
   children,
+  noTopBar,
   noBottomBar,
   backable,
   title,
@@ -25,9 +27,11 @@ const AppScreenLayout: FC<AppScreenLayoutProps> = ({
     <AppScreen {...appScreenProps} backgroundColor="beige">
       <div className="relative h-[100vh] w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white">
         {/* Top Bar */}
-        <div className="h-14 px-4 border-b border-gray-100">
-          <TopBar backable={backable} title={title} />
-        </div>
+        {!noTopBar && (
+          <div className="h-14 px-4 border-b border-gray-100">
+            <TopBar backable={backable} title={title} />
+          </div>
+        )}
 
         {/* Content Area */}
         <div className={cn("flex-1 overflow-auto ", wideScreen ? "" : "px-4")}>

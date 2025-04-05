@@ -9,13 +9,21 @@
       "recommended": true,
       "a11y": {
         "useButtonType": "off",
-        "useKeyWithClickEvents": "off"
+        "useKeyWithClickEvents": "off",
+        "noLabelWithoutControl": "off",
+        "noSvgWithoutTitle": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off"
       },
       "complexity": {
         "noBannedTypes": "off"
       },
       "correctness": {
         "noEmptyPattern": "off"
+      },
+      "style": {
+        "useSelfClosingElements": "off"
       }
     }
   },
