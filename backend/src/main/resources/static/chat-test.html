@@ -20,9 +20,11 @@
   <label for="roomId">채팅방 번호:</label>
   <input type="text" id="roomId" value="1" />
   <label for="senderId">내 사용자 ID:</label>
-  <input type="text" id="senderId" value="1" />
+  <input type="text" id="senderId" value="1" placeholder="변경 후 재연결 필요" />
   <button onclick="connect()">연결</button>
-  <button onclick="disconnect()">나가기</button>
+  <button onclick="disconnect()">WebSocket 나가기</button>
+  <!-- 채팅방 나가기 API 호출 (HTTP DELETE) -->
+  <button onclick="leaveChatRoom()">채팅방 나가기 (API 호출)</button>
 </div>
 <div id="chat"></div>
 <div>
@@ -34,11 +36,9 @@
   var subscription = null;
 
   function connect() {
-    // 연결 전에 roomId와 senderId 최신값 읽기
     var roomId = document.getElementById("roomId").value;
     var senderId = document.getElementById("senderId").value;
 
-    // 이미 연결되어 있으면 중복 연결 방지
     if (stompClient && stompClient.connected) {
       console.log("이미 연결되어 있습니다.");
       return;
@@ -48,7 +48,6 @@
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
       console.log("WebSocket 연결 성공!", frame);
-      // 동적으로 구독 경로 구성: /sub/chat/{roomId}
       subscription = stompClient.subscribe("/sub/chat/" + roomId, function(message) {
         var receivedMessage = JSON.parse(message.body);
         console.log("받은 메시지:", receivedMessage);
@@ -73,8 +72,9 @@
     var roomId = document.getElementById("roomId").value;
     var senderId = document.getElementById("senderId").value;
     var messageText = document.getElementById("messageInput").value;
+
     var chatMessageRequest = {
-      chatroomId: roomId,  // 서버 DTO가 'chatroomId'로 받도록
+      chatroomId: roomId,
       senderId: senderId,
       content: messageText,
       type: "CHAT"
@@ -84,7 +84,6 @@
       console.error("WebSocket 연결이 아직 완료되지 않았습니다.");
       return;
     }
-    // 발행 경로 구성: /pub/{roomId}/message
     stompClient.send("/pub/" + roomId + "/message", {}, JSON.stringify(chatMessageRequest));
   }
 
@@ -92,14 +91,33 @@
     var chat = document.getElementById("chat");
     var messageElement = document.createElement("div");
     messageElement.className = "message";
+
     var senderElement = document.createElement("span");
     senderElement.className = "sender";
     senderElement.innerText = message.senderId + ": ";
+
     var contentElement = document.createElement("span");
     contentElement.innerText = message.content;
+
     messageElement.appendChild(senderElement);
     messageElement.appendChild(contentElement);
     chat.appendChild(messageElement);
+  }
+
+  // 채팅방 나가기 API 호출 (HTTP DELETE)
+  async function leaveChatRoom() {
+    var roomId = document.getElementById("roomId").value;
+    // 테스트용: 상대방 ID를 2로 고정 (실제 운영에서는 요청 파라미터나 동적으로 받아야 함)
+    var otherMemberId = 2;
+    try {
+      const response = await fetch(`/api/chat/chatrooms/delete?otherMemberId=${otherMemberId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      console.log("채팅방 나가기 응답:", result);
+    } catch (error) {
+      console.error("채팅방 나가기 실패:", error);
+    }
   }
 </script>
 </body>

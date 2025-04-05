@@ -59,7 +59,6 @@ public class ChatRoomController {
      * 현재 사용자가 채팅방에서 나갈 때, 상대방의 ID를 받아 채팅방 나가기 로직을 실행합니다.
      * 나간 사용자는 채팅방 참여 목록에서 제거되고, 남은 사용자에게 시스템 메시지를 전송합니다.
      *
-     * @param deletingMember 현재 채팅방을 나가는 사용자 (Spring Security를 통해 주입)
      * @param otherMemberId 채팅방의 상대방 ID (요청 파라미터)
      * @return 채팅방 나가기 성공 응답
      */

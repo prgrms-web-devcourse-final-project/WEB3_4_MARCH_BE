@@ -62,8 +62,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/ws/**",
                                 "/favicon.ico",
-                                "/error",
-                                "/api/chat/chatrooms/**"
+                                "/error"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
