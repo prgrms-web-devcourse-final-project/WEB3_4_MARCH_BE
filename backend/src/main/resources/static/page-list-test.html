@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방 목록</title>
+  <script>
+    async function loadChatRooms(page = 0, size = 10) {
+        const response = await fetch(`/chatrooms?page=${page}&size=${size}`);
+        const result = await response.json();
+
+        const container = document.getElementById('chat-rooms');
+        container.innerHTML = '';
+
+        if (result.success) {
+            result.data.content.forEach(room => {
+                const div = document.createElement('div');
+                div.className = 'chat-room';
+                div.innerHTML = `
+                    <p><strong>채팅방 ID:</strong> ${room.id}</p>
+                    <p><strong>보낸 사람 ID:</strong> ${room.senderId}</p>
+                    <p><strong>받는 사람 ID:</strong> ${room.receiverId}</p>
+                    <p><strong>생성일:</strong> ${room.createdAt}</p>
+                    <hr>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('pagination').innerText =
+                `현재 페이지: ${result.data.number + 1} / 총 ${result.data.totalPages}`;
+        } else {
+            container.innerHTML = `<p>불러오기 실패: ${result.message}</p>`;
+        }
+    }
+
+    window.onload = () => loadChatRooms();
+  </script>
+</head>
+<body>
+<h1>👻 채팅방 목록</h1>
+<div id="chat-rooms"></div>
+<div id="pagination" style="margin-top: 20px;"></div>
+</body>
+</html>

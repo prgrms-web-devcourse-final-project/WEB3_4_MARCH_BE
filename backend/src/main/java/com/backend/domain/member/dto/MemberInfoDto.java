@@ -35,7 +35,7 @@ public record MemberInfoDto(
                 member.getAge(),
                 member.getHeight(),
                 member.getGender(),
-                member.getChatAble(),
+                member.isChatAble(),
                 member.getImages(),
                 member.getLatitude(),
                 member.getLongitude()

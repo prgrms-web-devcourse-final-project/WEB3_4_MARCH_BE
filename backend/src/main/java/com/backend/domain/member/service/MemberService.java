@@ -103,7 +103,7 @@ public class MemberService {
                 requestDto.height(),
                 requestDto.gender(),
                 requestDto.images(),
-                member.getChatAble(),
+                member.isChatAble(),
                 // 사용자의 위도, 경도 값을 수정하여 위치 최신화
                 requestDto.latitude() != null ? requestDto.latitude() : member.getLatitude(),
                 requestDto.longitude() != null ? requestDto.longitude() : member.getLongitude()
@@ -121,7 +121,7 @@ public class MemberService {
                 member.getHeight(),
                 member.getGender(),
                 member.getImages(),
-                member.getChatAble(),
+                member.isChatAble(),
                 latitude,
                 longitude
         );

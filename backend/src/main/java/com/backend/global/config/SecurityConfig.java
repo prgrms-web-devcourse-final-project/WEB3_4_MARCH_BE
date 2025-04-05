@@ -48,14 +48,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
-                            "/api/auth/kakao/login",
-                            "/api/auth/kakao/login-url",
+                                "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/api/members/register"
+                                "/api/members/register",
+                                "/chat-test.html",
+                                "/page-list-test.html",
+                                "/js/**",
+                                "/ws/**",
+                                "/favicon.ico",
+                                "/error"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -67,7 +72,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // 프론트 주소
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://43.201.9.189:8080"  // EC2 서버 도메인
+        )); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // 쿠키 전송 허용
