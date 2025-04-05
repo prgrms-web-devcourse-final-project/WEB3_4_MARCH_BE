@@ -1,5 +1,11 @@
 package com.backend.domain.member.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -10,12 +16,8 @@ import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -60,49 +62,34 @@ public class MemberService {
     @Transactional
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부
-        if (memberRepository.existsByKakaoIdAndIsDeletedFalse(requestDto.kakaoId())) {
-            throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
-        }
+        Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         // 2. 탈퇴한 회원이면 복구
-        Member member = memberRepository.findByKakaoId(requestDto.kakaoId()).map(existing -> {
-            if (existing.isDeleted()) {
-                existing.rejoin(requestDto);
-                existing.updateRole(Role.ROLE_USER);
-                return existing;
+        if (member.isDeleted()) {
+            member.rejoin(requestDto);
+            member.updateRole(Role.ROLE_USER);
+            return MemberInfoDto.from(member);
+        } else {
+            // 임시 회원인지 현재 회원인지 판별 여부
+            if (member.getRole() == Role.ROLE_TEMP_USER) {
+                member.updateProfile(
+                    member.getNickname(),           // 기존 닉네임 유지
+                    requestDto.age(),               // 추가 정보: 나이
+                    requestDto.height(),            // 추가 정보: 키
+                    requestDto.gender(),            // 추가 정보: 성별
+                    member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
+                    member.getChatAble(),           // 기존 chatAble 유지
+                    requestDto.latitude(),          // 추가 정보: 위도
+                    requestDto.longitude()          // 추가 정보: 경도
+                );
+                redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
+                member.updateRole(Role.ROLE_USER);
+                return MemberInfoDto.from(member);
             } else {
                 throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
             }
-        }).orElseGet(() -> {
-            // 3. 신규 등록
-            Member newMember = Member.builder()
-                    .kakaoId(requestDto.kakaoId())
-                    .email(requestDto.email())
-                    .nickname(requestDto.nickname())
-                    .age(requestDto.age())
-                    .height(requestDto.height())
-                    .gender(requestDto.gender())
-                    .chatAble(true)
-                    .latitude(requestDto.latitude())
-                    .longitude(requestDto.longitude())
-                    .role(Role.ROLE_USER)
-                    .build();
-
-            Member savedMember = memberRepository.save(newMember);
-
-            // redis내에서 회원위치정보 저장.
-            redisGeoService.addLocation(newMember.getId(), newMember.getLatitude(), newMember.getLongitude());
-
-            return savedMember;
-        });
-
-
-        // 임시 신규 회원이라면 ROLE_USER(추가 데이터를 다 입력한 정규 회원)으로 승격 처리
-        if (member.getRole() == Role.ROLE_TEMP_USER) {
-            member.updateRole(Role.ROLE_USER);
         }
-
-        return MemberInfoDto.from(member);
     }
 
     // 회원 정보 수정
