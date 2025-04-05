@@ -1,7 +1,7 @@
 package com.backend.global.config;
 
-import com.backend.global.auth.jwt.JwtFilter;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +16,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.backend.global.auth.jwt.JwtFilter;
+
+import lombok.RequiredArgsConstructor;
 
 
 /**
@@ -54,7 +56,13 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/members/register",
                                 "/api/members/*/notifications/**",
-                                "/api/likes/**"
+                                "/api/likes/**",
+                                "/chat-test.html",
+                                "/page-list-test.html",
+                                "/js/**",
+                                "/ws/**",
+                                "/favicon.ico",
+                                "/error"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -66,7 +74,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // 프론트 주소
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://43.201.9.189:8080"  // EC2 서버 도메인
+        )); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // 쿠키 전송 허용
