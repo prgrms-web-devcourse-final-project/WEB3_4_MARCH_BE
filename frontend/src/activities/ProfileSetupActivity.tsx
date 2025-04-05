@@ -6,19 +6,23 @@ import {
   ProfileUserInfoSetupView,
   type UserInfo,
 } from "../features/profile/ProfileUserInfoSetupView";
+import { useFlow } from "../stackflow/stackflow";
 
 export const ProfileSetupActivity = () => {
   const [page, setPage] = useState<"profile" | "keyword">("profile");
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  const { push } = useFlow();
+
   const onConfirmProfileSetup = (userInfo: UserInfo) => {
     setUserInfo(userInfo);
 
-    setPage("keyword");
+    // setPage("keyword");
+    push("ExploreActivity", {});
   };
 
   return (
-    <AppScreenLayout noBottomBar title="프로필 설정">
+    <AppScreenLayout noBottomBar noLoginCheck title="프로필 설정">
       {page === "profile" && (
         <ProfileUserInfoSetupView onComplete={onConfirmProfileSetup} />
       )}

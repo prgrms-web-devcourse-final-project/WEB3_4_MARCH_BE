@@ -1,4 +1,3 @@
-import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Logo } from "../components/Logo";
 import { KaKaoLoginButton } from "../components/KaKaoLoginButton";
 import AppScreenLayout from "../layout/AppScreenLayout";
