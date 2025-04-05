@@ -1,6 +1,7 @@
 import { useFlow } from "@stackflow/react/future";
 import { ArrowLeft, Bell } from "lucide-react";
 import type { FC } from "react";
+import { Logo } from "../components/Logo";
 
 type TopBarProps = {
   backable?: boolean;
@@ -24,7 +25,7 @@ const TopBar: FC<TopBarProps> = ({ backable, title }) => {
           <ArrowLeft size={24} />
         </button>
       ) : (
-        <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+        <Logo showText={false} />
       )}
 
       {title ? <div className="text-lg font-medium">{title}</div> : null}

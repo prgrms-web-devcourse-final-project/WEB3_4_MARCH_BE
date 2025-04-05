@@ -8,10 +8,12 @@ import MapActivity from "../activities/MapActivity";
 import ChatActivity from "../activities/ChatActivity";
 import MyProfileActivity from "../activities/MyProfileActivity";
 import ProfileDetailActivity from "../activities/ProfileDetailActivity";
+import { LoginActivity } from "../activities/LoginActivity";
 
 export const { Stack, useFlow } = stackflow({
   transitionDuration: 350,
   activities: {
+    LoginActivity,
     ExploreActivity,
     MapActivity,
     ChatActivity,
@@ -30,14 +32,15 @@ export const { Stack, useFlow } = stackflow({
     }),
     historySyncPlugin({
       routes: {
+        LoginActivity: "/login",
         ExploreActivity: "/explorer",
         MapActivity: "/map",
         ChatActivity: "/chat",
         MyProfileActivity: "/profile",
         ProfileDetailActivity: "/profile/:userId",
       },
-      fallbackActivity: () => "ExploreActivity",
+      fallbackActivity: () => "LoginActivity",
     }),
   ],
-  initialActivity: () => "ExploreActivity",
+  initialActivity: () => "LoginActivity",
 });
