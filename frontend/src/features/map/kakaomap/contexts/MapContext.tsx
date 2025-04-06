@@ -19,7 +19,7 @@ interface MapProviderProps {
 // Create the provider component
 export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
   const [loading] = useKakaoLoader({
-    appkey: import.meta.env.VITE_DEFAULT_KAKAO_API_KEY,
+    appkey: import.meta.env.VITE_DEFAULT_KAKAO_MAP_API_KEY,
   });
 
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null);

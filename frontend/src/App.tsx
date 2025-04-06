@@ -3,6 +3,8 @@ import "@stackflow/plugin-basic-ui/index.css";
 
 import { Stack } from "./stackflow/stackflow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
+import AppScreenLayout from "./layout/AppScreenLayout";
 
 const queryClient = new QueryClient();
 
