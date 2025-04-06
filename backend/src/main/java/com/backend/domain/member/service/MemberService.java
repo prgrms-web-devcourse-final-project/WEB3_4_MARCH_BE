@@ -1,11 +1,5 @@
 package com.backend.domain.member.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -16,8 +10,12 @@ import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +77,7 @@ public class MemberService {
                     requestDto.height(),            // 추가 정보: 키
                     requestDto.gender(),            // 추가 정보: 성별
                     member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
-                    member.getChatAble(),           // 기존 chatAble 유지
+                    member.isChatAble(),           // 기존 chatAble 유지
                     requestDto.latitude(),          // 추가 정보: 위도
                     requestDto.longitude()          // 추가 정보: 경도
                 );

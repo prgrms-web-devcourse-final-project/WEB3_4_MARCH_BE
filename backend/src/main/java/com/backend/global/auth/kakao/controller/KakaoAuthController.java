@@ -53,15 +53,17 @@ public class KakaoAuthController {
     }
 
 
-    /**
-     * 로그인 API (인가코드로 로그인 및 회원가입 처리)
-     * 	프론트에서 code 받아 백엔드로 POST
-     */
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
-        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
-        return ResponseEntity.ok(loginResult);
-    }
+//    /**
+//     * 로그인 API (인가코드로 로그인 및 회원가입 처리)
+//     * 	프론트에서 code 받아 백엔드로 POST
+//     */
+//    @PostMapping("/login")
+//    public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
+//        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
+//        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
+//        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
+//        return ResponseEntity.ok(loginResult);
+//    }
 
     /**
      * 프론트 리다이렉트용 콜백 핸들러
@@ -69,7 +71,19 @@ public class KakaoAuthController {
      * 	카카오 서버가 직접 리다이렉트
      */
     @GetMapping("/callback")
-    public ResponseEntity<GenericResponse<LoginResponseDto>> loginCallback(@RequestParam String code, HttpServletResponse response) {
+    public ResponseEntity<GenericResponse<LoginResponseDto>> loginCallback(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String error,
+            @RequestParam(required = false, name = "error_description") String errorDescription,
+            HttpServletResponse response) {
+
+        // 카카오 로그인 실패 시 예외 처리
+        if (error != null) {
+            throw new GlobalException(GlobalErrorCode.KAKAO_LOGIN_FAILED,
+                    "카카오 로그인 실패: " + (errorDescription != null ? errorDescription : error));
+        }
+
+        // 카카오 로그인 정상 처리시
         LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
 
         cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);

@@ -36,7 +36,7 @@ public class SwaggerConfig {
                                                 .tokenUrl("https://kauth.kakao.com/oauth/token")
                                                 .scopes(new Scopes()
                                                         .addString("profile_nickname", "사용자 닉네임")
-                                                        .addString("profile_image", "프로필 이미지")
+//                                                        .addString("profile_image", "프로필 이미지")
                                                         .addString("account_email", "이메일"))))));
     }
 

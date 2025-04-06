@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum GlobalErrorCode {
 
+	// 카카오 로그인 에러
+	KAKAO_LOGIN_FAILED(HttpStatus.BAD_REQUEST, 400, "카카오 로그인 중 에러가 발생했습니다."),
+
 
 	// 이미지 도메인 세부 에러
 	IMAGE_COUNT_INVALID(HttpStatus.BAD_REQUEST, 400, "이미지는 1장 이상 5장 이하로 등록해야 합니다."),

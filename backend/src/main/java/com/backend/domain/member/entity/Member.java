@@ -3,24 +3,10 @@ package com.backend.domain.member.entity;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
 import com.backend.global.base.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -87,26 +73,6 @@ public class Member extends BaseEntity {
                 .chatAble(true)
                 .role(role)
                 .build();
-    }
-
-    @Builder
-    public Member(Long kakaoId, String email, String nickname,
-                  Integer age, Integer height, String gender,
-                  List<Image> images, Boolean chatAble,
-                  Double latitude, Double longitude,
-                  Role role) {
-
-        this.kakaoId = kakaoId;
-        this.email = email;
-        this.nickname = nickname;
-        this.age = age;
-        this.height = height;
-        this.gender = gender;
-        this.images = images;
-        this.chatAble = chatAble;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.role = role;
     }
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
