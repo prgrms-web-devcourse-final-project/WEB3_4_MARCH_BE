@@ -3,6 +3,7 @@ export const BASE_URL = "http://localhost:8080";
 // 기본 fetch 함수 추상화
 export const apiClient = {
   async get<T>(endpoint: string, options = {}): Promise<T> {
+    console.log("get", `${BASE_URL}${endpoint}`);
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method: "GET",
       headers: {
