@@ -8,15 +8,20 @@ import MapActivity from "../activities/MapActivity";
 import ChatActivity from "../activities/ChatActivity";
 import MyProfileActivity from "../activities/MyProfileActivity";
 import ProfileDetailActivity from "../activities/ProfileDetailActivity";
-
+import { LoginActivity } from "../activities/LoginActivity";
+import { ProfileSetupActivity } from "../activities/ProfileSetupActivity";
+import { LoginLoadingActivity } from "../activities/LoginLoadingActivity";
 export const { Stack, useFlow } = stackflow({
   transitionDuration: 350,
   activities: {
+    LoginActivity,
+    LoginLoadingActivity,
     ExploreActivity,
     MapActivity,
     ChatActivity,
     MyProfileActivity,
     ProfileDetailActivity,
+    ProfileSetupActivity,
   },
   plugins: [
     basicRendererPlugin(),
@@ -30,14 +35,17 @@ export const { Stack, useFlow } = stackflow({
     }),
     historySyncPlugin({
       routes: {
+        LoginActivity: "/login",
+        LoginLoadingActivity: "/login-redirect",
         ExploreActivity: "/explorer",
         MapActivity: "/map",
         ChatActivity: "/chat",
         MyProfileActivity: "/profile",
         ProfileDetailActivity: "/profile/:userId",
+        ProfileSetupActivity: "/profile-setup",
       },
-      fallbackActivity: () => "ExploreActivity",
+      fallbackActivity: () => "LoginActivity",
     }),
   ],
-  initialActivity: () => "ExploreActivity",
+  initialActivity: () => "LoginActivity",
 });
