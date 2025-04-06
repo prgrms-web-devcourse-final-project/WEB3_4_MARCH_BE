@@ -4,7 +4,7 @@ import AppScreenLayout from "../layout/AppScreenLayout";
 import { useFlow } from "../stackflow/stackflow";
 import { getKakaoAuthUrl } from "../features/auth/kakao/kakao-auth";
 
-const REDIRECT_URI = "http://localhost:3000/login-redirect";
+const REDIRECT_URI = `${window.location.origin}/login-redirect`;
 
 export const LoginActivity = () => {
   const { push } = useFlow();

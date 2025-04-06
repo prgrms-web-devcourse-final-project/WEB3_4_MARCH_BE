@@ -27,7 +27,7 @@ const AppScreenLayout: FC<AppScreenLayoutProps> = ({
   ...appScreenProps
 }) => {
   return (
-    <AppScreen {...appScreenProps} backgroundColor="beige">
+    <AppScreen {...appScreenProps}>
       <LoginCheck disabled={noLoginCheck}>
         <div className="relative h-[100vh] w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white">
           {/* Top Bar */}
