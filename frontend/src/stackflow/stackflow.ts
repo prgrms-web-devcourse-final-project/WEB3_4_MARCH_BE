@@ -10,10 +10,12 @@ import MyProfileActivity from "../activities/MyProfileActivity";
 import ProfileDetailActivity from "../activities/ProfileDetailActivity";
 import { LoginActivity } from "../activities/LoginActivity";
 import { ProfileSetupActivity } from "../activities/ProfileSetupActivity";
+import { LoginLoadingActivity } from "../activities/LoginLoadingActivity";
 export const { Stack, useFlow } = stackflow({
   transitionDuration: 350,
   activities: {
     LoginActivity,
+    LoginLoadingActivity,
     ExploreActivity,
     MapActivity,
     ChatActivity,
@@ -34,6 +36,7 @@ export const { Stack, useFlow } = stackflow({
     historySyncPlugin({
       routes: {
         LoginActivity: "/login",
+        LoginLoadingActivity: "/login-redirect",
         ExploreActivity: "/explorer",
         MapActivity: "/map",
         ChatActivity: "/chat",

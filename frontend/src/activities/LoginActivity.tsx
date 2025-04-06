@@ -2,11 +2,26 @@ import { Logo } from "../components/Logo";
 import { KaKaoLoginButton } from "../components/KaKaoLoginButton";
 import AppScreenLayout from "../layout/AppScreenLayout";
 import { useFlow } from "../stackflow/stackflow";
+import { getKakaoAuthUrl } from "../features/auth/kakao/kakao-auth";
+
+const REDIRECT_URI = "http://localhost:3000/login-redirect";
 
 export const LoginActivity = () => {
   const { push } = useFlow();
-  const handleKaKaoLoginClick = () => {
-    push("ProfileSetupActivity", {});
+
+  const handleKaKaoLoginClick = async () => {
+    const kakaoAuthUrl = getKakaoAuthUrl({
+      clientId: import.meta.env.VITE_DEFAULT_KAKAO_API_KEY,
+      redirectUri: REDIRECT_URI,
+    });
+
+    console.log(
+      "###url",
+      kakaoAuthUrl,
+      import.meta.env.VITE_DEFAULT_KAKAO_API_KEY,
+    );
+
+    window.location.href = kakaoAuthUrl;
   };
 
   return (
