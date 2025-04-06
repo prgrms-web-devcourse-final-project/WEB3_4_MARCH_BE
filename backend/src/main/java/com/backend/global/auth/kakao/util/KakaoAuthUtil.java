@@ -33,6 +33,12 @@ public class KakaoAuthUtil {
     @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
     private String USER_INFO_URI;
 
+    @Value("${kakao.logout-url}")
+    private String KAKAO_LOGOUT_URL;
+
+    @Value("${kakao.logout-redirect-uri}")
+    private String KAKAO_LOGOUT_REDIRECT_URI;
+
     // 사용자가 카카오 로그인 버튼 클릭 시 리디렉션될 인가 코드 요청 URL
     public String getKakaoAuthorizationUrl() {
         return UriComponentsBuilder.fromUriString(AUTH_URI)
@@ -63,6 +69,15 @@ public class KakaoAuthUtil {
                 .queryParam("grant_type", "refresh_token")
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("refresh_token", refreshToken)
+                .toUriString();
+    }
+
+    public String getLogoutUrl(Long userId) {
+
+        return UriComponentsBuilder.fromUriString(KAKAO_LOGOUT_URL)
+                .queryParam("client_id", CLIENT_ID)
+                .queryParam("logout_redirect_uri", KAKAO_LOGOUT_REDIRECT_URI)
+                .queryParam("state", userId)
                 .toUriString();
     }
 }
