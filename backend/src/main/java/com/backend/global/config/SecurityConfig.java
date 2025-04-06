@@ -55,8 +55,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/members/register",
-                                "/api/members/*/notifications/**",
-                                "/api/likes/**",
                                 "/chat-test.html",
                                 "/page-list-test.html",
                                 "/js/**",
