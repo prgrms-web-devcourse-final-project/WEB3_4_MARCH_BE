@@ -1,7 +1,7 @@
 package com.backend.global.config;
 
-import java.util.List;
-
+import com.backend.global.auth.jwt.JwtFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,9 +16,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.backend.global.auth.jwt.JwtFilter;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 
 /**
@@ -48,6 +46,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+//                                "https://connect-to.pages.dev/",
+//                                "https://connect-to.pages.dev",
                                 "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -74,6 +74,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
+                "https://connect-to.pages.dev",
+                "https://connect-to.pages.dev/",
                 "http://43.201.9.189:8080"  // EC2 서버 도메인
         )); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
