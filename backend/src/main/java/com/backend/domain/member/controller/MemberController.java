@@ -2,14 +2,14 @@ package com.backend.domain.member.controller;
 
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
-import com.backend.domain.member.dto.MemberInfoDto;
-import com.backend.domain.member.dto.MemberModifyRequestDto;
-import com.backend.domain.member.dto.MemberRegisterRequestDto;
-import com.backend.domain.member.dto.MemberResponseDto;
+import com.backend.domain.member.dto.*;
 import com.backend.domain.member.service.MemberService;
+import com.backend.global.auth.kakao.service.CookieService;
+import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +27,8 @@ public class MemberController {
     private final MemberService memberService;
     private final PresignedService presignedService;
     private final ImageService imageService;
+    private final TokenProvider tokenProvider;
+    private final CookieService cookieService;
 
     /**
      * 회원 가입을 처리하는 엔드포인트이다.
@@ -46,9 +48,10 @@ public class MemberController {
      * @throws GlobalException 이미지 파일 수가 1장 미만이거나 5장을 초과할 경우 IMAGE_COUNT_INVALID 오류 발생
      */
     @PostMapping("/register")
-    public ResponseEntity<GenericResponse<MemberInfoDto>> registerMember(
+    public ResponseEntity<GenericResponse<MemberRegisterResponseDto>> registerMember(
             @RequestPart("member") MemberRegisterRequestDto requestDto,
-            @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            HttpServletResponse response) throws IOException {
 
         if (files == null || files.length < 1 || files.length > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
@@ -63,7 +66,20 @@ public class MemberController {
 
         // 3. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
         MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());
-        return ResponseEntity.ok(GenericResponse.of(updatedInfo, "회원 등록이 완료되었습니다."));
+
+        // 🔑 4. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
+        String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
+        String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
+
+        // 5. 새로 발급된 토큰을 쿠키에 저장.
+        cookieService.addAccessTokenToCookie(accessToken, response);
+        cookieService.addRefreshTokenToCookie(refreshToken, response);
+
+        // 6. 응답 DTO 생성
+        MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
+
+
+        return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
     }
 
     // 회원 정보 조회
