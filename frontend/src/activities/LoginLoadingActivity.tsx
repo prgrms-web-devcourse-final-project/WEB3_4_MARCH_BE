@@ -11,8 +11,11 @@ export const LoginLoadingActivity = () => {
     const handleLogin = async () => {
       if (code) {
         console.log("###code", code);
-        const response = await apiClient.post("/api/auth/kakao/login", {
-          code,
+        // const response = await apiClient.post("/api/auth/kakao/login", {
+          const response = await apiClient.get("/api/auth/kakao/callback", {
+            params: {
+              code,
+            },
         });
 
         console.log("###response", response);

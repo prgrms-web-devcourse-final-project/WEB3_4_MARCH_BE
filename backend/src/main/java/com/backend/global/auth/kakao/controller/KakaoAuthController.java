@@ -89,7 +89,7 @@ public class KakaoAuthController {
         cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
         cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
 
-        return ResponseEntity.ok(GenericResponse.of(loginResult, "로그인 성공"));
+        return ResponseEntity.ok(GenericResponse.of(loginResult, "카카오 로그인 성공"));
     }
 
     /**

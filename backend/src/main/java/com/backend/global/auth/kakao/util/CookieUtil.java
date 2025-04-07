@@ -3,6 +3,7 @@ package com.backend.global.auth.kakao.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
+@Slf4j
 public class CookieUtil {
 
     /**
@@ -21,14 +23,32 @@ public class CookieUtil {
      * @param name 찾을 쿠키 이름
      * @return 쿠키 값 또는 null
      */
+//    public String getCookieValue(HttpServletRequest request, String name) {
+//        if (request.getCookies() == null) return null;
+//
+//        for (Cookie cookie : request.getCookies()) {
+//            if (name.equals(cookie.getName())) {
+//                return cookie.getValue();
+//            }
+//        }
+//        return null;
+//    }
     public String getCookieValue(HttpServletRequest request, String name) {
-        if (request.getCookies() == null) return null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            log.warn("⚠️ [CookieUtil] No cookies found in request");
+            return null;
+        }
 
-        for (Cookie cookie : request.getCookies()) {
-            if (name.equals(cookie.getName())) {
+        for (Cookie cookie : cookies) {
+            log.info("🔍 [CookieUtil] Cookie: name={}, value={}", cookie.getName(), cookie.getValue());
+            if (cookie.getName().equals(name)) {
+                log.info("✅ [CookieUtil] Found target cookie '{}'", name);
                 return cookie.getValue();
             }
         }
+
+        log.warn("❌ [CookieUtil] Cookie '{}' not found in request", name);
         return null;
     }
 
@@ -41,8 +61,9 @@ public class CookieUtil {
      */
     public void addCookie(String name, String value, long maxAge, HttpServletResponse response) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setHttpOnly(true); // 쿠키를 브라우저의 JavaScript에서 접근할 수 없도록 설정
+//        cookie.setSecure(true); // HTTPS 환경에서만 쿠키 전송
+        cookie.setSecure(false); //스웨거 테스트용 임시 설정
         cookie.setPath("/");
         cookie.setMaxAge((int) maxAge);
         response.addCookie(cookie);
