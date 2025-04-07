@@ -76,4 +76,13 @@ public class SwaggerConfig {
                 .build();
     }
 
+    // 채팅 API
+    @Bean
+    public GroupedOpenApi chatApi() {
+        return GroupedOpenApi.builder()
+                .group("Chat")
+                .pathsToMatch("/api/chatrooms/**")
+                .build();
+    }
+
 }
