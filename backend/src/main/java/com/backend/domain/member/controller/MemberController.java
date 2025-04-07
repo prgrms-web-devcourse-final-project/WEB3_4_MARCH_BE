@@ -1,21 +1,5 @@
 package com.backend.domain.member.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
@@ -26,9 +10,14 @@ import com.backend.domain.member.service.MemberService;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,20 +35,20 @@ public class MemberController {
      * 클라이언트로부터 회원 가입 정보와 1장 이상 5장 이하의 이미지 파일을 전달받아,
      * 1. 회원 기본 정보를 등록한 후,
      * 2. 이미지 파일들을 S3에 업로드하고, 해당 이미지들을 DB에 등록한다.
-     *    이때, 첫 번째 업로드된 이미지는 자동으로 대표 이미지로 지정된다.
+     * 이때, 첫 번째 업로드된 이미지는 자동으로 대표 이미지로 지정된다.
      * 3. 최종적으로 업로드된 이미지를 반영한 최신 회원 정보를 반환한다.
      * </p>
      *
      * @param requestDto 회원 가입 요청 DTO (카카오 ID, 이메일, 닉네임, 성별, 나이, 키, 위치 등 정보 포함)
-     * @param files 업로드할 이미지 파일 배열 (1장 이상 5장 이하)
+     * @param files      업로드할 이미지 파일 배열 (1장 이상 5장 이하)
      * @return 회원 가입에 성공한 회원의 최신 정보를 담은 응답 객체 (MemberInfoDto)
-     * @throws IOException 파일 처리 중 I/O 예외가 발생할 경우
+     * @throws IOException     파일 처리 중 I/O 예외가 발생할 경우
      * @throws GlobalException 이미지 파일 수가 1장 미만이거나 5장을 초과할 경우 IMAGE_COUNT_INVALID 오류 발생
      */
     @PostMapping("/register")
     public ResponseEntity<GenericResponse<MemberInfoDto>> registerMember(
-        @RequestPart("member") MemberRegisterRequestDto requestDto,
-        @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
+            @RequestPart("member") MemberRegisterRequestDto requestDto,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
 
         if (files == null || files.length < 1 || files.length > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
@@ -74,7 +63,7 @@ public class MemberController {
 
         // 3. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
         MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());
-        return ResponseEntity.ok(GenericResponse.of(updatedInfo));
+        return ResponseEntity.ok(GenericResponse.of(updatedInfo, "회원 등록이 완료되었습니다."));
     }
 
     // 회원 정보 조회
@@ -82,14 +71,14 @@ public class MemberController {
     @GetMapping("/{memberId}")
     public ResponseEntity<GenericResponse<MemberInfoDto>> getMemberInfo(@PathVariable Long memberId) {
         MemberInfoDto responseDto = memberService.getMemberInfo(memberId);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 조회가 완료되었습니다."));
     }
 
     // 닉네임으로 회원 검색
     @GetMapping("/search")
     public ResponseEntity<GenericResponse<List<MemberInfoDto>>> searchMembersByNickname(@RequestParam String nickname) {
         List<MemberInfoDto> members = memberService.searchByNickname(nickname);
-        return ResponseEntity.ok().body(GenericResponse.of(members));
+        return ResponseEntity.ok().body(GenericResponse.of(members, "회원 검색이 완료되었습니다."));
     }
 
     // 회원 정보 수정
@@ -99,7 +88,7 @@ public class MemberController {
             @Valid @RequestBody MemberModifyRequestDto requestDto) {
 
         MemberResponseDto responseDto = memberService.modifyMember(memberId, requestDto);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 정보 수정이 완료되었습니다."));
     }
 
     // 닉네임 중복 검사
@@ -118,7 +107,7 @@ public class MemberController {
             @PathVariable Long memberId) {
 
         MemberResponseDto responseDto = memberService.withdraw(memberId);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 탈퇴가 완료되었습니다."));
     }
 
     // 사용자 위치 정보 갱신 (사용자가 위치 정보 갱신 버튼 클릭 시 호출)
@@ -129,6 +118,6 @@ public class MemberController {
             @RequestParam Double longitude) {
 
         MemberResponseDto responseDto = memberService.updateLocation(memberId, latitude, longitude);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto));
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "위치 정보가 업데이트되었습니다."));
     }
 }

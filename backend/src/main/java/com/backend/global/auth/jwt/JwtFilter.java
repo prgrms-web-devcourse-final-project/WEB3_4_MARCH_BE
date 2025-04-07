@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -37,6 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 1. 쿠키에서 AccessToken 추출 (CookieService 활용)
         String token = cookieService.getAccessTokenFromCookie(request);
+        log.info("✅ [JwtFilter] Extracted AccessToken from Cookie: {}", token);
 
         // 2. 토큰이 존재하고 유효하면
         if (token != null) {

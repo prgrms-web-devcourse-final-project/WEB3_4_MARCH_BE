@@ -154,6 +154,7 @@ public class KakaoAuthService {
         redisRefreshTokenService.saveRefreshToken(member.getId(), newRefreshToken, ttl);
 
         return LoginResponseDto.of(newAccessToken, member.getKakaoId(), member.getId(), newRefreshToken, true);
+//        return new LoginResponseDto(newAccessToken, kakaoId(), memberId, newRefreshToken, true);
 
     }
 }

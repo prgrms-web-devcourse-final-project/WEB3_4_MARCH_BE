@@ -57,13 +57,13 @@ public class KakaoAuthController {
 //     * 로그인 API (인가코드로 로그인 및 회원가입 처리)
 //     * 	프론트에서 code 받아 백엔드로 POST
 //     */
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
-        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
-        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
-        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
-        return ResponseEntity.ok(loginResult);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestParam String code, HttpServletResponse response) {
+//        LoginResponseDto loginResult = kakaoAuthService.processLogin(code, response);
+//        cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
+//        cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
+//        return ResponseEntity.ok(loginResult);
+//    }
 
     /**
      * 프론트 리다이렉트용 콜백 핸들러
@@ -89,7 +89,7 @@ public class KakaoAuthController {
         cookieService.addAccessTokenToCookie(loginResult.accessToken(), response);
         cookieService.addRefreshTokenToCookie(loginResult.refreshToken(), response);
 
-        return ResponseEntity.ok(GenericResponse.of(loginResult, "로그인 성공"));
+        return ResponseEntity.ok(GenericResponse.of(loginResult, "카카오 로그인 성공"));
     }
 
     /**
