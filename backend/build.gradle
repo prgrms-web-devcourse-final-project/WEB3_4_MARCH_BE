@@ -67,6 +67,15 @@ dependencies {
 
     // Spring Security Messaging 의존성
     implementation 'org.springframework.security:spring-security-messaging:'
+
+    // Spring Retry (재시도 로직 적용)
+    implementation 'org.springframework.retry:spring-retry'
+
+    // Spring AOP (재시도 로직 등 관점지향 프로그래밍 지원)
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Spring Boot Actuator (헬스체크 및 모니터링)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
