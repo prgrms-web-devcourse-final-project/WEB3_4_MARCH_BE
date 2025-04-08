@@ -4,7 +4,7 @@
 JAR_NAME=backend-0.0.1-SNAPSHOT.jar
 KEY_PATH=/c/Users/ho_go/team06-api-server-key.pem    # 👈 키 파일 정확한 위치 입력 (예: ~/Downloads/... )
 REMOTE_USER=ubuntu
-REMOTE_HOST=43.201.9.189
+REMOTE_HOST=3.34.188.64
 REMOTE_DIR=/home/ubuntu
 
 echo "🚀 EC2로 JAR 파일 전송 중..."
