@@ -18,11 +18,11 @@ public class UserKeyword {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "member_id")
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "keyword_id")
+    @JoinColumn(name = "keyword_id")
     private Keyword keyword;
 
 }
