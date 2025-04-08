@@ -36,19 +36,19 @@ public class CookieUtil {
     public String getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            log.warn("⚠️ [CookieUtil] No cookies found in request");
+            log.warn("⚠️ [CookieUtil] 요청에 쿠키가 존재하지 않습니다.");
             return null;
         }
 
         for (Cookie cookie : cookies) {
-            log.info("🔍 [CookieUtil] Cookie: name={}, value={}", cookie.getName(), cookie.getValue());
+            log.info("🔍 [CookieUtil] 쿠키 확인: name={}, value={}", cookie.getName(), cookie.getValue());
             if (cookie.getName().equals(name)) {
-                log.info("✅ [CookieUtil] Found target cookie '{}'", name);
+                log.info("✅ [CookieUtil] Target cookie '{}' 를 찾았습니다.", name);
                 return cookie.getValue();
             }
         }
 
-        log.warn("❌ [CookieUtil] Cookie '{}' not found in request", name);
+        log.warn("❌ [CookieUtil] 요청에서 쿠키 '{}' 를 찾을 수 없습니다.", name);
         return null;
     }
 

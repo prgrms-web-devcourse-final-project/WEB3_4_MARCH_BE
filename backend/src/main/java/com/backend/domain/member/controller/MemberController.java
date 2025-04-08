@@ -67,7 +67,7 @@ public class MemberController {
         // 3. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
         MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());
 
-        // 🔑 4. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
+        // 4. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
         String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
         String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
 

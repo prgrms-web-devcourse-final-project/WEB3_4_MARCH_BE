@@ -12,6 +12,11 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:latest
@@ -21,8 +26,13 @@ services:
       - "6379:6379"
     volumes:
       - ./backend/infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./backend/infra/redis/data:/data # /data(redis) -> ./infra/redis/data(local) 저장
+      - ./backend/infra/redis/data:/data
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -32,6 +42,12 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      # netcat (nc) 명령어로 2181 포트 점검
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -44,6 +60,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      # kafka 컨테이너의 9092 포트 점검; 컨테이너에 nc가 설치되어 있다면 사용
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   mysql_data:
