@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ public class ChatServiceImpl implements ChatService {
      * 사용자가 보낸 메시지를 처리합니다.
      * - 채팅방을 조회하고, 수신자 정보를 확인한 뒤
      * - ChatMessage 객체를 생성하여 Redis와 Kafka로 전송합니다.
+     * - 전송에 실패하면, 최대 3회 재전송합니다.
      *
      * @param request 클라이언트로부터 받은 채팅 메시지 요청
      * @param sender 현재 로그인한 사용자 (메시지 전송자)
@@ -66,6 +69,18 @@ public class ChatServiceImpl implements ChatService {
 
         // Redis에서 안 읽은 메시지 수 증가
         redisUnreadService.increaseUnreadCount(receiver.getId(), chatRoom.getId());
+
+        // 후속 처리 : 메시지 생성, DB 저장, 메시지 발행을 별도의 재시도 대상 메서드에서 처리
+        processMessageDelivery(request, sender, chatRoom, receiver);
+    }
+
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000)
+    )
+    private void processMessageDelivery(ChatMessageRequest request, Member sender,
+            ChatRoom chatRoom, Member receiver) {
 
         // 채팅 메시지 생성
         ChatMessage chatMessage = ChatMessage.builder()
