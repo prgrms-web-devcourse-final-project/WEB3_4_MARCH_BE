@@ -18,10 +18,11 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 
 /**
- * JWT 토큰 유효성 검사 및 사용자 정보 추출을 담당하는 유틸 클래스
+ * JWT 토큰 발급, 토큰 유효성 검사 및 사용자 정보 추출을 담당하는 유틸 클래스
  * JwtUtil과 CookieUtil을 내부적으로 활용함
  * JWT 발급, 파싱, 만료, 유효성 검사, Claim 추출 전담
  */
@@ -35,11 +36,11 @@ public class TokenProvider {
     private String secret;
 
     @Value("${spring.security.jwt.access-token.expiration}")
-    private long accessTokenTTL; // ms
+    private long accessTokenExpiration; // ms
 
     @Value("${spring.security.jwt.refresh-token.expiration}")
     @Getter
-    private long refreshTokenTTL; // ms
+    private long refreshTokenExpiration; // ms
 
     private Key signingKey;
 
@@ -51,12 +52,22 @@ public class TokenProvider {
 
     // 액세스 토큰 생성 (30분 TTL)
     public String createAccessToken(Long memberId, String role) {
-        return createToken(memberId, role, Duration.ofMillis(accessTokenTTL));
+        return createToken(memberId, role, Duration.ofMillis(accessTokenExpiration));
     }
 
     // 리프레시 토큰 생성 (14일 TTL)
+    // UUID로 jti 생성하여 JWT의 고유 식별자로 설정
+    // 매번 refreshToken 발급 시 고유 jti가 부여되므로, 이후 Redis에서 개별 토큰 단위로 관리가 가능
     public String createRefreshToken(Long memberId) {
-        return createToken(memberId, null, Duration.ofMillis(refreshTokenTTL));
+        String jti = UUID.randomUUID().toString();
+        Date now = new Date();
+        return Jwts.builder()
+                .claim("id", memberId)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + refreshTokenExpiration))
+                .setId(jti) // jti 추가
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // JWT 생성 (공통 로직)

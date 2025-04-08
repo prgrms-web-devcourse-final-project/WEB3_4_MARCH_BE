@@ -73,7 +73,6 @@ public class KakaoAuthUtil {
     }
 
     public String getLogoutUrl(Long userId) {
-
         return UriComponentsBuilder.fromUriString(KAKAO_LOGOUT_URL)
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("logout_redirect_uri", KAKAO_LOGOUT_REDIRECT_URI)
