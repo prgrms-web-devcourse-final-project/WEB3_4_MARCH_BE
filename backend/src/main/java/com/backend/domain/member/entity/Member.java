@@ -55,6 +55,10 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer blossomBalance = 50; // 매 신규회원은 자체 재화 블로썸을 50개를 가지고 서비스 이용
+
     // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
     @Column(nullable = false)
@@ -125,5 +129,10 @@ public class Member extends BaseEntity {
     @Override
     public int hashCode() {
         return 31;
+    }
+
+    // 블로썸 카운트 갱신하는 메서드
+    public void addBlossomBalance(int amount) {
+        this.blossomBalance = this.blossomBalance + amount;
     }
 }
