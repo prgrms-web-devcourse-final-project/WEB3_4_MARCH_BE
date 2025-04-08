@@ -5,6 +5,7 @@ import com.backend.domain.chatrequest.service.ChatRequestService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +26,13 @@ public class ChatRequestController {
      * @return 처리 결과 메시지
      */
     @PostMapping("/{receiverId}")
-    public GenericResponse<Void> sendRequest(
+    public ResponseEntity<GenericResponse<Void>> sendRequest(
             @AuthenticationPrincipal CustomUserDetails loginUser,
             @PathVariable("receiverId") Long receiverId
             ) {
         chatRequestService.sendChatRequest(loginUser, receiverId);
 
-        return GenericResponse.ok("채팅요청을 보냈습니다.");
+        return ResponseEntity.ok(GenericResponse.ok("채팅요청을 보냈습니다."));
     }
 
     /**
@@ -42,13 +43,13 @@ public class ChatRequestController {
      * @return 처리 결과 메시지
      */
     @PostMapping("/respond/{requestId}")
-    public GenericResponse<Void> respond(
+    public ResponseEntity<GenericResponse<Void>> respond(
             @PathVariable("requestId") Long requestId,
             @RequestParam boolean accept
     ) {
         chatRequestService.respondToRequest(requestId, accept);
 
-        return GenericResponse.ok("요청 처리 완료.");
+        return ResponseEntity.ok(GenericResponse.ok("요청 처리 완료."));
     }
 
     /**
@@ -58,12 +59,12 @@ public class ChatRequestController {
      * @return
      */
     @GetMapping("/sent-list")
-    public GenericResponse<List<ChatRequestDto>> getSentRequests(
+    public ResponseEntity<GenericResponse<List<ChatRequestDto>>> getSentRequests(
             @AuthenticationPrincipal CustomUserDetails loginUser
     ) {
         List<ChatRequestDto> list =  chatRequestService.getSentRequests(loginUser);
 
-        return GenericResponse.ok(list, "보낸 요청 목록 조회 성공");
+        return ResponseEntity.ok(GenericResponse.ok(list, "보낸 요청 목록 조회 성공"));
     }
 
     /**
@@ -73,12 +74,12 @@ public class ChatRequestController {
      * @return
      */
     @GetMapping("/received-list")
-    public GenericResponse<List<ChatRequestDto>> getReceivedRequests(
+    public ResponseEntity<GenericResponse<List<ChatRequestDto>>> getReceivedRequests(
             @AuthenticationPrincipal CustomUserDetails loginUser
     ) {
         List<ChatRequestDto> list = chatRequestService.getReceivedRequests(loginUser);
 
-        return GenericResponse.of(list, "받은 요청 목록 조회 성공");
+        return ResponseEntity.ok(GenericResponse.of(list, "받은 요청 목록 조회 성공"));
     }
 
 
