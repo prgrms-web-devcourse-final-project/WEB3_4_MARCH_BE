@@ -54,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // 인증 실패 → SecurityContextHolder에 아무것도 안 넣고 넘어감
                 // 토큰이 유효하지 않아도, Swagger나 로그인 페이지처럼 비회원도 접근해야 하는 리소스에 대한 접근 허용
-                log.warn("⚠️ JWT 토큰이 유효하지 않음: {}", e.getMessage());
+                log.warn("⚠️ [JwtFilter] JWT 토큰이 유효하지 않음: {}", e.getMessage());
             }
         }
         // 3. 다음 필터로 이동
