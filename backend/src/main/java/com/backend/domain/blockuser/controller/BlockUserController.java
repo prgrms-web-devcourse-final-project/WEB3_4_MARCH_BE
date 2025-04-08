@@ -6,6 +6,7 @@ import com.backend.domain.blockuser.service.BlockUserService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +25,13 @@ public class BlockUserController {
      * @param request 차단할 회원
      */
     @PostMapping("/block-user")
-    public GenericResponse<Void> blockUser(
+    public ResponseEntity<GenericResponse<Void>> blockUser(
             @AuthenticationPrincipal CustomUserDetails loginUser,
             @RequestBody BlockUserRequest request
     ) {
 
         blockUserService.blockUser(loginUser, request.getBlockedId());
-        return GenericResponse.ok("회원 차단에 성공했습니다");
+        return ResponseEntity.ok(GenericResponse.ok("회원 차단에 성공했습니다"));
     }
 
     /**
@@ -40,13 +41,13 @@ public class BlockUserController {
      * @param request 차단된 회원
      */
     @DeleteMapping("/unblock-user")
-    public GenericResponse<Void> unblockUser(
+    public ResponseEntity<GenericResponse<Void>> unblockUser(
             @AuthenticationPrincipal CustomUserDetails loginUser,
             @RequestBody BlockUserRequest request
     ) {
         blockUserService.unblockUser(loginUser, request.getBlockedId());
 
-        return GenericResponse.ok("회원 차단해제에 성공했습니다.");
+        return ResponseEntity.ok(GenericResponse.ok("회원 차단해제에 성공했습니다."));
     }
 
     /**
@@ -56,12 +57,12 @@ public class BlockUserController {
      * @return List<BlockedUserResponse>
      */
     @GetMapping("/block-user")
-    public GenericResponse<List<BlockedUserResponse>> blockedList(
+    public ResponseEntity<GenericResponse<List<BlockedUserResponse>>> blockedList(
             @AuthenticationPrincipal CustomUserDetails loginUser
     ) {
         List<BlockedUserResponse> blockedUsers = blockUserService.getBlockedUsers(loginUser);
 
-        return GenericResponse.ok(blockedUsers, "차단회원 목록 조회 성공.");
+        return ResponseEntity.ok(GenericResponse.ok(blockedUsers, "차단회원 목록 조회 성공."));
     }
 
 
