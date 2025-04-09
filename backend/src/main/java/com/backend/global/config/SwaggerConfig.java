@@ -81,7 +81,7 @@ public class SwaggerConfig {
     public GroupedOpenApi imageApi() {
         return GroupedOpenApi.builder()
                 .group("Image")
-                .pathsToMatch("/images/**")
+                .pathsToMatch("/api/images/**")
                 .build();
     }
 
@@ -90,7 +90,7 @@ public class SwaggerConfig {
     public GroupedOpenApi likeApi() {
         return GroupedOpenApi.builder()
                 .group("Like")
-                .pathsToMatch("/likes/**")
+                .pathsToMatch("/api/likes/**")
                 .build();
     }
 
@@ -99,7 +99,7 @@ public class SwaggerConfig {
     public GroupedOpenApi notificationApi() {
         return GroupedOpenApi.builder()
                 .group("Notification")
-                .pathsToMatch("/notifications/**")
+                .pathsToMatch("/api/notifications/**")
                 .build();
     }
 }
