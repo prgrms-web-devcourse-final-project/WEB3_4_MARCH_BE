@@ -1,18 +1,12 @@
 package com.backend.domain.like.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.backend.domain.like.dto.LikeMemberProfileDto;
 import com.backend.domain.like.service.LikeService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/likes")
@@ -29,14 +23,14 @@ public class LikeController {
     }
 
     // 내가 좋아요한 목록 조회
-    @GetMapping("/I-Like-U")
+    @GetMapping("/ILikeU")
     public ResponseEntity<List<LikeMemberProfileDto>> getLikedProfilesBySender(@RequestParam Long senderId) {
         List<LikeMemberProfileDto> profiles = likeService.getLikedProfilesBySender(senderId);
         return ResponseEntity.ok(profiles);
     }
 
     // 나를 좋아한 목록 조회
-    @GetMapping("/U-Like-Me")
+    @GetMapping("/ULikeMe")
     public ResponseEntity<List<LikeMemberProfileDto>> getLikerProfilesByReceiver(@RequestParam Long receiverId) {
         List<LikeMemberProfileDto> profiles = likeService.getLikerProfilesByReceiver(receiverId);
         return ResponseEntity.ok(profiles);

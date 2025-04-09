@@ -76,6 +76,32 @@ public class SwaggerConfig {
                 .build();
     }
 
+    // 이미지 API
+    @Bean
+    public GroupedOpenApi imageApi() {
+        return GroupedOpenApi.builder()
+                .group("Image")
+                .pathsToMatch("/api/images/**")
+                .build();
+    }
+
+    // 좋아요 API
+    @Bean
+    public GroupedOpenApi likeApi() {
+        return GroupedOpenApi.builder()
+                .group("Like")
+                .pathsToMatch("/api/likes/**")
+                .build();
+    }
+
+    // 알림 API
+    @Bean
+    public GroupedOpenApi notificationApi() {
+        return GroupedOpenApi.builder()
+                .group("Notification")
+                .pathsToMatch("/api/notifications/**")
+                .build();
+    }
     // 차단회원 API
     @Bean
     public GroupedOpenApi blockUserApi() {

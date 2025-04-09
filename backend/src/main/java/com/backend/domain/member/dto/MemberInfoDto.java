@@ -1,11 +1,12 @@
 package com.backend.domain.member.dto;
 
-import com.backend.domain.image.entity.Image;
+import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
 import lombok.Builder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 서비스 내부 전용 DTO로 설계
@@ -22,7 +23,7 @@ public record MemberInfoDto(
         Integer height,
         String gender,
         Boolean chatAble,
-        List<Image> images,
+        List<ImageResponseDto> images,
         Double latitude,
         Double longitude,
         Role role
@@ -37,7 +38,9 @@ public record MemberInfoDto(
                 member.getHeight(),
                 member.getGender(),
                 member.isChatAble(),
-                member.getImages(),
+                member.getImages().stream()
+                        .map(ImageResponseDto::from)
+                        .collect(Collectors.toList()),
                 member.getLatitude(),
                 member.getLongitude(),
                 member.getRole()

@@ -2,7 +2,7 @@ package com.backend.domain.notification.dto;
 
 import java.time.LocalDateTime;
 
-import com.backend.domain.notification.entity.Notification;
+import com.backend.domain.notification.entity.Notifications;
 import com.backend.domain.notification.entity.NotificationType;
 
 import lombok.AllArgsConstructor;
@@ -29,19 +29,19 @@ public class NotificationDto {
     /**
      * Notification 엔티티를 NotificationDto로 변환한다.
      *
-     * @param notification 알림 엔티티
+     * @param notifications 알림 엔티티
      * @return 변환된 NotificationDto 객체
      */
-    public static NotificationDto from(Notification notification) {
+    public static NotificationDto from(Notifications notifications) {
         return new NotificationDto(
-            notification.getId(),
-            notification.getSender().getId(),
-            notification.getReceiver().getId(),
-            notification.getType(),
-            notification.getMessage(),
-            notification.getCreatedAt(),
-            notification.isRead(),
-            notification.isDeleted()
+            notifications.getId(),
+            notifications.getSender().getId(),
+            notifications.getReceiver().getId(),
+            notifications.getType(),
+            notifications.getMessage(),
+            notifications.getCreatedAt(),
+            notifications.isRead(),
+            notifications.isDeleted()
         );
     }
 }

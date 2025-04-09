@@ -1,6 +1,5 @@
 package com.backend.domain.member.controller;
 
-import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.*;
 import com.backend.domain.member.service.MemberService;
@@ -9,9 +8,11 @@ import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,9 +27,9 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PresignedService presignedService;
-    private final ImageService imageService;
     private final TokenProvider tokenProvider;
     private final CookieService cookieService;
+    private final ObjectMapper objectMapper;
 
     /**
      * 회원 가입을 처리하는 엔드포인트이다.
@@ -98,13 +99,16 @@ public class MemberController {
     }
 
     // 회원 정보 수정
-    @PatchMapping("/{memberId}")
-    public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMember(
-            @PathVariable Long memberId,
-            @Valid @RequestBody MemberModifyRequestDto requestDto) {
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GenericResponse<MemberResponseDto>> modify(
+            @PathVariable Long id,
+            @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart("keepImageId") String keepIdsJson,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        MemberResponseDto responseDto = memberService.modifyMember(memberId, requestDto);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 정보 수정이 완료되었습니다."));
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
+        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 
     // 닉네임 중복 검사
