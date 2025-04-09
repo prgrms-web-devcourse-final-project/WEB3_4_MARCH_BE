@@ -1,50 +1,25 @@
 package com.backend.domain.notification.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.backend.domain.notification.dto.NotificationDto;
 import com.backend.domain.notification.entity.Notification;
-import com.backend.domain.notification.entity.NotificationType;
 import com.backend.domain.notification.service.NotificationService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.response.GenericResponse;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/members/{member_id}/notifications")
+@RequestMapping("/api/notification/{member_id}")
 public class NotificationController {
 
     private final NotificationService notificationService;
-    /**
-     * test notification DB 생성
-     */
-    @PostMapping("/test")
-    public String test() {
-
-        notificationService.sendNotification(1L, NotificationType.LIKE, 2L);
-        notificationService.sendNotification(1L, NotificationType.BLOCK, 3L);
-        notificationService.sendNotification(2L, NotificationType.REQUEST, 3L);
-        notificationService.sendNotification(2L, NotificationType.LIKE, 4L);
-        notificationService.sendNotification(3L, NotificationType.BLOCK, 4L);
-        notificationService.sendNotification(3L, NotificationType.REQUEST, 5L);
-        notificationService.sendNotification(4L, NotificationType.LIKE, 5L);
-        notificationService.sendNotification(4L, NotificationType.BLOCK, 6L);
-        notificationService.sendNotification(5L, NotificationType.REQUEST, 6L);
-        return "DB 등록이 완료되었습니다.";
-    }
 
     /**
      * 특정 사용자의 알림 목록을 조회한다.
@@ -74,7 +49,7 @@ public class NotificationController {
      * @param notificationId 알림 ID
      * @return 읽음 처리 완료 메시지
      */
-    @PatchMapping("/{notification_Id}/read")
+    @PatchMapping("/read/{notification_Id}")
     public ResponseEntity<GenericResponse<String>> markAsRead(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
         notificationService.markAsRead(notificationId);
         long count = notificationService.getUnreadNotificationCount(memberId);
@@ -101,7 +76,7 @@ public class NotificationController {
      * @param notificationId 알림 ID
      * @return 읽음 처리 완료 메시지
      */
-    @PatchMapping("/{notification_Id}/delete")
+    @PatchMapping("/delete/{notification_Id}")
     public ResponseEntity<GenericResponse<String>> softDeleteNotification(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
         notificationService.softDeleteNotification(notificationId);
         long count = notificationService.getUnreadNotificationCount(memberId);
