@@ -15,6 +15,7 @@ import com.backend.global.redis.service.RedisGeoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -98,20 +99,40 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public MemberResponseDto modifyMember(Long memberId, MemberModifyRequestDto requestDto) throws IOException {
+    public MemberResponseDto modifyMember(Long memberId,
+                                          MemberModifyRequestDto dto,
+                                          List<Long> keepImageIds,
+                                          List<MultipartFile> newImages) throws IOException {
+
         Member member = getMemberEntity(memberId);
 
+        // 1. 삭제 로직
+        member.getImages().stream()
+                .filter(img -> !keepImageIds.contains(img.getId()))
+                .collect(Collectors.toList())
+                .forEach(img -> imageService.deleteImage(memberId, img.getId()));
+
+        // 2. 추가 로직
+        int finalCount = keepImageIds.size() + (newImages == null ? 0 : newImages.size());
+        if (finalCount < 1 || finalCount > 5) {
+            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
+        }
+        if (newImages != null && !newImages.isEmpty()) {
+            presignedService.uploadFiles(newImages, memberId);
+        }
+
+        // 4. 프로필 정보 수정
         member.updateProfile(
-                requestDto.nickname(),
-                requestDto.age(),
-                requestDto.height(),
-                requestDto.gender(),
+                dto.nickname(),
+                dto.age(),
+                dto.height(),
+                dto.gender(),
                 member.getImages(),
                 member.isChatAble(),
-                // 사용자의 위도, 경도 값을 수정하여 위치 최신화
-                requestDto.latitude() != null ? requestDto.latitude() : member.getLatitude(),
-                requestDto.longitude() != null ? requestDto.longitude() : member.getLongitude()
+                dto.latitude() != null ? dto.latitude() : member.getLatitude(),
+                dto.longitude() != null ? dto.longitude() : member.getLongitude()
         );
+
         return MemberResponseDto.from(member);
     }
 

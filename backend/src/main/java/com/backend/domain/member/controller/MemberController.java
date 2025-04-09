@@ -1,11 +1,7 @@
 package com.backend.domain.member.controller;
 
-import com.backend.domain.image.entity.Image;
-import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.*;
-import com.backend.domain.member.entity.Member;
-import com.backend.domain.member.repository.MemberRepository;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.kakao.service.CookieService;
 import com.backend.global.auth.kakao.util.TokenProvider;
@@ -23,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,10 +27,9 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PresignedService presignedService;
-    private final ImageService imageService;
     private final TokenProvider tokenProvider;
     private final CookieService cookieService;
-    private final MemberRepository memberRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 회원 가입을 처리하는 엔드포인트이다.
@@ -105,41 +99,16 @@ public class MemberController {
     }
 
     // 회원 정보 수정
-    @PatchMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMember(
-            @PathVariable Long memberId,
-            @RequestPart("member") MemberModifyRequestDto requestDto,
-            @RequestPart(value = "keepImageId") String keepImageIdJson,
-            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages
-    ) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<Long> keepImageId = objectMapper.readValue(keepImageIdJson, new TypeReference<List<Long>>() {});
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GenericResponse<MemberResponseDto>> modify(
+            @PathVariable Long id,
+            @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart("keepImageId") String keepIdsJson,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        Member member = memberService.getMemberEntity(memberId);
-        List<Image> currentImages = member.getImages();
-
-        List<Image> imagesToDelete = currentImages.stream()
-                .filter(image -> !keepImageId.contains(image.getId()))
-                .collect(Collectors.toList());
-
-        for (Image image : imagesToDelete) {
-            imageService.deleteImage(memberId, image.getId());
-        }
-
-        int keptImagesCount = keepImageId.size();
-        int newImagesCount = (newImages != null) ? newImages.size() : 0;
-        int finalImagesCount = keptImagesCount + newImagesCount;
-        if (finalImagesCount < 1 || finalImagesCount > 5) {
-            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
-        }
-        if (newImages != null && !newImages.isEmpty()) {
-            presignedService.uploadFiles(newImages, memberId);
-        }
-
-        MemberResponseDto responseDto = memberService.modifyMember(memberId, requestDto);
-
-
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 정보 수정이 완료되었습니다."));
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
+        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 
     // 닉네임 중복 검사
