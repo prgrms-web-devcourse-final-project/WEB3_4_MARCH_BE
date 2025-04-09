@@ -50,3 +50,6 @@ backend/env
 
 # Redis 영속성
 /backend/infra/redis/data/
+
+# data.sql ignore
+/backend/src/main/resources/data.sql
