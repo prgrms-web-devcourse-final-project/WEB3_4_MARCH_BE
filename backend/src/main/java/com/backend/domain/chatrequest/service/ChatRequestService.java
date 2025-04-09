@@ -81,7 +81,7 @@ public class ChatRequestService {
     private void createChatRoom(ChatRequest request) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .sender(request.getSender())
-                .receiver(request.getSender())
+                .receiver(request.getReceiver())
                 .chatRequest(request)
                 .createAt(LocalDateTime.now())
                 .build();
