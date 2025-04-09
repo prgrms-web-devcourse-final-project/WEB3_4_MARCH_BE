@@ -13,4 +13,5 @@ public record BlossomTransactionDto(
         LocalDateTime approvedAt,
         Integer purchasedBlossomCount,
         String paymentKey
-) {}
+) {
+}

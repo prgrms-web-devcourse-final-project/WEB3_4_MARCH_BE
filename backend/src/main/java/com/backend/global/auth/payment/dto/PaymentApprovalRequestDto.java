@@ -5,4 +5,5 @@ public record PaymentApprovalRequestDto(
         String paymentKey,
         String orderId,
         Integer amount
-) {}
+) {
+}
