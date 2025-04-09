@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Builder
 @Getter
-@Table(name = "Chat")
+@Table(name = "Chat", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "uuid")
+})
 @AllArgsConstructor()
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Chat {
@@ -29,6 +32,10 @@ public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // 클라이언트 또는 서버에서 생성한 고유 식별자 (UUID)
+    @Column(nullable = false, unique = true)
+    private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chatroom_id", nullable = false)
@@ -47,11 +54,13 @@ public class Chat {
     @Column(name = "is_read", nullable = false)
     private boolean isRead;
 
-    public Chat(ChatRoom room, Member sender, String content, LocalDateTime sendTime) {
+    public Chat(ChatRoom room, Member sender, String content, LocalDateTime sendTime, String uuid, boolean isRead) {
         this.chatRoom = room;
         this.sender = sender;
+        this.uuid = uuid;
         this.chatContent = content;
         this.sendTime = sendTime;
+        this.isRead = isRead;
     }
 }
 
