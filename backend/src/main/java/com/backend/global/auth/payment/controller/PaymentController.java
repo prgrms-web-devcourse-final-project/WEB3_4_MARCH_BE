@@ -1,7 +1,11 @@
 package com.backend.global.auth.payment.controller;
 
-import com.backend.global.auth.payment.dto.*;
+import com.backend.global.auth.payment.dto.CancelPaymentRequest;
+import com.backend.global.auth.payment.dto.PaymentApprovalRequestDto;
+import com.backend.global.auth.payment.dto.PaymentApprovalResponseDto;
+import com.backend.global.auth.payment.dto.SaveAmountRequest;
 import com.backend.global.auth.payment.service.PaymentService;
+import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +38,8 @@ public class PaymentController {
                                                                 @RequestBody SaveAmountRequest saveAmountRequest) {
         String savedAmount = (String) session.getAttribute(saveAmountRequest.orderId());
         if (savedAmount == null || !savedAmount.equals(saveAmountRequest.amount())) {
-            return ResponseEntity.badRequest()
-                    .body(GenericResponse.fail(400, "결제 금액 정보가 유효하지 않습니다."));
+            return ResponseEntity.badRequest().body(
+                    GenericResponse.fail(GlobalErrorCode.INVALID_REQUEST.getCode(), "결제 금액 정보가 유효하지 않습니다."));
         }
         session.removeAttribute(saveAmountRequest.orderId());
         return ResponseEntity.ok(GenericResponse.ok("결제 정보가 유효합니다."));

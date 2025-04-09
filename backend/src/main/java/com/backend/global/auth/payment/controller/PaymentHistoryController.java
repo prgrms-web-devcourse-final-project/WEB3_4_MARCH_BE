@@ -38,7 +38,7 @@ public class PaymentHistoryController {
                         tx.getPaymentKey()
                 ))
                 .collect(Collectors.toList());
-        GenericResponse<List<BlossomTransactionDto>> response = GenericResponse.ok(blossomTransactionDto, "거래 내역 조회에 성공하였습니다.");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(GenericResponse.ok(blossomTransactionDto, "거래 내역 조회에 성공하였습니다."));
+
     }
 }
