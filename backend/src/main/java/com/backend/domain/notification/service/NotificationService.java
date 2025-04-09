@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
-import com.backend.domain.notification.entity.Notification;
+import com.backend.domain.notification.entity.Notifications;
 import com.backend.domain.notification.entity.NotificationType;
 import com.backend.domain.notification.repository.NotificationRepository;
 import com.backend.global.exception.GlobalErrorCode;
@@ -68,7 +68,7 @@ public class NotificationService {
                 break;
         }
 
-        Notification notification = Notification.builder()
+        Notifications notifications = Notifications.builder()
                 .receiver(receiver)
                 .sender(sender)
                 .type(type)
@@ -76,7 +76,7 @@ public class NotificationService {
                 .createdAt(LocalDateTime.now(ZoneId.of("UTC")))
                 .isRead(false)
                 .build();
-        notificationRepository.save(notification);
+        notificationRepository.save(notifications);
     }
 
     /**
@@ -86,7 +86,7 @@ public class NotificationService {
      * @return 알림 목록
      */
     @Transactional(readOnly = true)
-    public List<Notification> getNotificationsForMember(Long memberId) {
+    public List<Notifications> getNotificationsForMember(Long memberId) {
         return notificationRepository.findByReceiverIdAndIsDeletedFalseOrderByCreatedAtDesc(memberId);
     }
 
@@ -97,9 +97,9 @@ public class NotificationService {
      */
     @Transactional
     public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
+        Notifications notifications = notificationRepository.findById(notificationId)
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED)); // 필요에 따라 다른 예외 사용
-        notification.markAsRead();
+        notifications.markAsRead();
     }
 
     /**
@@ -109,9 +109,9 @@ public class NotificationService {
      */
     @Transactional
     public void markAllAsRead(Long memberId) {
-        List<Notification> unreadNotifications =
+        List<Notifications> unreadNotifications =
             notificationRepository.findByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(memberId);
-        unreadNotifications.forEach(Notification::markAsRead);
+        unreadNotifications.forEach(Notifications::markAsRead);
     }
 
     /**
@@ -121,9 +121,9 @@ public class NotificationService {
      */
     @Transactional
     public void softDeleteNotification(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
+        Notifications notifications = notificationRepository.findById(notificationId)
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.ALREADY_REQUESTED));
-        notification.softDeleteNotification();
+        notifications.softDeleteNotification();
     }
 
     /**
@@ -133,9 +133,9 @@ public class NotificationService {
      */
     @Transactional
     public void deleteAllNotifications(Long memberId) {
-        List<Notification> notifications =
+        List<Notifications> notifications =
             notificationRepository.findByReceiverIdAndIsDeletedFalseOrderByCreatedAtDesc(memberId);
-        notifications.forEach(Notification::softDeleteNotification);
+        notifications.forEach(Notifications::softDeleteNotification);
     }
 
     /**

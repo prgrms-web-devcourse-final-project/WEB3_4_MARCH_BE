@@ -1,7 +1,7 @@
 package com.backend.domain.notification.controller;
 
 import com.backend.domain.notification.dto.NotificationDto;
-import com.backend.domain.notification.entity.Notification;
+import com.backend.domain.notification.entity.Notifications;
 import com.backend.domain.notification.service.NotificationService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.response.GenericResponse;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/notification/{member_id}")
+@RequestMapping("/api/notifications/{member_id}")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -36,7 +36,7 @@ public class NotificationController {
             throw new AccessDeniedException("자신의 알림만 조회할 수 있습니다.");
         }
 
-        List<Notification> notifications = notificationService.getNotificationsForMember(memberId);
+        List<Notifications> notifications = notificationService.getNotificationsForMember(memberId);
         List<NotificationDto> dtos = notifications.stream()
                 .map(NotificationDto::from)
                 .collect(Collectors.toList());
