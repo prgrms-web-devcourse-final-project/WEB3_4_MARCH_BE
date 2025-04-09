@@ -88,7 +88,9 @@ public class KakaoAuthController {
 
     /**
      * 리프레시 토큰을 통해 새로운 액세스 토큰 재발급
-     * 백엔드 내부 로직 또는 로그인 이후 토큰 갱신 시 사용
+     * 클라이언트가 명시적으로 POST 요청을 보내어 토큰 재발급을 요청
+     * 요청 쿠키에서 refresh token을 추출한 후, 유효성을 검증하고, Redis에 저장된 토큰 정보와 비교
+     * 검증 통과 시, 새로운 액세스 토큰과 리프레시 토큰을 생성
      */
     @PostMapping("/reissue")
     public ResponseEntity<GenericResponse<LoginResponseDto>> reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -147,7 +149,9 @@ public class KakaoAuthController {
     }
 
     /**
-     * 쿠키에서 리프레시 토큰을 기반으로 새로운 accessToken과 refreshToken을 강제로 발급
+     * 쿠키에서 리프레시 토큰을 기반으로 새로운 액세스 토큰 재발급
+     * 액세스 토큰이 만료되어 보안 컨텍스트(AuthenticationPrincipal)가 없는 상황에서도, 클라이언트의 refresh token 쿠키를 이용해 새 토큰을 발급
+     * 새로운 리프레시 토큰도 발급하여, Redis에 저장하고 쿠키에 업데이트
      */
     @GetMapping("/refresh")
     public ResponseEntity<GenericResponse<LoginResponseDto>> refreshToken(HttpServletRequest request,
