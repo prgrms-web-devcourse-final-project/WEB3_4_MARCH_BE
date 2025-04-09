@@ -68,8 +68,8 @@ public class KakaoAuthController {
     /**
      * 프론트 리다이렉트용 콜백 핸들러
      * 로그인 후 콜백 요청 처리 (액세스/리프레시 토큰을 쿠키에 설정)
-     * 	카카오 서버가 직접 리다이렉트
-     * 	로그인 후 콜백 시 HttpServletRequest 추가
+     * 카카오 서버가 직접 리다이렉트
+     * 로그인 후 콜백 시 HttpServletRequest 추가
      */
     @GetMapping("/callback")
     public ResponseEntity<GenericResponse<LoginResponseDto>> loginCallback(
@@ -99,7 +99,7 @@ public class KakaoAuthController {
      * 백엔드 내부 로직 또는 로그인 이후 토큰 갱신 시 사용
      */
     @PostMapping("/reissue")
-    public ResponseEntity<LoginResponseDto> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<GenericResponse<LoginResponseDto>> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
         tokenProvider.validateToken(refreshToken);
 
@@ -121,7 +121,7 @@ public class KakaoAuthController {
             cookieService.addRefreshTokenToCookie(newToken.refreshToken(), response);
         }
 
-        return ResponseEntity.ok(newToken);
+        return ResponseEntity.ok(GenericResponse.of(newToken, "토큰 재발급 성공"));
     }
 
     /**
