@@ -1,14 +1,5 @@
 package com.backend.global.auth.kakao.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
 import com.backend.global.auth.kakao.dto.LoginResponseDto;
@@ -16,15 +7,16 @@ import com.backend.global.auth.kakao.service.CookieService;
 import com.backend.global.auth.kakao.service.KakaoAuthService;
 import com.backend.global.auth.kakao.service.RedisRefreshTokenService;
 import com.backend.global.auth.kakao.util.TokenProvider;
-import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 카카오 소셜 로그인 인증을 처리하는 컨트롤러 클래스
@@ -128,35 +120,43 @@ public class KakaoAuthController {
      */
     @PostMapping("/logout")
     // AuthenticationPrincipal CustomUserDetails를 통해 인증된 사용자 정보 가져옴
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response) {
-        Long memberId = userDetails.getMemberId(); // 인증 정보에서 ID 추출
+    public ResponseEntity<GenericResponse<Void>> logout(HttpServletRequest request,
+                                                        HttpServletResponse response) {
 
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
-        if (refreshToken != null) {
-            String jti = tokenProvider.parseToken(refreshToken).getId();
-            redisRefreshTokenService.deleteRefreshToken(memberId, jti);
-            log.info("[Logout] 로그아웃한 회원 {}에 대한 리프레시 토큰(jti: {}) 삭제 완료.", memberId, jti);
-        } else {
-            log.warn("[Logout] 로그아웃한 회원 {}의 리프레시 토큰을 찾을 수 없습니다.", memberId);
+
+        // 이미 로그아웃되었거나 쿠키가 존재하지 않는 상황이므로,
+        // 별도의 삭제 로직 없이 쿠키를 비워주고 로그아웃 성공 메시지를 반환
+        if (refreshToken == null) {
+
+            cookieService.clearTokensFromCookie(response);
+            return ResponseEntity.ok(GenericResponse.<Void>ok("로그아웃 성공"));
         }
 
+        // refresh token에서 memberId 추출
+        Long memberId = tokenProvider.extractMemberId(refreshToken);
+        String jti = tokenProvider.parseToken(refreshToken).getId();
+
+        // Redis에 저장된 refresh token 삭제
+        redisRefreshTokenService.deleteRefreshToken(memberId, jti);
+        log.info("[Logout] 로그아웃한 회원 {}에 대한 리프레시 토큰(jti: {}) 삭제 완료.", memberId, jti);
+
         cookieService.clearTokensFromCookie(response);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(GenericResponse.<Void>ok("로그아웃 성공"));
     }
 
     /**
      * 쿠키에서 리프레시 토큰을 기반으로 새로운 액세스 토큰 재발급
      */
     @GetMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refreshToken(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         HttpServletRequest request,
-                                                         HttpServletResponse response) {
+    public ResponseEntity<GenericResponse<LoginResponseDto>> refreshToken(HttpServletRequest request,
+                                                                          HttpServletResponse response) {
         String refreshToken = cookieService.getRefreshTokenFromCookie(request);
-        Long memberId = userDetails.getMemberId(); // 인증 정보에서 ID 추출
         tokenProvider.validateToken(refreshToken);
 
+        // 기존의 만료된 access token 대신 쿠키에 저장된 refresh token을 기반으로 새 토큰을 발급
+        // refresh token에서 memberId 추출
+        Long memberId = tokenProvider.extractMemberId(refreshToken);
         String jti = tokenProvider.parseToken(refreshToken).getId();
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
@@ -166,26 +166,29 @@ public class KakaoAuthController {
             throw new GlobalException(GlobalErrorCode.INVALID_TOKEN); // 같지 않으면 예외 처리
         }
 
+        // 회원 정보를 기본키(memberId)를 기준으로 조회
+        Member member = memberService.getMemberEntity(memberId);
+        String role = member.getRole().name();
+
         // 새로운 AccessToken 발급
-        String role = userDetails.getAuthorities().stream()
-                .findFirst()
-                .map(Object::toString)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INVALID_TOKEN)); // 같지 않으면 예외 처리
+        String newAccessToken = tokenProvider.createAccessToken(memberId, role);
 
-        String newAccessToken = tokenProvider.createAccessToken(memberId, role); // AccessToken 발급
-
-        // refreshToken도 자주 갱신 (덮어쓰기)
+        // 새로운 RefreshToken도 발급  (덮어쓰기)
         String newRefreshToken = tokenProvider.createRefreshToken(memberId);
         long refreshTokenExpiration = tokenProvider.getRefreshTokenExpiration(); // refresh token 유효기간 가져오기
 
-        // 새 refreshToken 정보 저장 (jti 및 클라이언트 정보 포함)
+        // 새로운 jti 및 클라이언트 정보 발급
         String newJti = tokenProvider.parseToken(newRefreshToken).getId();
+
+        // 새 refresh token 저장 및 쿠키 업데이트
         redisRefreshTokenService.saveRefreshToken(memberId, newJti, newRefreshToken, refreshTokenExpiration, ip, userAgent);
         cookieService.addRefreshTokenToCookie(newRefreshToken, response);
 
-        Member member = memberService.getByKakaoId(memberId);
-        return ResponseEntity.ok(LoginResponseDto.of(newAccessToken, member.getKakaoId(), memberId
-                , newRefreshToken, true));
+        return ResponseEntity.ok(GenericResponse.of(
+                LoginResponseDto.of(newAccessToken, member.getKakaoId(), memberId, newRefreshToken, true),
+                "토큰 리프레쉬 성공"
+        ));
     }
-
 }
+
+
