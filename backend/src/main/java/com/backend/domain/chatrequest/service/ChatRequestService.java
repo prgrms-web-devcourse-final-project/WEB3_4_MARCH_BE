@@ -40,6 +40,10 @@ public class ChatRequestService {
                 () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
         );
 
+        if (sender.getId().equals(receiverId)) {
+            throw new GlobalException(GlobalErrorCode.SAME_SENDER_AND_RECEIVER);
+        }
+
         validateDuplicateRequest(sender, receiver);
 
         ChatRequest request = ChatRequest.builder()
@@ -77,7 +81,8 @@ public class ChatRequestService {
     private void createChatRoom(ChatRequest request) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .sender(request.getSender())
-                .receiver(request.getSender())
+                .receiver(request.getReceiver())
+                .chatRequest(request)
                 .createAt(LocalDateTime.now())
                 .build();
 

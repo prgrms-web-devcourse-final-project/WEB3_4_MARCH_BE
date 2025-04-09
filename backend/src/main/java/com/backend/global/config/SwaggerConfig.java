@@ -94,7 +94,7 @@ public class SwaggerConfig {
                 .build();
     }
 
-    // 이미지 API
+    // 알림 API
     @Bean
     public GroupedOpenApi notificationApi() {
         return GroupedOpenApi.builder()
@@ -102,4 +102,52 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/notifications/**")
                 .build();
     }
+    // 차단회원 API
+    @Bean
+    public GroupedOpenApi blockUserApi() {
+        return GroupedOpenApi.builder()
+                .group("BlockUser")
+                .pathsToMatch("/api/block-user", "/api/unblock-user")
+                .build();
+    }
+
+    // 회원추천 API
+    @Bean
+    public GroupedOpenApi matchingApi() {
+        return GroupedOpenApi.builder()
+                .group("UserRecommendation")
+                .pathsToMatch("/api/matching/**")
+                .build();
+    }
+
+    // 채팅요청 API
+    @Bean
+    public GroupedOpenApi chatRequestApi() {
+        return GroupedOpenApi.builder()
+                .group("ChatRequest")
+                .pathsToMatch("/api/chat-request/**")
+                .build();
+    }
+
+    // 키워드 API
+    @Bean
+    public GroupedOpenApi keywordApi() {
+        return GroupedOpenApi.builder()
+                .group("Keyword")
+                .pathsToMatch("/api/keywords")
+                .build();
+    }
+
+    // 유저 키워드 API
+    @Bean
+    public GroupedOpenApi userKeywordApi() {
+        return GroupedOpenApi.builder()
+                .group("UserKeyword")
+                .pathsToMatch("/api/user-keywords/**")
+                .build();
+    }
+
+
+
+
 }
