@@ -1,5 +1,7 @@
 package com.backend.domain.member.service;
 
+import com.backend.domain.image.service.ImageService;
+import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final RedisGeoService redisGeoService;
+    private final ImageService imageService;
+    private final PresignedService presignedService;
+
 
     // 회원 정보 조회
     // Member 엔티티를 DTO로 변환해서 반환
@@ -92,7 +98,7 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public MemberResponseDto modifyMember(Long memberId, MemberModifyRequestDto requestDto) {
+    public MemberResponseDto modifyMember(Long memberId, MemberModifyRequestDto requestDto) throws IOException {
         Member member = getMemberEntity(memberId);
 
         member.updateProfile(
@@ -100,7 +106,7 @@ public class MemberService {
                 requestDto.age(),
                 requestDto.height(),
                 requestDto.gender(),
-                requestDto.images(),
+                member.getImages(),
                 member.isChatAble(),
                 // 사용자의 위도, 경도 값을 수정하여 위치 최신화
                 requestDto.latitude() != null ? requestDto.latitude() : member.getLatitude(),

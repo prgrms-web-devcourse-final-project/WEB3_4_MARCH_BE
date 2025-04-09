@@ -85,6 +85,7 @@ public class PresignedService {
 					.build();
 				imageRepository.save(image);
 				uploadResults.add(imageUrl);
+				member.getImages().add(image);
 				if (!hasPrimary) {
                		member.setProfileImage(image);
                 	memberRepository.save(member);

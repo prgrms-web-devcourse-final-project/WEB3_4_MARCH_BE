@@ -99,6 +99,9 @@ public class ImageService {
 
         // S3에서 이미지 삭제
         deleteImageFromS3(image.getUrl());
+
+        // 부모 컬렉션에서 제거 (orphanRemoval=true)
+        member.getImages().remove(image);
         // DB에서 이미지 삭제
         imageRepository.delete(image);
     }
