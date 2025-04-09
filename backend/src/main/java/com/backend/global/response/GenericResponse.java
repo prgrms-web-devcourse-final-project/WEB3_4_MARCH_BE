@@ -1,5 +1,6 @@
 package com.backend.global.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ import java.time.ZonedDateTime;
 public class GenericResponse<T> {
 
     private final ZonedDateTime timestamp;
+    @Getter(onMethod_ = { @JsonProperty("isSuccess") })
     private final boolean isSuccess;
     private final int code;
     private final T data;
