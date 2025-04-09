@@ -26,6 +26,7 @@ public class ChatMessage {
 
     @JsonProperty("chatroomId")
     private Long roomId;
+    private String uuid;
 
     private Long senderId;
     private Long receiverId;
@@ -35,6 +36,8 @@ public class ChatMessage {
     private LocalDateTime sendTime;
 
     private MessageType type;
+
+    private boolean isRead;
 
     /**
      * ChatMessage DTO를 Chat 엔티티로 변환합니다.
@@ -49,7 +52,9 @@ public class ChatMessage {
                 room,
                 sender,
                 this.content,
-                this.sendTime != null ? this.sendTime : LocalDateTime.now()
+                this.sendTime != null ? this.sendTime : LocalDateTime.now(),
+                this.uuid,
+                this.isRead
         );
     }
 }
