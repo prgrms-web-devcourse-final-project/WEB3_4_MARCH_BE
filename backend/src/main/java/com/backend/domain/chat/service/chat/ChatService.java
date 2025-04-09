@@ -16,4 +16,7 @@ public interface ChatService {
 
     // 채팅방 메시지 조회
     Slice<ChatMessageResponse> getRoomMessage(Long roomId, Long currentMemberId, Pageable pageable);
+
+    // 채팅방 입장시 읽음 처리
+    void markMessageAsRead(Long roomId, Long memberId);
 }
