@@ -1,31 +1,22 @@
 package com.backend.domain.image.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.image.repository.ImageRepository;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.response.GenericResponse;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/members/{memberId}/images")
+@RequestMapping("/api/images/{memberId}")
 public class ImageController {
 
     private final ImageService imageService;
@@ -74,7 +65,7 @@ public class ImageController {
      * @param imageId 삭제할 이미지 ID
      * @return 삭제 성공 메시지를 포함한 응답 객체
      */
-    @DeleteMapping("/{imageId}")
+    @DeleteMapping("/delete/{imageId}")
     public ResponseEntity<GenericResponse<String>> deleteImage(
         @PathVariable Long memberId,
         @PathVariable Long imageId) {
@@ -91,7 +82,7 @@ public class ImageController {
      * @param imageId 대표 이미지로 설정할 이미지 ID
      * @return 업데이트된 이미지 정보를 포함한 응답 객체
      */
-    @PatchMapping("/{imageId}/primary")
+    @PatchMapping("/primary/{imageId}")
     public ResponseEntity<GenericResponse<ImageResponseDto>> setPrimaryImage(
         @PathVariable Long memberId,
         @PathVariable Long imageId) {
