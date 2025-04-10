@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  app:
+    image: team06march:latest
+    container_name: team06march
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/config/application-server.yml
+      - AWS_REGION=ap-northeast-2
+    volumes:
+      - ./resources/application-server.yml:/config/application-server.yml
+    depends_on:
+      - mysql
+    networks:
+      - common
+
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm_1
+    restart: unless-stopped
+    networks:
+      - common
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      # 호스트 내 원하는 경로로 변경
+      - ./npm_data/data:/data
+      - ./npm_data/letsencrypt:/etc/letsencrypt
+
+  haproxy:
+    image: haproxy:latest
+    container_name: ha_proxy_1
+    restart: unless-stopped
+    networks:
+      - common
+    ports:
+      - "8090:80"
+    volumes:
+      # HAProxy 설정 파일들을 호스트에서 관리 (예, haproxy.cfg, lua 스크립트 등)
+      - ./haproxy_config:/usr/local/etc/haproxy
+    environment:
+      - TZ=${TZ}
+
+  redis:
+    image: redis:latest
+    container_name: redis_1
+    restart: unless-stopped
+    networks:
+      - common
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${PASSWORD_1}"]
+    environment:
+      - TZ=${TZ}
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_1
+    restart: unless-stopped
+    networks:
+      common:
+        aliases:
+          - mysql_1
+          - mysql1
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data/mysql:/var/lib/mysql
+      - ./mysql_data/conf.d:/etc/mysql/conf.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PASSWORD_1}       # 예: connectto20250314
+      - MYSQL_DATABASE=meeting_app
+      - MYSQL_USER=team06march
+      - MYSQL_PASSWORD=${PASSWORD_1}              # 반드시 비밀번호를 지정 (빈 값 X)
+      - TZ=${TZ}
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper_1
+    restart: unless-stopped
+    networks:
+      - common
+    ports:
+      - "2181:2181"
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka_1
+    restart: unless-stopped
+    networks:
+      - common
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper_1:2181
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      # EC2_PUBLIC_IP 변수를 통해 외부 접속 시 사용할 IP를 지정합니다.
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${EC2_PUBLIC_IP}:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_HEAP_OPTS=-Xms512M -Xmx512M
+      - KAFKA_JVM_PERFORMANCE_OPTS=-server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35
+
+networks:
+  common:
+    driver: bridge

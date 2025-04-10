@@ -2,6 +2,8 @@ package com.backend.domain.chat.service.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,6 +22,7 @@ public class RedisUnreadService {
      * @param receiverId 안 읽은 메시지를 증가시킬 사용자의 ID
      * @param chatRoomId 채팅방 ID (안 읽은 메시지를 구분하기 위한 키의 일부)
      */
+    @Retryable(retryFor = { Exception.class }, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void increaseUnreadCount(Long receiverId, Long chatRoomId) {
         // Redis에 저장할 키를 생성합니다.
         String key = buildKey(receiverId, chatRoomId);

@@ -102,6 +102,7 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/notifications/**")
                 .build();
     }
+
     // 차단회원 API
     @Bean
     public GroupedOpenApi blockUserApi() {
@@ -147,7 +148,12 @@ public class SwaggerConfig {
                 .build();
     }
 
-
-
-
+    // 채팅 API
+    @Bean
+    public GroupedOpenApi chatApi() {
+        return GroupedOpenApi.builder()
+                .group("Chat")
+                .pathsToMatch("/api/chatrooms/**")
+                .build();
+    }
 }
