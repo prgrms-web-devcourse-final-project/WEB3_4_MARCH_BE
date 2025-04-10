@@ -1,18 +1,25 @@
 package com.backend.domain.notification.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.backend.domain.notification.dto.NotificationDto;
 import com.backend.domain.notification.entity.Notifications;
 import com.backend.domain.notification.service.NotificationService;
 import com.backend.global.auth.model.CustomUserDetails;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,13 +40,13 @@ public class NotificationController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         if (!userDetails.getMemberId().equals(memberId)) {
-            throw new AccessDeniedException("자신의 알림만 조회할 수 있습니다.");
+            throw new GlobalException(GlobalErrorCode.NOTIFICATION_ACCESS_DENIED);
         }
 
         List<Notifications> notifications = notificationService.getNotificationsForMember(memberId);
         List<NotificationDto> dtos = notifications.stream()
-                .map(NotificationDto::from)
-                .collect(Collectors.toList());
+            .map(NotificationDto::from)
+            .collect(Collectors.toList());
         return ResponseEntity.ok(GenericResponse.of(dtos));
     }
 
@@ -50,7 +57,15 @@ public class NotificationController {
      * @return 읽음 처리 완료 메시지
      */
     @PatchMapping("/read/{notification_Id}")
-    public ResponseEntity<GenericResponse<String>> markAsRead(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
+    public ResponseEntity<GenericResponse<String>> markAsRead(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("member_id") Long memberId,
+        @PathVariable("notification_Id") Long notificationId) {
+
+        if (!userDetails.getMemberId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         notificationService.markAsRead(notificationId);
         long count = notificationService.getUnreadNotificationCount(memberId);
         return ResponseEntity.ok(GenericResponse.of("알림을 읽음 처리했습니다. 남은 알림 갯수 : " + count + "개"));
@@ -64,7 +79,13 @@ public class NotificationController {
      */
     @PatchMapping("/read-all")
     public ResponseEntity<GenericResponse<String>> markAllAsRead(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable("member_id") Long memberId) {
+
+        if (!userDetails.getMemberId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         notificationService.markAllAsRead(memberId);
         long count = notificationService.getUnreadNotificationCount(memberId);
         return ResponseEntity.ok(GenericResponse.of("모든 알림을 읽음 처리했습니다. 남은 알림 갯수 : " + count + "개"));
@@ -77,7 +98,15 @@ public class NotificationController {
      * @return 읽음 처리 완료 메시지
      */
     @PatchMapping("/delete/{notification_Id}")
-    public ResponseEntity<GenericResponse<String>> softDeleteNotification(@PathVariable("member_id") Long memberId,@PathVariable("notification_Id") Long notificationId) {
+    public ResponseEntity<GenericResponse<String>> softDeleteNotification(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("member_id") Long memberId,
+        @PathVariable("notification_Id") Long notificationId) {
+
+        if (!userDetails.getMemberId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         notificationService.softDeleteNotification(notificationId);
         long count = notificationService.getUnreadNotificationCount(memberId);
         return ResponseEntity.ok(GenericResponse.of("알림을 삭제했습니다. 남은 알림 갯수 : " + count + "개"));
@@ -91,7 +120,13 @@ public class NotificationController {
      */
     @PatchMapping("/delete-all")
     public ResponseEntity<GenericResponse<String>> deleteAllNotifications(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable("member_id") Long memberId) {
+
+        if (!userDetails.getMemberId().equals(memberId)) {
+            throw new GlobalException(GlobalErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         notificationService.deleteAllNotifications(memberId);
         long count = notificationService.getUnreadNotificationCount(memberId);
         return ResponseEntity.ok(GenericResponse.of("모든 알림을 삭제 처리했습니다. 남은 알림 갯수 : " + count + "개"));
