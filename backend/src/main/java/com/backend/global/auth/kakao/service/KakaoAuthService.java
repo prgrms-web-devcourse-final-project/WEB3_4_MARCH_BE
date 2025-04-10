@@ -49,11 +49,11 @@ public class KakaoAuthService {
     private final CookieService cookieService;
 
     // 관리자 계정 카카오 Id
-    @Value("${admin.whitelist.kakaoIds}")
+    @Value("${admin.whitelist.kakaoIds:}")
     private Long[] adminKakaoIds;
 
     // 관리자 계정 이메일
-    @Value("${admin.whitelist.emailDomains}")
+    @Value("${admin.whitelist.emailDomains:}")
     private String[] adminEmailDomains;
 
 
