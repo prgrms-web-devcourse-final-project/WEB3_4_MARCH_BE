@@ -1,5 +1,13 @@
 package com.backend.domain.member.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
@@ -12,14 +20,8 @@ import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +39,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberInfoDto getMemberInfo(Long memberId) {
         return memberRepository.findById(memberId)
-                .filter(member -> !member.isDeleted())
-                .map(MemberInfoDto::from)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+            .filter(member -> !member.isDeleted())
+            .map(MemberInfoDto::from)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     // 닉네임으로 조회
