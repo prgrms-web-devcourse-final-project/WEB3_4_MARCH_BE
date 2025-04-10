@@ -6,6 +6,8 @@ import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.auth.admin.dto.AdminLoginRequestDto;
 import com.backend.global.auth.admin.dto.AdminLoginResponseDto;
 import com.backend.global.auth.kakao.util.TokenProvider;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import org.springframework.stereotype.Service;
 
 
@@ -27,12 +29,12 @@ public class AdminAuthService {
     // 관리자 로그인 처리: 하드코딩된 화이트리스트에 의해 이미 Role이 ROLE_ADMIN이어야 함.
     public AdminLoginResponseDto processAdminLogin(AdminLoginRequestDto request) {
         Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("관리자 계정이 존재하지 않습니다."));
+                .orElseThrow(() ->  new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND, "관리자 계정이 존재하지 않습니다."));
 
         // 관리자 계정 확인
         // 관리자로 사용하기 위해서는 미리 설정된 화이트리스트 등에 의해 회원의 역할이 ROLE_ADMIN으로 업데이트되어 있어야 됨.
         if (!member.getRole().equals(Role.ROLE_ADMIN)) {
-            throw new IllegalArgumentException("관리자 계정이 아닙니다.");
+            throw new GlobalException(GlobalErrorCode.INVALID_REQUEST, "관리자 계정이 아닙니다.");
         }
 
         // JWT AccessToken 생성

@@ -41,6 +41,8 @@ public enum GlobalErrorCode {
 	// 정리 필요
 	SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "서버 오류가 발생했습니다."),
 	INVALID_REQUEST(HttpStatus.BAD_REQUEST, 400, "잘못된 요청입니다."),
+
+	// 토큰 오류 코드
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유효하지 않은 토큰입니다."),
 	TOKEN_REISSUE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 401, "토큰 갱신에 실패했습니다."),
 	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 401, "토큰이 만료되었습니다."),
@@ -49,6 +51,8 @@ public enum GlobalErrorCode {
 	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "멤버를 찾을 수 없습니다."),
 	AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, 401, "인증된 사용자 정보를 가져올 수 없습니다."),
 	TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "Authorization 헤더가 존재하지 않거나 형식이 올바르지 않습니다."),
+
+	// 카프카 오류 코드
     KAFKA_SEND_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Kafka 메시지 전송 실패."),
 
     // 차단회원 오류코드
@@ -60,9 +64,6 @@ public enum GlobalErrorCode {
 
     // 권한 없는 유저 오류코드
     TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다.");
-
-
-
 
 
     private final HttpStatus httpStatus;
