@@ -8,10 +8,14 @@ services:
       - "8080:8080"
     environment:
       - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/config/application-server.yml
+      - AWS_REGION=ap-northeast-2
     volumes:
       - ./resources/application-server.yml:/config/application-server.yml
     depends_on:
       - mysql
+    networks:
+      - common
+
   npm:
     image: jc21/nginx-proxy-manager:latest
     container_name: npm_1
@@ -60,15 +64,20 @@ services:
     container_name: mysql_1
     restart: unless-stopped
     networks:
-      - common
+      common:
+        aliases:
+          - mysql_1
+          - mysql1
     ports:
       - "3306:3306"
     volumes:
-      # MySQL 데이터를 영구 저장할 경로 지정
       - ./mysql_data/mysql:/var/lib/mysql
       - ./mysql_data/conf.d:/etc/mysql/conf.d
     environment:
-      - MYSQL_ROOT_PASSWORD=${PASSWORD_1}
+      - MYSQL_ROOT_PASSWORD=${PASSWORD_1}       # 예: connectto20250314
+      - MYSQL_DATABASE=meeting_app
+      - MYSQL_USER=team06march
+      - MYSQL_PASSWORD=${PASSWORD_1}              # 반드시 비밀번호를 지정 (빈 값 X)
       - TZ=${TZ}
 
   zookeeper:
