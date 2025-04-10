@@ -21,24 +21,52 @@
 //
 //    @PostConstruct
 //    public void init() {
-//        for (int i = 0; i <= 15; i++) {
+//
+//        double centerLat = 37.5665;
+//        double centerLon = 126.978;
+//
+//        // 반경 10km 이내 30명
+//        for (int i = 0; i < 30; i++) {
+//            double lat = centerLat + (Math.random() - 0.5) * 0.09; // 약 ±5km
+//            double lon = centerLon + (Math.random() - 0.5) * 0.09;
+//
 //            Member member = memberRepository.save(
 //                    Member.builder()
-//                            .kakaoId(1000L + i)
-//                            .nickname("user" + i)
-//                            .age(25 + (i % 5))
-//                            .height(160 + (i % 10))
+//                            .kakaoId(10000L + i)
+//                            .nickname("near_user" + i)
+//                            .age(20 + (i % 10))
+//                            .height(160 + (i % 20))
 //                            .gender(i % 2 == 0 ? "MALE" : "FEMALE")
-//                            .latitude(37.56 + (i * 0.001))   // 서울 중심 기준
-//                            .longitude(127.01 + (i * 0.001))
+//                            .latitude(lat)
+//                            .longitude(lon)
 //                            .chatAble(true)
 //                            .build()
 //            );
 //
-//            System.out.println("[DB] Member 저장됨: " + member.getId());
+//            redisGeoService.addLocation(member.getId(), lat, lon);
+//            System.out.println("[10km 이내] 저장됨: " + member.getNickname());
+//        }
 //
-//            redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
+//        // 반경 10km 밖 (대략 20km ~ 40km 거리) 20명
+//        for (int i = 0; i < 20; i++) {
+//            double lat = centerLat + (Math.random() > 0.5 ? 0.3 : -0.3) + (Math.random() * 0.05);  // ±30km ~ 35km
+//            double lon = centerLon + (Math.random() > 0.5 ? 0.3 : -0.3) + (Math.random() * 0.05);
 //
+//            Member member = memberRepository.save(
+//                    Member.builder()
+//                            .kakaoId(20000L + i)
+//                            .nickname("far_user" + i)
+//                            .age(20 + (i % 10))
+//                            .height(160 + (i % 20))
+//                            .gender(i % 2 == 0 ? "MALE" : "FEMALE")
+//                            .latitude(lat)
+//                            .longitude(lon)
+//                            .chatAble(true)
+//                            .build()
+//            );
+//
+//            redisGeoService.addLocation(member.getId(), lat, lon);
+//            System.out.println("[10km 밖] 저장됨: " + member.getNickname());
 //        }
 //    }
 //
