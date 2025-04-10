@@ -52,8 +52,14 @@ public class Member extends BaseEntity {
 
     private Double longitude;
 
+    @Column(length = 20)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role; // 사용자의 권한 종류
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MemberStatus status = MemberStatus.ACTIVE;
+
 
     // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
@@ -89,8 +95,15 @@ public class Member extends BaseEntity {
     }
 
     // 회원 탈퇴(soft delete)
+    // 회원 탈퇴 시 상태 "WITHDRAWN"으로 변경
     public void withdraw() {
         this.isDeleted = true;
+        this.status = MemberStatus.WITHDRAWN;;
+    }
+
+    // 관리자 차단 시 상태 변경 (getStatus() 메서드는 Lombok의 @Getter로 자동 생성됨)
+    public void block() {
+        this.status = MemberStatus.BLOCKED;
     }
 
     // 재가입 처리

@@ -120,7 +120,7 @@ public class MemberController {
     }
 
     // 닉네임 중복 검사
-    @GetMapping("/check-nickname")
+    @GetMapping("/checkNickname")
     public ResponseEntity<GenericResponse<Boolean>> checkNickname(@RequestParam String nickname) {
         boolean exists = memberService.isNicknameTaken(nickname);
         if (exists) {

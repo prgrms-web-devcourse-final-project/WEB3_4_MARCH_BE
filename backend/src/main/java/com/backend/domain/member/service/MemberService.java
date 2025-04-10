@@ -191,7 +191,7 @@ public class MemberService {
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
-    // 멤버 전환 메서드
+    // 임시 멤버를 일반 멤버로 전환 메서드
     @Transactional
     public void upgradeToUserRole(Long memberId) {
         Member member = getMemberEntity(memberId);

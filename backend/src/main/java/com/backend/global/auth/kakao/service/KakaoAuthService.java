@@ -10,14 +10,17 @@ import com.backend.global.auth.kakao.dto.LoginResponseDto;
 import com.backend.global.auth.kakao.util.JwtUtil;
 import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
+import com.backend.global.config.AdminWhitelistProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -48,6 +51,17 @@ public class KakaoAuthService {
     // 쿠키 관련 서비스 및 유틸
     private final CookieService cookieService;
 
+    // 관리자 계정 카카오 Id
+//    @Value("${admin.whitelist.kakaoIds:}")
+//    private Long[] adminKakaoIds;
+
+    // 관리자 계정 이메일
+//    @Value("${admin.whitelist.emailDomains:}")
+//    private String[] adminEmailDomains;
+
+    private final AdminWhitelistProperties adminWhitelistProperties;
+
+
     /**
      * 카카오 로그인 인가 요청 URL 반환
      */
@@ -58,6 +72,7 @@ public class KakaoAuthService {
     /**
      * 인가 코드를 통해 카카오로부터 토큰 발급받기
      */
+
     public KakaoTokenResponseDto getTokenFromKakao(String code) {
         return webClient.post()
                 .uri(kakaoAuthUtil.getKakaoLoginTokenUrl(code))
@@ -65,6 +80,23 @@ public class KakaoAuthService {
                 .bodyToMono(KakaoTokenResponseDto.class)
                 .block();
     }
+
+//    public KakaoTokenResponseDto getTokenFromKakao(String code) {
+//        // KakaoAuthUtil에서 토큰 발급 엔드포인트 URL만 반환하도록 수정
+//        String tokenUrl = kakaoAuthUtil.getKakaoTokenUrl(); // TOKEN_URL만 반환
+//
+//        return webClient.post()
+//                .uri(tokenUrl)
+//                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+//                .body(BodyInserters.fromFormData("grant_type", kakaoAuthUtil.getGrantType())
+//                        .with("client_id", kakaoAuthUtil.getClientId())
+//                        .with("redirect_uri", kakaoAuthUtil.getRedirectUri())
+//                        .with("code", code))
+//                .retrieve()
+//                .bodyToMono(KakaoTokenResponseDto.class)
+//                .block();
+//    }
+
 
     /**
      * 카카오 accessToken을 사용해 사용자 정보 조회
@@ -84,8 +116,10 @@ public class KakaoAuthService {
     /**
      * 카카오 인가 코드를 통해 로그인 또는 회원가입 처리 후 JWT 토큰 발급
      */
+
     // 회원 조회 및 회원가입
     // processLogin 메서드에 HttpServletRequest 추가하여 클라이언트 정보(IP, User-Agent)를 전달
+    @Transactional
     public LoginResponseDto processLogin(String code, HttpServletRequest request, HttpServletResponse response) {
         // 1. 인가 코드로 accessToken, refreshToken 발급받기
         KakaoTokenResponseDto kakaoTokenDto = getTokenFromKakao(code);
@@ -96,14 +130,50 @@ public class KakaoAuthService {
         KakaoUserInfoResponseDto kakaoUserInfo = getUserInfo(kakaoAccessToken);
         Long kakaoId = kakaoUserInfo.id();
 
+        // 관리자 화이트리스트에서 카카오 Id, 이메일 가져오기
+        List<Long> kakaoIds = adminWhitelistProperties.getKakaoIds();
+        List<String> emailDomains = adminWhitelistProperties.getEmailDomains();
+
         // 3. 해당 kakaoId가 등록된 사용자인지 확인 (회원인지 아닌지 확인)
         Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoId);
         boolean isRegistered = optionalMember.isPresent();
         Member member;
 
+        log.info("🧪 [admin list] kakaoIds={}", adminWhitelistProperties.getKakaoIds());
+        log.info("🧪 [admin list] emailDomains={}", adminWhitelistProperties.getEmailDomains());
+        log.info("🧪 [current user] kakaoId={}", kakaoId);
+
         if (isRegistered) {
-            // 3-1. 기존 회원 정보 조회
+            // 3-1. 이미 등록된 회원인 경우, 기존 회원 정보 조회
             member = optionalMember.get();
+            // **관리자 화이트리스트 조건을 재검사하여, 필요한 경우 관리자 역할로 업데이트**
+            boolean isAdmin = false;
+
+            // 카카오ID 화이트리스트 체크
+            if (kakaoIds != null && kakaoIds.contains(kakaoId)) {
+                isAdmin = true;
+                log.info("[KakaoAuthService] 관리자 ID 일치: kakaoId={} matched with whitelist", kakaoId);
+            }
+
+            // 이메일 화이트리스트 체크
+            String email = kakaoUserInfo.kakaoAccount().email();
+            if (email != null && emailDomains != null && emailDomains.contains(email.trim().toLowerCase())) {
+                isAdmin = true;
+                log.info("[KakaoAuthService] 관리자 이메일 일치: email={} matched with whitelist", email);
+            }
+
+            // 관리자 권한으로 변경
+            if (isAdmin && !member.getRole().equals(Role.ROLE_ADMIN)) {
+                member.updateRole(Role.ROLE_ADMIN); // Role 업데이트
+                memberRepository.saveAndFlush(member);
+                member = memberRepository.findById(member.getId()).orElseThrow();
+                log.info("[KakaoAuthService] 관리자 권한 반영 완료: memberId={}, Role={}", member.getId(), member.getRole());
+            }
+
+            if (member.getRole().equals(Role.ROLE_ADMIN)) {
+                log.info("[KakaoAuthService] 관리자 계정 로그인 성공: memberId={}", member.getId());
+            }
+
         } else {
             // 3-2. 신규 회원 → 아직 DB에는 등록하지 않음 (회원가입 전 단계)
             // 이후 /members/register 에서 최종 등록 예정
@@ -114,6 +184,26 @@ public class KakaoAuthService {
                     kakaoUserInfo.properties().nickname(),
                     Role.ROLE_TEMP_USER
             );
+
+            // 관리자 계정 조건: 카카오ID 또는 이메일이 관리자 목록에 있으면 관리자 권한 ROLE_ADMIN 부여
+            boolean isAdmin = false;
+            // 카카오ID 화이트리스트 체크
+            if (kakaoIds != null && kakaoIds.contains(kakaoId)) {
+                isAdmin = true;
+                log.info("[KakaoAuthService] 관리자 ID 일치: kakaoId={} matched with whitelist", kakaoId);
+            }
+
+
+            // 이메일 화이트리스트 체크
+            String email = kakaoUserInfo.kakaoAccount().email();
+            if (email != null && emailDomains != null && emailDomains.contains(email.trim().toLowerCase())) {
+                isAdmin = true;
+                log.info("[KakaoAuthService] 관리자 이메일 일치: email={} matched with whitelist", email);
+            }
+            // 관리자 계정으로 확인되면
+            if (isAdmin) {
+                member.updateRole(Role.ROLE_ADMIN); // 권한을 관리자로 변경
+            }
 
             memberRepository.save(member); // id 부여 목적
         }
@@ -141,6 +231,7 @@ public class KakaoAuthService {
         // 8. 응답 DTO 반환
         return LoginResponseDto.of(accessToken, kakaoId, isRegistered ? member.getId() : null, refreshToken, isRegistered);
     }
+
 
     /**
      * 카카오 리프레시 토큰을 통해 accessToken 재발급
