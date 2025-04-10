@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 관리자 전용 로그인 컨트롤러 클래스
+ */
 
-// 관리자 전용 로그인 기능
 @RestController
-@RequestMapping("/api/admin/auth")
+@RequestMapping("/api/auth/admin")
 public class AdminAuthController {
 
     private final AdminAuthService adminAuthService;
@@ -21,6 +23,7 @@ public class AdminAuthController {
         this.adminAuthService = adminAuthService;
     }
 
+    // 관리자 전용 로그인 엔드포인트
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDto> adminLogin(@RequestBody AdminLoginRequestDto request) {
         AdminLoginResponseDto responseDto = adminAuthService.processAdminLogin(request);

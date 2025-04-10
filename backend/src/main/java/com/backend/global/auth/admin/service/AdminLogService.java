@@ -7,6 +7,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+
+/**
+ * 관리자 작업 로그를 기록하는 서비스 클래스
+ */
+
 @Service
 public class AdminLogService {
 
