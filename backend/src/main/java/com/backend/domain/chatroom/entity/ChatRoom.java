@@ -51,7 +51,7 @@ public class ChatRoom {
     /**
      * 채팅창에서 현재 참여자(currentMemberId)를 제외한 다른 참여자(수신자)를 찾는 메서드입니다.
      *
-     * @param currentMemberId 현재 채팅창의 참여자 (삭제 요청자 포함)
+     * @param currentMember 현재 채팅창의 참여자 (삭제 요청자 포함)
      * @return 현재 참여자가 아닌 다른 참여자 (sender 또는 receiver)
      * @throws GlobalException 만약 currentMemberId가 sender나 receiver에 해당하지 않는 경우 예외를 발생시킵니다.
      */

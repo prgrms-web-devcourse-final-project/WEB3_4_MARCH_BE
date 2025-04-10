@@ -76,6 +76,8 @@ dependencies {
 
     // Spring Boot Actuator (헬스체크 및 모니터링)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 }
 
 tasks.named('test') {
