@@ -47,7 +47,6 @@ backend/env
 
 # .gitignore yml 로컬 프로필 설정
 **/application-local.yml
-src/main/resources/application-server.yml
 
 # 배포 설정 yml 파일
 src/main/resources/application-server.yml
