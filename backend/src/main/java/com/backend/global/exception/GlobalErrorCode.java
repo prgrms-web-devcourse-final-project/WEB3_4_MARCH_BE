@@ -63,7 +63,11 @@ public enum GlobalErrorCode {
     ALREADY_UNBLOCK(HttpStatus.BAD_REQUEST, 400-3, "이미 차단해제된 유저입니다."),
 
     // 권한 없는 유저 오류코드
-    TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다.");
+    TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다."),
+
+	// 회원추천 오류코드
+	NO_RECOMMENDATION_USER(HttpStatus.NOT_FOUND, 404, "추천할 사용자가 없습니다.");
+
 
 
     private final HttpStatus httpStatus;

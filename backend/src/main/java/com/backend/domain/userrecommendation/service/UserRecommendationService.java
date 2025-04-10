@@ -32,7 +32,6 @@ public class UserRecommendationService {
     @Transactional
     public List<RecommendedUserDto> generateRecommendations(Member me) {
 
-
         // 차단 유저 ID 목록 조회
         List<Long> blockedUserIds = blockUserRepository.findBlockedUserIds(me);
 
@@ -58,6 +57,10 @@ public class UserRecommendationService {
                 .limit(10)
                 .toList();
 
+        if (selected.isEmpty()) {
+            throw new GlobalException(GlobalErrorCode.NO_RECOMMENDATION_USER);
+        }
+
         List<UserRecommendation> records = selected.stream()
                 .map(user -> UserRecommendation.builder()
                         .receivingUser(me)
@@ -74,6 +77,29 @@ public class UserRecommendationService {
                         .latitude(user.getLatitude())
                         .longitude(user.getLongitude())
                         .build())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecommendedUserDto> getRecommendedUsers(Member me) {
+
+        LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfToday = startOfToday.plusDays(1);
+
+        List<UserRecommendation> todayRecommendations =
+                userRecommendationRepository
+                        .findByReceivingUserAndRecommendedDateBetween(me, startOfToday, endOfToday);
+
+        return todayRecommendations.stream()
+                .map(record -> {
+                    Member user = record.getRecommendedUser();
+                    return RecommendedUserDto.builder()
+                            .id(user.getId())
+                            .nickname(user.getNickname())
+                            .latitude(user.getLatitude())
+                            .longitude(user.getLongitude())
+                            .build();
+                })
                 .toList();
     }
 
