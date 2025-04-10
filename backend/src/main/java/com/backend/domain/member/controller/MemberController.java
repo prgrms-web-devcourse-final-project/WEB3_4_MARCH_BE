@@ -3,6 +3,8 @@ package com.backend.domain.member.controller;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.*;
 import com.backend.domain.member.service.MemberService;
+import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
+import com.backend.domain.userkeyword.service.UserKeywordService;
 import com.backend.global.auth.kakao.service.CookieService;
 import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.exception.GlobalErrorCode;
@@ -30,6 +32,7 @@ public class MemberController {
     private final TokenProvider tokenProvider;
     private final CookieService cookieService;
     private final ObjectMapper objectMapper;
+    private final UserKeywordService userKeywordService;
 
     /**
      * 회원 가입을 처리하는 엔드포인트이다.
@@ -52,6 +55,7 @@ public class MemberController {
     public ResponseEntity<GenericResponse<MemberRegisterResponseDto>> registerMember(
             @RequestPart("member") MemberRegisterRequestDto requestDto,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
+            @RequestPart("keywords") UserKeywordSaveRequest userKeywordRequest,
             HttpServletResponse response) throws IOException {
 
         if (files == null || files.length < 1 || files.length > 5) {
@@ -68,15 +72,19 @@ public class MemberController {
         // 3. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
         MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());
 
-        // 4. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
+        // 4. 선택한 키워드 저장
+        userKeywordService.saveUserKeywords(memberInfo.id(), userKeywordRequest.getKeywordIds());
+        memberService.setRole(memberInfo.id());
+
+        // 5. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
         String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
         String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
 
-        // 5. 새로 발급된 토큰을 쿠키에 저장.
+        // 6. 새로 발급된 토큰을 쿠키에 저장.
         cookieService.addAccessTokenToCookie(accessToken, response);
         cookieService.addRefreshTokenToCookie(refreshToken, response);
 
-        // 6. 응답 DTO 생성
+        // 7. 응답 DTO 생성
         MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
 
 

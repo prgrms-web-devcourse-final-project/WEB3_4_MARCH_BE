@@ -89,12 +89,20 @@ public class MemberService {
                     requestDto.longitude()          // 추가 정보: 경도
                 );
                 redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
-                member.updateRole(Role.ROLE_USER);
                 return MemberInfoDto.from(member);
             } else {
                 throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
             }
         }
+    }
+
+    @Transactional
+    public void setRole(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
+        );
+
+        member.updateRole(Role.ROLE_USER);
     }
 
     // 회원 정보 수정
