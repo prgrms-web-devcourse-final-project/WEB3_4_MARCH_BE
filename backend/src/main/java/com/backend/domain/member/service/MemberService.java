@@ -39,9 +39,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberInfoDto getMemberInfo(Long memberId) {
         return memberRepository.findById(memberId)
-                .filter(member -> !member.isDeleted())
-                .map(MemberInfoDto::from)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+            .filter(member -> !member.isDeleted())
+            .map(MemberInfoDto::from)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     // 닉네임으로 조회
@@ -193,7 +193,7 @@ public class MemberService {
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
-    // 멤버 전환 메서드
+    // 임시 멤버를 일반 멤버로 전환 메서드
     @Transactional
     public void upgradeToUserRole(Long memberId) {
         Member member = getMemberEntity(memberId);

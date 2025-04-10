@@ -17,8 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-;
-
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -57,8 +55,10 @@ public class ImageService {
      */
     @Transactional
     public void deleteImage(Long memberId, Long imageId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+
+        Member member;
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         Image image = imageRepository.findById(imageId)
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.IMAGE_NOT_FOUND));

@@ -36,13 +36,16 @@ public class TokenProvider {
     private String secret;
 
     @Value("${spring.security.jwt.access-token.expiration}")
-    private long accessTokenExpiration; // ms
+    private long accessTokenExpiration; // ms (30분)
 
     @Value("${spring.security.jwt.refresh-token.expiration}")
     @Getter
-    private long refreshTokenExpiration; // ms
+    private long refreshTokenExpiration; // ms (14일)
 
     private Key signingKey;
+
+    // 관리자용 토큰 TTL : 365일
+    private static final long adminTokenExpiration = 31536000000L; // ms (365일)
 
     @PostConstruct
     protected void init() {
@@ -50,8 +53,13 @@ public class TokenProvider {
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 액세스 토큰 생성 (30분 TTL)
+    // 액세스 토큰 생성
     public String createAccessToken(Long memberId, String role) {
+        // 관리자 계정이면, TTL 365일로 설정
+        if ("ROLE_ADMIN".equals(role)) {
+            return createToken(memberId, role, Duration.ofMillis(adminTokenExpiration));
+        }
+        // 일반 사용자면, TTL 30분으로 설정
         return createToken(memberId, role, Duration.ofMillis(accessTokenExpiration));
     }
 
@@ -73,8 +81,12 @@ public class TokenProvider {
     // JWT 생성 (공통 로직)
     public String createToken(Long memberId, String role, Duration ttl) {
         Date now = new Date();
+
+        boolean isAdmin = "ROLE_ADMIN".equals(role); // 관리자 계정일 경우
+
         var builder = Jwts.builder()
                 .claim("id", memberId)
+                .claim("isAdmin", isAdmin) // 관리자 계정 여부를 클레임으로 추가
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ttl.toMillis()))
                 .signWith(signingKey, SignatureAlgorithm.HS256);

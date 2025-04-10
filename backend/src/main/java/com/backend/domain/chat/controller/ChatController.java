@@ -6,6 +6,7 @@ import com.backend.domain.chat.service.chat.ChatService;
 import com.backend.domain.chatroom.service.ChatRoomService;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.global.auth.kakao.util.SecurityUtil;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
@@ -53,11 +54,11 @@ public class ChatController {
             @RequestParam(defaultValue = "20") int size
     ) {
 
-//        // 로그인 사용자 ID 추출
-//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        // 로그인 사용자 ID 추출
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
-        // TODO : 테스트 끝나고 수정
-        Long currentMemberId = 1L;
+        // 채팅방 입장 시, 해당 사용자의 안 읽은 메시지를 읽음 처리
+        chatService.markMessageAsRead(roomId, currentMemberId);
 
         // 최신순으로 조회
         Pageable pageable = PageRequest.of(page, size, Sort.by("sendTime").descending());
@@ -74,11 +75,9 @@ public class ChatController {
      */
     @MessageMapping("/{roomId}/message")
     public void sendMessage(@Payload ChatMessageRequest chatMessageRequest) {
-//        // 로그인 사용자 ID 추출
-//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
-        // TODO : 테스트 끝나고 수정
-        Long currentMemberId = 1L;
+        // 로그인 사용자 ID 추출
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
         Member sender = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
