@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.util.Optional;
 
 /**
@@ -47,6 +47,15 @@ public class KakaoAuthService {
 
     // 쿠키 관련 서비스 및 유틸
     private final CookieService cookieService;
+
+    // 관리자 계정 카카오 Id
+    @Value("${admin.whitelist.kakaoIds}")
+    private Long[] adminKakaoIds;
+
+    // 관리자 계정 이메일
+    @Value("${admin.whitelist.emailDomains}")
+    private String[] adminEmailDomains;
+
 
     /**
      * 카카오 로그인 인가 요청 URL 반환
@@ -114,6 +123,30 @@ public class KakaoAuthService {
                     kakaoUserInfo.properties().nickname(),
                     Role.ROLE_TEMP_USER
             );
+
+            // 관리자 계정 조건: 카카오ID 또는 이메일이 관리자 목록에 있으면 관리자 권한 ROLE_ADMIN 부여
+            boolean isAdmin = false;
+            // 카카오ID 화이트리스트 체크
+            for (Long adminId : adminKakaoIds) {
+                if (kakaoId.equals(adminId)) {
+                    isAdmin = true;
+                    break;
+                }
+            }
+            // 이메일 화이트리스트 체크
+            String email = member.getEmail();
+            if (email != null) {
+                for (String domain : adminEmailDomains) {
+                    if (email.trim().toLowerCase().endsWith("@" + domain.trim().toLowerCase())) {
+                        isAdmin = true;
+                        break;
+                    }
+                }
+            }
+            // 관리자 계정으로 확인되면
+            if (isAdmin) {
+                member.updateRole(Role.ROLE_ADMIN); // 권한을 관리자로 변경
+            }
 
             memberRepository.save(member); // id 부여 목적
         }
