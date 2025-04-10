@@ -38,7 +38,7 @@ public class ChatRequestController {
     /**
      * 클라이언트에서 수락/거절 을 누를시 호출될 api
      *
-     * @param requestId 처리할 ChatRequest ID
+     * @param requestId 처리할 ChatRequest테이블 ID
      * @param accept true면 수락, false면 거절
      * @return 처리 결과 메시지
      */
