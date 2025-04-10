@@ -48,6 +48,26 @@ public class KakaoAuthUtil {
                 .toUriString();
     }
 
+    // 토큰 발급 엔드포인트 URL (쿼리 파라미터 없이 기본 URL만 반환)
+    public String getKakaoTokenUrl() {
+        return TOKEN_URI;
+    }
+
+    // grant type 반환 (예: "authorization_code")
+    public String getGrantType() {
+        return GRANT_TYPE;
+    }
+
+    // client id 반환
+    public String getClientId() {
+        return CLIENT_ID;
+    }
+
+    // redirect URI 반환
+    public String getRedirectUri() {
+        return REDIRECT_URI;
+    }
+
     // 인가 코드로 카카오 액세스 토큰을 요청하는 URL
     public String getKakaoLoginTokenUrl(String code) {
         return UriComponentsBuilder.fromUriString(TOKEN_URI)

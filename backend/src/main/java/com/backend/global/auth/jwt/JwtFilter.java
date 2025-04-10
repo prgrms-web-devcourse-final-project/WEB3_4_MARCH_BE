@@ -51,6 +51,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 if (Boolean.TRUE.equals(isAdmin)) {
                     // 2-1. 관리자 토큰인 경우, 일반 토큰 검증을 우회하고 인증 객체 설정
+                    // 관리자 토큰인 경우 별도 로그 출력
+                    log.info("[JwtFilter] 관리자 토큰 감지: 관리자 계정으로 인증 처리함.");
                     Authentication authentication = jwtUtil.getAuthentication(token);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     log.info("🔑 [JwtFilter] 관리자 토큰으로 인증 정보를 설정함.");

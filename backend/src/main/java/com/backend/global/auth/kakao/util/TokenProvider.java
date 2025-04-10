@@ -81,8 +81,12 @@ public class TokenProvider {
     // JWT 생성 (공통 로직)
     public String createToken(Long memberId, String role, Duration ttl) {
         Date now = new Date();
+
+        boolean isAdmin = "ROLE_ADMIN".equals(role); // 관리자 계정일 경우
+
         var builder = Jwts.builder()
                 .claim("id", memberId)
+                .claim("isAdmin", isAdmin) // 관리자 계정 여부를 클레임으로 추가
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ttl.toMillis()))
                 .signWith(signingKey, SignatureAlgorithm.HS256);

@@ -52,6 +52,7 @@ public class Member extends BaseEntity {
 
     private Double longitude;
 
+    @Column(length = 20)
     @Enumerated(EnumType.STRING)
     private Role role; // 사용자의 권한 종류
 
