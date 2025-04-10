@@ -65,6 +65,9 @@ public enum GlobalErrorCode {
     // 권한 없는 유저 오류코드
     TEMP_USER_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "추가 정보 입력이 필요합니다."),
 
+	// 알림 오류코드
+	NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "자신의 알림만 처리할 수 있습니다.");
+  
 	// 회원추천 오류코드
 	NO_RECOMMENDATION_USER(HttpStatus.NOT_FOUND, 404, "추천할 사용자가 없습니다.");
 
