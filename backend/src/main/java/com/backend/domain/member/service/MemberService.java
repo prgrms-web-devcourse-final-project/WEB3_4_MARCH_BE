@@ -14,6 +14,7 @@ import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.userkeyword.dto.response.UserKeywordResponse;
 import com.backend.domain.userkeyword.service.UserKeywordService;
 import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
@@ -45,10 +46,10 @@ public class MemberService {
     // 서비스 내부 조회/리스트 반환용 (Service → API/Query)
     @Transactional(readOnly = true)
     public MemberInfoDto getMemberInfoForInternal(Long memberId) {
-        return memberRepository.findById(memberId)
-                .filter(member -> !member.isDeleted())
-                .map(MemberInfoDto::from)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+        Member member = getMemberEntity(memberId);
+
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
+        return MemberInfoDto.from(member, keywords);
     }
 
     // 다른 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
@@ -75,38 +76,21 @@ public class MemberService {
         }
 
         // 키워드 리스트
-        List<Keyword> keywords = userKeywordService.getUserKeywords(memberId).stream()
-                .map(dto -> Keyword.ofKeyword(dto.getId(), dto.getName()))
-                .toList();
-
-        // 기본 프로필 정보 DTO 생성
-        MemberResponseDto memberResponseDto = MemberResponseDto.from(member);
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
 
         // 응답 DTO 생성하여 반환
-        return new MemberResponseDto(
-                memberResponseDto.id(),
-                memberResponseDto.nickname(),
-                memberResponseDto.gender(),
-                memberResponseDto.age(),
-                memberResponseDto.height(),
-                memberResponseDto.profileImage(),
-                memberResponseDto.images(),
-                memberResponseDto.introduction(),
-                keywords,
-                liked,
-                chatRequestStatus,
-                memberResponseDto.blockStatus(),
-                memberResponseDto.isDeleted(),
-                memberResponseDto.latitude(),
-                memberResponseDto.longitude()
-        );
+        return MemberResponseDto.from(member, keywords, liked, chatRequestStatus);
+
     }
 
     // 닉네임으로 조회
     public List<MemberResponseDto> searchByNickname(String nickname) {
         return memberRepository.findByNicknameContaining(nickname).stream()
                 .filter(member -> !member.isDeleted())
-                .map(MemberResponseDto::from)
+                .map(member -> {
+                    List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(member.getId());
+                    return MemberResponseDto.from(member, keywords, false, null);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -134,7 +118,6 @@ public class MemberService {
         if (member.isDeleted()) {
             member.rejoin(requestDto);
             member.updateRole(Role.ROLE_USER);
-            return MemberInfoDto.from(member);
         } else {
             // 임시 회원인지 현재 회원인지 판별 여부
             if (member.getRole() == Role.ROLE_TEMP_USER) {
@@ -150,11 +133,14 @@ public class MemberService {
                         requestDto.introduction()
                 );
                 redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
-                return MemberInfoDto.from(member);
             } else {
                 throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
             }
         }
+
+        // 키워드 리스트 포함해서 DTO 반환
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(member.getId());
+        return MemberInfoDto.from(member, keywords);
     }
 
     @Transactional
@@ -212,7 +198,11 @@ public class MemberService {
             userKeywordService.updateUserKeywords(memberId, keywordIds);
         }
 
-        return MemberResponseDto.from(member);
+        // 5. 최신 키워드 조회 및 응답 DTO 반환
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
+
+        // 팩토리 메서드로 응답 DTO 반환
+        return MemberResponseDto.from(member, keywords, false, null);
     }
 
     // 위치 정보 갱신 (프론트에서 버튼을 누르면 사용자 위치정보 최신화하여 갱신)
@@ -231,7 +221,10 @@ public class MemberService {
                 member.getIntroduction()
         );
 
-        return MemberResponseDto.from(member);
+        // 키워드 리스트 포함해서 DTO 반환
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
+
+        return MemberResponseDto.from(member, keywords, false, null);
     }
 
     // 회원 탈퇴 처리
@@ -243,7 +236,10 @@ public class MemberService {
         // redis내에서 회원 위치 정보삭제
         redisGeoService.removeLocation(memberId);
 
-        return MemberResponseDto.from(member);
+        // 키워드 리스트 포함해서 DTO 반환
+        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
+
+        return MemberResponseDto.from(member, keywords, false, null);
     }
 
     // 닉네임 중복 검사
