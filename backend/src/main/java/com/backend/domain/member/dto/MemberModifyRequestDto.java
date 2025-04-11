@@ -27,6 +27,8 @@ public record MemberModifyRequestDto(
 
         // 위도, 경도 정보
         Double latitude,
-        Double longitude
+        Double longitude,
+
+        String introduction
 ) {
 }

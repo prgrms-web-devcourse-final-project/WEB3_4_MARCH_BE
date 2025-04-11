@@ -1,13 +1,5 @@
 package com.backend.domain.member.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.MemberInfoDto;
@@ -20,8 +12,14 @@ import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +37,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberInfoDto getMemberInfo(Long memberId) {
         return memberRepository.findById(memberId)
-            .filter(member -> !member.isDeleted())
-            .map(MemberInfoDto::from)
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+                .filter(member -> !member.isDeleted())
+                .map(MemberInfoDto::from)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
     // 닉네임으로 조회
@@ -70,7 +68,7 @@ public class MemberService {
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부
         Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         // 2. 탈퇴한 회원이면 복구
         if (member.isDeleted()) {
@@ -81,14 +79,15 @@ public class MemberService {
             // 임시 회원인지 현재 회원인지 판별 여부
             if (member.getRole() == Role.ROLE_TEMP_USER) {
                 member.updateProfile(
-                    member.getNickname(),           // 기존 닉네임 유지
-                    requestDto.age(),               // 추가 정보: 나이
-                    requestDto.height(),            // 추가 정보: 키
-                    requestDto.gender(),            // 추가 정보: 성별
-                    member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
-                    member.isChatAble(),           // 기존 chatAble 유지
-                    requestDto.latitude(),          // 추가 정보: 위도
-                    requestDto.longitude()          // 추가 정보: 경도
+                        member.getNickname(),           // 기존 닉네임 유지
+                        requestDto.age(),               // 추가 정보: 나이
+                        requestDto.height(),            // 추가 정보: 키
+                        requestDto.gender(),            // 추가 정보: 성별
+                        member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
+                        member.isChatAble(),           // 기존 chatAble 유지
+                        requestDto.latitude(),          // 추가 정보: 위도
+                        requestDto.longitude(),          // 추가 정보: 경도
+                        member.getIntroduction()
                 );
                 redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 return MemberInfoDto.from(member);
@@ -140,7 +139,8 @@ public class MemberService {
                 member.getImages(),
                 member.isChatAble(),
                 dto.latitude() != null ? dto.latitude() : member.getLatitude(),
-                dto.longitude() != null ? dto.longitude() : member.getLongitude()
+                dto.longitude() != null ? dto.longitude() : member.getLongitude(),
+                dto.introduction()
         );
 
         return MemberResponseDto.from(member);
@@ -158,7 +158,8 @@ public class MemberService {
                 member.getImages(),
                 member.isChatAble(),
                 latitude,
-                longitude
+                longitude,
+                member.getIntroduction()
         );
 
         return MemberResponseDto.from(member);
