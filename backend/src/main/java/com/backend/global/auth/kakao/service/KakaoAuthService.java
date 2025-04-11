@@ -11,6 +11,8 @@ import com.backend.global.auth.kakao.util.JwtUtil;
 import com.backend.global.auth.kakao.util.KakaoAuthUtil;
 import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.config.AdminWhitelistProperties;
+import com.backend.global.exception.GlobalErrorCode;
+import com.backend.global.exception.GlobalException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
@@ -61,7 +64,6 @@ public class KakaoAuthService {
 
     private final AdminWhitelistProperties adminWhitelistProperties;
 
-
     /**
      * 카카오 로그인 인가 요청 URL 반환
      */
@@ -73,29 +75,40 @@ public class KakaoAuthService {
      * 인가 코드를 통해 카카오로부터 토큰 발급받기
      */
 
-    public KakaoTokenResponseDto getTokenFromKakao(String code) {
-        return webClient.post()
-                .uri(kakaoAuthUtil.getKakaoLoginTokenUrl(code))
-                .retrieve()
-                .bodyToMono(KakaoTokenResponseDto.class)
-                .block();
-    }
-
 //    public KakaoTokenResponseDto getTokenFromKakao(String code) {
-//        // KakaoAuthUtil에서 토큰 발급 엔드포인트 URL만 반환하도록 수정
-//        String tokenUrl = kakaoAuthUtil.getKakaoTokenUrl(); // TOKEN_URL만 반환
-//
 //        return webClient.post()
-//                .uri(tokenUrl)
-//                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-//                .body(BodyInserters.fromFormData("grant_type", kakaoAuthUtil.getGrantType())
-//                        .with("client_id", kakaoAuthUtil.getClientId())
-//                        .with("redirect_uri", kakaoAuthUtil.getRedirectUri())
-//                        .with("code", code))
+//                .uri(kakaoAuthUtil.getKakaoLoginTokenUrl(code))
 //                .retrieve()
 //                .bodyToMono(KakaoTokenResponseDto.class)
 //                .block();
 //    }
+
+    public KakaoTokenResponseDto getTokenFromKakao(String code) {
+        // 인가 코드 로그 출력
+        log.info("[카카오 로그인] 전달받은 인가 코드: {}", code);
+
+        // KakaoAuthUtil에서 토큰 발급 엔드포인트 URL만 반환하도록 수정
+        String tokenUrl = kakaoAuthUtil.getKakaoTokenUrl(); // TOKEN_URL만 반환
+
+        KakaoTokenResponseDto kakaoTokenDto = webClient.post()
+                .uri(tokenUrl)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("grant_type", kakaoAuthUtil.getGrantType())
+                        .with("client_id", kakaoAuthUtil.getClientId())
+                        .with("redirect_uri", kakaoAuthUtil.getRedirectUri())
+                        .with("code", code))
+                .retrieve()
+                .bodyToMono(KakaoTokenResponseDto.class)
+                .block();
+
+        // 토큰 응답 null 체크
+        if (kakaoTokenDto == null) {
+            log.error("❌ [카카오 로그인] KakaoTokenResponseDto가 null입니다. 토큰 발급 실패");
+            throw new GlobalException(GlobalErrorCode.KAKAO_LOGIN_FAILED, "카카오 토큰 발급 실패");
+        }
+
+        return kakaoTokenDto;
+    }
 
 
     /**

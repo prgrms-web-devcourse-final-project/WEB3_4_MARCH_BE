@@ -16,6 +16,8 @@ public enum GlobalErrorCode {
 	// 카카오 로그인 에러
 	KAKAO_LOGIN_FAILED(HttpStatus.BAD_REQUEST, 400, "카카오 로그인 중 에러가 발생했습니다."),
 
+	// 회원가입 도중 에러
+	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "회원가입 중 오류가 발생했습니다."),
 
 	// 이미지 도메인 세부 에러
 	IMAGE_COUNT_INVALID(HttpStatus.BAD_REQUEST, 400, "이미지는 1장 이상 5장 이하로 등록해야 합니다."),
@@ -35,7 +37,7 @@ public enum GlobalErrorCode {
 	CHATROOM_FORBIDDEN(HttpStatus.FORBIDDEN, 403, "채팅방에 접근할 수 없습니다."),
 
 	// 멤버 오류코드
-	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "해당 유저를 찾을 수 없습니다."),
+	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "해당 멤버를 찾을 수 없습니다."),
 	DUPLICATE_MEMBER(HttpStatus.CONFLICT, 409, "이미 등록된 회원입니다."),
 
 	// 정리 필요
@@ -48,7 +50,6 @@ public enum GlobalErrorCode {
 	TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 401, "토큰이 만료되었습니다."),
 	UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, 401, "지원하지 않는 JWT 입니다."),
 	REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "리프레시 토큰이 존재하지 않습니다."),
-	MEMBER_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "멤버를 찾을 수 없습니다."),
 	AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, 401, "인증된 사용자 정보를 가져올 수 없습니다."),
 	TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "Authorization 헤더가 존재하지 않거나 형식이 올바르지 않습니다."),
 

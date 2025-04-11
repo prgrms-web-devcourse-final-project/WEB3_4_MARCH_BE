@@ -2,7 +2,6 @@ package com.backend.domain.member.controller;
 
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.*;
-import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
 import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
 import com.backend.domain.userkeyword.service.UserKeywordService;
@@ -66,7 +65,11 @@ public class MemberController {
         }
 
         // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
-        MemberInfoDto memberInfo = memberService.registerMember(requestDto);
+        MemberInfoDto memberInfo = memberService.registerMember(
+                requestDto,
+                List.of(files),
+                userKeywordRequest.getKeywordIds(),
+                response);
 
         // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
         //    여기서는 List<MultipartFile>가 필요하므로 배열을 List로 변환합니다.
@@ -108,8 +111,7 @@ public class MemberController {
     public ResponseEntity<GenericResponse<MemberResponseDto>> getMyProfile(
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, customUserDetails.getMemberId());
-        Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
-        System.out.println("현재 유저 역할 : " + member.getRole());
+
         return ResponseEntity.ok().body(GenericResponse.of(responseDto, "자신의 프로필 조회가 완료되었습니다."));
     }
 
@@ -126,14 +128,15 @@ public class MemberController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long id,
             @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart(value = "keywordIds", required = false) UserKeywordSaveRequest keywordRequest,
             @RequestPart("keepImageId") String keepIdsJson,
             @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {
-        });
-        Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
-        System.out.println(member.getRole());
-        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() { });
+
+        MemberResponseDto res = memberService.modifyMember(id, dto, keywordRequest, keepIds, newImages);
+
+
         return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 

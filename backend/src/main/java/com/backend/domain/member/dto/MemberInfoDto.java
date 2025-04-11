@@ -3,6 +3,7 @@ package com.backend.domain.member.dto;
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
+import com.backend.domain.userkeyword.dto.response.UserKeywordResponse;
 import lombok.Builder;
 
 import java.util.List;
@@ -26,9 +27,11 @@ public record MemberInfoDto(
         List<ImageResponseDto> images,
         Double latitude,
         Double longitude,
-        Role role
+        Role role,
+        String introduction,
+        List<UserKeywordResponse> keywords
 ) {
-    public static MemberInfoDto from(Member member) {
+    public static MemberInfoDto from(Member member, List<UserKeywordResponse> keywords) {
         return new MemberInfoDto(
                 member.getId(),
                 member.getKakaoId(),
@@ -43,7 +46,9 @@ public record MemberInfoDto(
                         .collect(Collectors.toList()),
                 member.getLatitude(),
                 member.getLongitude(),
-                member.getRole()
+                member.getRole(),
+                member.getIntroduction(),
+                keywords
         );
     }
 }
