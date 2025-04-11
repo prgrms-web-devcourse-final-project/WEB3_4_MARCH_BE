@@ -14,6 +14,10 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword, Long> 
     @Query("DELETE FROM UserKeyword uk WHERE uk.member.id = :memberId AND uk.keyword.category.id = :categoryId")
     void deleteByMemberIdAndKeywordCategoryId(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 
+    @Modifying
+    @Query("DELETE FROM UserKeyword uk WHERE uk.member.id = :memberId")
+    void deleteAllKeywordsByMemberId(@Param("memberId") Long memberId); // 프로필의 키워드를 수정할 때 사용, memberId에 해당하는 모든 키워드를 삭제함
+
     List<UserKeyword> findAllByMemberId(Long memberId);
 
 

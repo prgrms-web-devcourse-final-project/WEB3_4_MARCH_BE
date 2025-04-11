@@ -37,6 +37,8 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String gender;
 
+    private String introduction; // 소개글
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> images;
 
@@ -60,8 +62,6 @@ public class Member extends BaseEntity {
     @Builder.Default
     private MemberStatus status = MemberStatus.ACTIVE;
 
-
-    // Entity에 탈퇴 여부 필드 추가 (isDeleted)
     // 회원 탈퇴(soft delete)
     @Column(nullable = false)
     @Builder.Default
@@ -83,7 +83,7 @@ public class Member extends BaseEntity {
 
     public void updateProfile(String nickname, Integer age, Integer height, String gender,
                               List<Image> images, Boolean chatAble,
-                              Double latitude, Double longitude) {
+                              Double latitude, Double longitude, String introduction) {
         this.nickname = nickname;
         this.age = age;
         this.height = height;
@@ -92,7 +92,9 @@ public class Member extends BaseEntity {
         this.chatAble = chatAble;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.introduction = introduction;
     }
+
 
     // 회원 탈퇴(soft delete)
     // 회원 탈퇴 시 상태 "WITHDRAWN"으로 변경
@@ -101,7 +103,7 @@ public class Member extends BaseEntity {
         this.status = MemberStatus.WITHDRAWN;;
     }
 
-    // 관리자 차단 시 상태 변경 (getStatus() 메서드는 Lombok의 @Getter로 자동 생성됨)
+    // 관리자 차단 시 상태 변경
     public void block() {
         this.status = MemberStatus.BLOCKED;
     }
@@ -138,5 +140,10 @@ public class Member extends BaseEntity {
     @Override
     public int hashCode() {
         return 31;
+    }
+
+    @Transient
+    public Boolean getBlockStatus() {
+        return this.status != null && this.status.equals(MemberStatus.BLOCKED);
     }
 }

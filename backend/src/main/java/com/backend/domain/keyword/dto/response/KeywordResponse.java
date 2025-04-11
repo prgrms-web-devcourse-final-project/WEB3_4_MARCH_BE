@@ -22,8 +22,4 @@ public class KeywordResponse {
                 .name(keyword.getName())
                 .build();
     }
-
-
-
-
 }

@@ -24,6 +24,7 @@ public class UserKeywordService {
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
 
+    // 회원가입시 사용하는 메서드 (유저가 회원가입시 선택한 키워드 단순 저장)
     @Transactional
     public void saveUserKeywords(Long userId, List<Long> keywordIds) {
         Member loginUser = memberRepository.findById(userId).orElseThrow(
@@ -34,7 +35,9 @@ public class UserKeywordService {
 
         for (Keyword keyword : keywords) {
             KeywordCategory category = keyword.getCategory();
+            // 단일 선택해야만 되는 카테고리인 경우
             if (!category.isMultipleChoice()) {
+                // 기존 키워드 삭제
                 userKeywordRepository.deleteByMemberIdAndKeywordCategoryId(userId, category.getId());
             }
         }
@@ -45,6 +48,26 @@ public class UserKeywordService {
                     .keyword(keyword)
                     .build();
 
+            userKeywordRepository.save(userKeyword);
+        }
+    }
+
+    // 회원정보 수정(업데이트)에서 사용하는 메서드
+    @Transactional
+    public void updateUserKeywords(Long userId, List<Long> keywordIds) {
+        Member member = memberRepository.findById(userId).orElseThrow(
+                () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
+        );
+
+        // 회원 정보 수정 시에는 기존에 선택한 키워드 전체 삭제 후 재등록
+        userKeywordRepository.deleteAllKeywordsByMemberId(userId);
+
+        List<Keyword> keywords = keywordRepository.findAllById(keywordIds);
+        for (Keyword keyword : keywords) {
+            UserKeyword userKeyword = UserKeyword.builder()
+                    .member(member)
+                    .keyword(keyword)
+                    .build();
             userKeywordRepository.save(userKeyword);
         }
     }

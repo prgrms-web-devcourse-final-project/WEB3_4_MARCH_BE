@@ -1,28 +1,7 @@
 package com.backend.domain.member.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.domain.image.service.PresignedService;
-import com.backend.domain.member.dto.MemberInfoDto;
-import com.backend.domain.member.dto.MemberModifyRequestDto;
-import com.backend.domain.member.dto.MemberRegisterRequestDto;
-import com.backend.domain.member.dto.MemberRegisterResponseDto;
-import com.backend.domain.member.dto.MemberResponseDto;
+import com.backend.domain.member.dto.*;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
 import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
@@ -35,9 +14,16 @@ import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,7 +55,7 @@ public class MemberController {
      * @throws GlobalException 이미지 파일 수가 1장 미만이거나 5장을 초과할 경우 IMAGE_COUNT_INVALID 오류 발생
      */
     @PostMapping("/register")
-    public ResponseEntity<GenericResponse<MemberRegisterResponseDto>> registerMember(
+    public ResponseEntity<GenericResponse<MemberRegisterResponseDto>> register(
             @RequestPart("member") MemberRegisterRequestDto requestDto,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
             @RequestPart("keywords") UserKeywordSaveRequest userKeywordRequest,
@@ -91,7 +77,7 @@ public class MemberController {
         memberService.setRole(memberInfo.id());
 
         // 4. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
-        MemberInfoDto updatedInfo = memberService.getMemberInfo(memberInfo.id());
+        MemberInfoDto updatedInfo = memberService.getMemberInfoForInternal(memberInfo.id());
 
         // 5. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
         String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
@@ -108,57 +94,47 @@ public class MemberController {
         return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
     }
 
-    // 회원 정보 조회
+    // 다른 멤버 정보 조회
     // 클라이언트(프론트엔드)에 회원 정보 응답할 때 사용
     @GetMapping("/{memberId}")
-    public ResponseEntity<GenericResponse<MemberInfoDto>> getMemberInfo(@PathVariable Long memberId) {
-        MemberInfoDto responseDto = memberService.getMemberInfo(memberId);
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 조회가 완료되었습니다."));
+    public ResponseEntity<GenericResponse<MemberResponseDto>> getMemberProfile(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                               @PathVariable Long memberId) {
+        MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, memberId);
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "회원 프로필 조회가 완료되었습니다."));
     }
 
     // 내 정보 조회
     @GetMapping("/me")
-    public ResponseEntity<GenericResponse<MemberInfoDto>> getMyinfo(
-        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        MemberInfoDto responseDto = memberService.getMemberInfo(customUserDetails.getMemberId());
+    public ResponseEntity<GenericResponse<MemberResponseDto>> getMyProfile(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, customUserDetails.getMemberId());
         Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
         System.out.println("현재 유저 역할 : " + member.getRole());
-        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "자신의 회원 정보 조회가 완료되었습니다."));
+        return ResponseEntity.ok().body(GenericResponse.of(responseDto, "자신의 프로필 조회가 완료되었습니다."));
     }
 
     // 닉네임으로 회원 검색
     @GetMapping("/search")
-    public ResponseEntity<GenericResponse<List<MemberInfoDto>>> searchMembersByNickname(@RequestParam String nickname) {
-        List<MemberInfoDto> members = memberService.searchByNickname(nickname);
+    public ResponseEntity<GenericResponse<List<MemberResponseDto>>> searchMembersByNickname(@RequestParam String nickname) {
+        List<MemberResponseDto> members = memberService.searchByNickname(nickname);
         return ResponseEntity.ok().body(GenericResponse.of(members, "회원 검색이 완료되었습니다."));
     }
 
     // 회원 정보 수정
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMemberInfo(
-        @PathVariable Long id,
-        @RequestPart("member") MemberModifyRequestDto dto,
-        @RequestPart("keepImageId") String keepIdsJson,
-        @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long id,
+            @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart("keepImageId") String keepIdsJson,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
-        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
-        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
-    }
-
-    // 내 정보 수정
-    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMyinfo(
-        @AuthenticationPrincipal CustomUserDetails customUserDetails,
-        @RequestPart("member") MemberModifyRequestDto dto,
-        @RequestPart("keepImageId") String keepIdsJson,
-        @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
-
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {
+        });
         Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
         System.out.println(member.getRole());
-        MemberResponseDto res = memberService.modifyMember(customUserDetails.getMemberId(), dto, keepIds, newImages);
-        return ResponseEntity.ok(GenericResponse.of(res, "내 정보 수정 완료"));
+        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 
     // 닉네임 중복 검사

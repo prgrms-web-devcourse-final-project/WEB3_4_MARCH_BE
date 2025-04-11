@@ -1,15 +1,12 @@
 package com.backend.domain.member.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
+import com.backend.domain.chatrequest.dto.response.ChatRequestDto;
+import com.backend.domain.chatrequest.entity.ChatRequestStatus;
+import com.backend.domain.chatrequest.service.ChatRequestService;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
+import com.backend.domain.keyword.entity.Keyword;
+import com.backend.domain.like.service.LikeService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -17,11 +14,19 @@ import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.userkeyword.service.UserKeywordService;
+import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,23 +37,76 @@ public class MemberService {
     private final RedisGeoService redisGeoService;
     private final ImageService imageService;
     private final PresignedService presignedService;
+    private final UserKeywordService userKeywordService;
+    private final LikeService likeService;
+    private final ChatRequestService chatRequestService;
 
+    // 회원 프로필 정보 조회
+    // 서비스 내부 조회/리스트 반환용 (Service → API/Query)
+    @Transactional(readOnly = true)
+    public MemberInfoDto getMemberInfoForInternal(Long memberId) {
+        return memberRepository.findById(memberId)
+                .filter(member -> !member.isDeleted())
+                .map(MemberInfoDto::from)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+    }
 
-    // 회원 정보 조회
+    // 다른 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
     // Member 엔티티를 DTO로 변환해서 반환
     @Transactional(readOnly = true)
-    public MemberInfoDto getMemberInfo(Long memberId) {
-        return memberRepository.findById(memberId)
-            .filter(member -> !member.isDeleted())
-            .map(MemberInfoDto::from)
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+    public MemberResponseDto getMemberInfo(CustomUserDetails loginMember, Long memberId) {
+        Member member = getMemberEntity(memberId);
+
+        // 내가 이 회원을 좋아요 했는지 여부
+        boolean liked = false;
+        // 채팅 요청 상태 (보낸 적 없다면 null, 나머지는 ChatRequestStatus 상태로 보여짐)
+        ChatRequestStatus chatRequestStatus = null;
+
+        // 동적 필드: 로그인 유저와 다른 유저일 경우에만 계산
+        if (!loginMember.equals(memberId)) {
+            liked = likeService.getLikesGiven(loginMember.getMemberId()).stream()
+                    .anyMatch(like -> like.getReceiverId().equals(memberId));
+
+            chatRequestStatus = chatRequestService.getSentRequests(loginMember).stream()
+                    .filter(req -> req.getReceiverId().equals(memberId))
+                    .map(ChatRequestDto::getStatus)
+                    .findFirst()
+                    .orElse(null);  // 요청 없으면 null
+        }
+
+        // 키워드 리스트
+        List<Keyword> keywords = userKeywordService.getUserKeywords(memberId).stream()
+                .map(dto -> Keyword.ofKeyword(dto.getId(), dto.getName()))
+                .toList();
+
+        // 기본 프로필 정보 DTO 생성
+        MemberResponseDto memberResponseDto = MemberResponseDto.from(member);
+
+        // 응답 DTO 생성하여 반환
+        return new MemberResponseDto(
+                memberResponseDto.id(),
+                memberResponseDto.nickname(),
+                memberResponseDto.gender(),
+                memberResponseDto.age(),
+                memberResponseDto.height(),
+                memberResponseDto.profileImage(),
+                memberResponseDto.images(),
+                memberResponseDto.introduction(),
+                keywords,
+                liked,
+                chatRequestStatus,
+                memberResponseDto.blockStatus(),
+                memberResponseDto.isDeleted(),
+                memberResponseDto.latitude(),
+                memberResponseDto.longitude()
+        );
     }
 
     // 닉네임으로 조회
-    public List<MemberInfoDto> searchByNickname(String nickname) {
+    public List<MemberResponseDto> searchByNickname(String nickname) {
         return memberRepository.findByNicknameContaining(nickname).stream()
                 .filter(member -> !member.isDeleted())
-                .map(MemberInfoDto::from)
+                .map(MemberResponseDto::from)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +128,7 @@ public class MemberService {
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
         // 1. 기존 활성 회원 여부
         Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
         // 2. 탈퇴한 회원이면 복구
         if (member.isDeleted()) {
@@ -81,14 +139,15 @@ public class MemberService {
             // 임시 회원인지 현재 회원인지 판별 여부
             if (member.getRole() == Role.ROLE_TEMP_USER) {
                 member.updateProfile(
-                    member.getNickname(),           // 기존 닉네임 유지
-                    requestDto.age(),               // 추가 정보: 나이
-                    requestDto.height(),            // 추가 정보: 키
-                    requestDto.gender(),            // 추가 정보: 성별
-                    member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
-                    member.isChatAble(),           // 기존 chatAble 유지
-                    requestDto.latitude(),          // 추가 정보: 위도
-                    requestDto.longitude()          // 추가 정보: 경도
+                        member.getNickname(),           // 기존 닉네임 유지
+                        requestDto.age(),               // 추가 정보: 나이
+                        requestDto.height(),            // 추가 정보: 키
+                        requestDto.gender(),            // 추가 정보: 성별
+                        member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
+                        member.isChatAble(),           // 기존 chatAble 유지
+                        requestDto.latitude(),          // 추가 정보: 위도
+                        requestDto.longitude(),          // 추가 정보: 경도
+                        member.getIntroduction()
                 );
                 redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 return MemberInfoDto.from(member);
@@ -116,13 +175,13 @@ public class MemberService {
 
         Member member = getMemberEntity(memberId);
 
-        // 1. 삭제 로직
+        // 1. 기존 이미지 삭제 로직
         member.getImages().stream()
                 .filter(img -> !keepImageIds.contains(img.getId()))
-                .collect(Collectors.toList())
+                .toList()
                 .forEach(img -> imageService.deleteImage(memberId, img.getId()));
 
-        // 2. 추가 로직
+        // 2. 새 이미지 추가 로직
         int finalCount = keepImageIds.size() + (newImages == null ? 0 : newImages.size());
         if (finalCount < 1 || finalCount > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
@@ -131,7 +190,7 @@ public class MemberService {
             presignedService.uploadFiles(newImages, memberId);
         }
 
-        // 4. 프로필 정보 수정
+        // 3. 프로필 정보 수정
         member.updateProfile(
                 dto.nickname(),
                 dto.age(),
@@ -140,8 +199,18 @@ public class MemberService {
                 member.getImages(),
                 member.isChatAble(),
                 dto.latitude() != null ? dto.latitude() : member.getLatitude(),
-                dto.longitude() != null ? dto.longitude() : member.getLongitude()
+                dto.longitude() != null ? dto.longitude() : member.getLongitude(),
+                dto.introduction()
         );
+
+        // 4. 키워드 수정
+        if (dto.keywords() != null && !dto.keywords().isEmpty()) {
+            // Keyword 엔티티 리스트를 받아 처리
+            List<Long> keywordIds = dto.keywords().stream()
+                    .map(Keyword::getId)
+                    .toList();
+            userKeywordService.updateUserKeywords(memberId, keywordIds);
+        }
 
         return MemberResponseDto.from(member);
     }
@@ -158,7 +227,8 @@ public class MemberService {
                 member.getImages(),
                 member.isChatAble(),
                 latitude,
-                longitude
+                longitude,
+                member.getIntroduction()
         );
 
         return MemberResponseDto.from(member);
@@ -168,7 +238,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto withdraw(Long memberId) {
         Member member = getMemberEntity(memberId);
-        member.withdraw();
+        member.withdraw(); // → isDeleted = true, status = WITHDRAWN
 
         // redis내에서 회원 위치 정보삭제
         redisGeoService.removeLocation(memberId);
