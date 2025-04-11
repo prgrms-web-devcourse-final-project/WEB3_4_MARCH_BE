@@ -106,7 +106,7 @@ public class MemberController {
     // 내 정보 조회
     @GetMapping("/me")
     public ResponseEntity<GenericResponse<MemberResponseDto>> getMyProfile(
-        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, customUserDetails.getMemberId());
         Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
         System.out.println("현재 유저 역할 : " + member.getRole());
@@ -123,29 +123,18 @@ public class MemberController {
     // 회원 정보 수정
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMemberInfo(
-        @PathVariable Long id,
-        @RequestPart("member") MemberModifyRequestDto dto,
-        @RequestPart("keepImageId") String keepIdsJson,
-        @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long id,
+            @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart("keepImageId") String keepIdsJson,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
-        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
-        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
-    }
-
-    // 내 정보 수정
-    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMyinfo(
-        @AuthenticationPrincipal CustomUserDetails customUserDetails,
-        @RequestPart("member") MemberModifyRequestDto dto,
-        @RequestPart("keepImageId") String keepIdsJson,
-        @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
-
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {});
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {
+        });
         Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
         System.out.println(member.getRole());
-        MemberResponseDto res = memberService.modifyMember(customUserDetails.getMemberId(), dto, keepIds, newImages);
-        return ResponseEntity.ok(GenericResponse.of(res, "내 정보 수정 완료"));
+        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 
     // 닉네임 중복 검사
