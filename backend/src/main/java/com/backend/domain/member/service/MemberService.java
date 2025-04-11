@@ -54,7 +54,7 @@ public class MemberService {
     // 다른 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
     // Member 엔티티를 DTO로 변환해서 반환
     @Transactional(readOnly = true)
-    public MemberResponseDto getMemberInfo(CustomUserDetails loginMember, Long memberId){
+    public MemberResponseDto getMemberInfo(CustomUserDetails loginMember, Long memberId) {
         Member member = getMemberEntity(memberId);
 
         // 내가 이 회원을 좋아요 했는지 여부
@@ -175,13 +175,13 @@ public class MemberService {
 
         Member member = getMemberEntity(memberId);
 
-        // 1. 삭제 로직
+        // 1. 기존 이미지 삭제 로직
         member.getImages().stream()
                 .filter(img -> !keepImageIds.contains(img.getId()))
                 .toList()
                 .forEach(img -> imageService.deleteImage(memberId, img.getId()));
 
-        // 2. 추가 로직
+        // 2. 새 이미지 추가 로직
         int finalCount = keepImageIds.size() + (newImages == null ? 0 : newImages.size());
         if (finalCount < 1 || finalCount > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
@@ -190,7 +190,7 @@ public class MemberService {
             presignedService.uploadFiles(newImages, memberId);
         }
 
-        // 4. 프로필 정보 수정
+        // 3. 프로필 정보 수정
         member.updateProfile(
                 dto.nickname(),
                 dto.age(),
@@ -202,6 +202,15 @@ public class MemberService {
                 dto.longitude() != null ? dto.longitude() : member.getLongitude(),
                 dto.introduction()
         );
+
+        // 4. 키워드 수정
+        if (dto.keywords() != null && !dto.keywords().isEmpty()) {
+            // Keyword 엔티티 리스트를 받아 처리
+            List<Long> keywordIds = dto.keywords().stream()
+                    .map(Keyword::getId)
+                    .toList();
+            userKeywordService.updateUserKeywords(memberId, keywordIds);
+        }
 
         return MemberResponseDto.from(member);
     }

@@ -49,6 +49,25 @@ public class UserKeywordService {
         }
     }
 
+    // 회원정보 수정(업데이트)에서 사용하는 메서드
+    @Transactional
+    public void updateUserKeywords(Long userId, List<Long> keywordIds) {
+        Member member = memberRepository.findById(userId).orElseThrow(
+                () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
+        );
+
+        userKeywordRepository.deleteAllKeywordsByMemberId(userId);
+
+        List<Keyword> keywords = keywordRepository.findAllById(keywordIds);
+        for (Keyword keyword : keywords) {
+            UserKeyword userKeyword = UserKeyword.builder()
+                    .member(member)
+                    .keyword(keyword)
+                    .build();
+            userKeywordRepository.save(userKeyword);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<UserKeywordResponse> getUserKeywords(Long userId) {
         return userKeywordRepository.findAllByMemberId(userId).stream()

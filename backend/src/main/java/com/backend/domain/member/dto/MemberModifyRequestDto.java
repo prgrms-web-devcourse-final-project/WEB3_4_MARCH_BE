@@ -1,9 +1,12 @@
 package com.backend.domain.member.dto;
 
+import com.backend.domain.keyword.entity.Keyword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.List;
 
 
 /**
@@ -29,6 +32,7 @@ public record MemberModifyRequestDto(
         Double latitude,
         Double longitude,
 
-        String introduction
+        String introduction,    // 소개글
+        List<Keyword> keywords   // 키워드
 ) {
 }
