@@ -42,9 +42,9 @@ public record MemberResponseDto(
                     .map(ImageResponseDto::from)
                     .collect(Collectors.toList()),
                 member.getIntroduction(),
-                null,// 유저키워드 엔티티를 통해 보여짐
+                null,// 유저키워드 엔티티를 통해 보여짐 (기본값 null)
                 false, // 좋아요 는 Likes 엔티티를 통해 보여짐 (기본값 false)
-                null, // 채팅요청 여부는 실제 채팅 요청 여부에 따라 동적으로 결정 (기본값 false)
+                null, // 채팅요청 여부는 실제 채팅 요청 여부에 따라 동적으로 결정 (기본값 null)
                 member.getBlockStatus(),
                 member.isDeleted(),
                 member.getLatitude(),
