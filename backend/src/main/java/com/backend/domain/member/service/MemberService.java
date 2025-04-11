@@ -1,5 +1,7 @@
 package com.backend.domain.member.service;
 
+import com.backend.domain.chatrequest.dto.response.ChatRequestDto;
+import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.chatrequest.service.ChatRequestService;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
@@ -49,33 +51,38 @@ public class MemberService {
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
-    // 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
+    // 다른 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
     // Member 엔티티를 DTO로 변환해서 반환
     @Transactional(readOnly = true)
     public MemberResponseDto getMemberInfo(CustomUserDetails loginMember, Long memberId){
         Member member = getMemberEntity(memberId);
 
+        // 내가 이 회원을 좋아요 했는지 여부
         boolean liked = false;
-        boolean chatRequested = false;
+        // 채팅 요청 상태 (보낸 적 없다면 null, 나머지는 ChatRequestStatus 상태로 보여짐)
+        ChatRequestStatus chatRequestStatus = null;
 
-        // 동적 필드는 로그인 유저가 있을 경우에만 계산
+        // 동적 필드: 로그인 유저와 다른 유저일 경우에만 계산
         if (!loginMember.equals(memberId)) {
             liked = likeService.getLikesGiven(loginMember.getMemberId()).stream()
                     .anyMatch(like -> like.getReceiverId().equals(memberId));
 
-            chatRequested = chatRequestService.getSentRequests(loginMember).stream()
-                    .anyMatch(req -> req.getReceiverId().equals(memberId)
-                            && req.getStatus().name().equals("PENDING"));
+            chatRequestStatus = chatRequestService.getSentRequests(loginMember).stream()
+                    .filter(req -> req.getReceiverId().equals(memberId))
+                    .map(ChatRequestDto::getStatus)
+                    .findFirst()
+                    .orElse(null);  // 요청 없으면 null
         }
 
+        // 키워드 리스트
         List<Keyword> keywords = userKeywordService.getUserKeywords(memberId).stream()
                 .map(dto -> Keyword.ofKeyword(dto.getId(), dto.getName()))
                 .toList();
 
-        // 기본 프로필 변환
+        // 기본 프로필 정보 DTO 생성
         MemberResponseDto memberResponseDto = MemberResponseDto.from(member);
 
-        //
+        // 응답 DTO 생성하여 반환
         return new MemberResponseDto(
                 memberResponseDto.id(),
                 memberResponseDto.nickname(),
@@ -87,8 +94,9 @@ public class MemberService {
                 memberResponseDto.introduction(),
                 keywords,
                 liked,
-                chatRequested,
+                chatRequestStatus,
                 memberResponseDto.blockStatus(),
+                memberResponseDto.isDeleted(),
                 memberResponseDto.latitude(),
                 memberResponseDto.longitude()
         );
@@ -170,7 +178,7 @@ public class MemberService {
         // 1. 삭제 로직
         member.getImages().stream()
                 .filter(img -> !keepImageIds.contains(img.getId()))
-                .collect(Collectors.toList())
+                .toList()
                 .forEach(img -> imageService.deleteImage(memberId, img.getId()));
 
         // 2. 추가 로직
@@ -221,7 +229,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto withdraw(Long memberId) {
         Member member = getMemberEntity(memberId);
-        member.withdraw();
+        member.withdraw(); // → isDeleted = true, status = WITHDRAWN
 
         // redis내에서 회원 위치 정보삭제
         redisGeoService.removeLocation(memberId);

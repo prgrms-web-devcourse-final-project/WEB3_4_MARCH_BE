@@ -1,5 +1,6 @@
 package com.backend.domain.member.dto;
 
+import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.keyword.entity.Keyword;
 import com.backend.domain.member.entity.Member;
@@ -23,8 +24,9 @@ public record MemberResponseDto(
         String introduction,
         List<Keyword> keywords,
         Boolean liked,
-        Boolean chatRequest,
+        ChatRequestStatus chatRequestStatus,
         Boolean blockStatus,
+        Boolean isDeleted,
         Double latitude,
         Double longitude
 ) {
@@ -42,8 +44,9 @@ public record MemberResponseDto(
                 member.getIntroduction(),
                 null,// 유저키워드 엔티티를 통해 보여짐
                 false, // 좋아요 는 Likes 엔티티를 통해 보여짐 (기본값 false)
-                false, // 채팅요청 여부는 실제 채팅 요청 여부에 따라 동적으로 결정 (기본값 false)
+                null, // 채팅요청 여부는 실제 채팅 요청 여부에 따라 동적으로 결정 (기본값 false)
                 member.getBlockStatus(),
+                member.isDeleted(),
                 member.getLatitude(),
                 member.getLongitude()
         );
