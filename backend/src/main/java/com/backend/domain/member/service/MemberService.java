@@ -1,7 +1,10 @@
 package com.backend.domain.member.service;
 
+import com.backend.domain.chatrequest.service.ChatRequestService;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
+import com.backend.domain.keyword.entity.Keyword;
+import com.backend.domain.like.service.LikeService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
 import com.backend.domain.member.dto.MemberRegisterRequestDto;
@@ -9,6 +12,8 @@ import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.userkeyword.service.UserKeywordService;
+import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
@@ -30,23 +35,70 @@ public class MemberService {
     private final RedisGeoService redisGeoService;
     private final ImageService imageService;
     private final PresignedService presignedService;
+    private final UserKeywordService userKeywordService;
+    private final LikeService likeService;
+    private final ChatRequestService chatRequestService;
 
-
-    // 회원 정보 조회
-    // Member 엔티티를 DTO로 변환해서 반환
+    // 회원 프로필 정보 조회
+    // 서비스 내부 조회/리스트 반환용 (Service → API/Query)
     @Transactional(readOnly = true)
-    public MemberInfoDto getMemberInfo(Long memberId) {
+    public MemberInfoDto getMemberInfoForInternal(Long memberId) {
         return memberRepository.findById(memberId)
                 .filter(member -> !member.isDeleted())
                 .map(MemberInfoDto::from)
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
     }
 
+    // 회원 프로필 정보 조회 (API 응답 전용 DTO, Controller → Client)
+    // Member 엔티티를 DTO로 변환해서 반환
+    @Transactional(readOnly = true)
+    public MemberResponseDto getMemberInfo(CustomUserDetails loginMember, Long memberId){
+        Member member = getMemberEntity(memberId);
+
+        boolean liked = false;
+        boolean chatRequested = false;
+
+        // 동적 필드는 로그인 유저가 있을 경우에만 계산
+        if (!loginMember.equals(memberId)) {
+            liked = likeService.getLikesGiven(loginMember.getMemberId()).stream()
+                    .anyMatch(like -> like.getReceiverId().equals(memberId));
+
+            chatRequested = chatRequestService.getSentRequests(loginMember).stream()
+                    .anyMatch(req -> req.getReceiverId().equals(memberId)
+                            && req.getStatus().name().equals("PENDING"));
+        }
+
+        List<Keyword> keywords = userKeywordService.getUserKeywords(memberId).stream()
+                .map(dto -> Keyword.ofKeyword(dto.getId(), dto.getName()))
+                .toList();
+
+        // 기본 프로필 변환
+        MemberResponseDto memberResponseDto = MemberResponseDto.from(member);
+
+        //
+        return new MemberResponseDto(
+                memberResponseDto.id(),
+                memberResponseDto.nickname(),
+                memberResponseDto.gender(),
+                memberResponseDto.age(),
+                memberResponseDto.height(),
+                memberResponseDto.profileImage(),
+                memberResponseDto.images(),
+                memberResponseDto.introduction(),
+                keywords,
+                liked,
+                chatRequested,
+                memberResponseDto.blockStatus(),
+                memberResponseDto.latitude(),
+                memberResponseDto.longitude()
+        );
+    }
+
     // 닉네임으로 조회
-    public List<MemberInfoDto> searchByNickname(String nickname) {
+    public List<MemberResponseDto> searchByNickname(String nickname) {
         return memberRepository.findByNicknameContaining(nickname).stream()
                 .filter(member -> !member.isDeleted())
-                .map(MemberInfoDto::from)
+                .map(MemberResponseDto::from)
                 .collect(Collectors.toList());
     }
 

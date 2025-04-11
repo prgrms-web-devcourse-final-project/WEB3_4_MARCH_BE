@@ -1,6 +1,7 @@
 package com.backend.domain.member.dto;
 
 import com.backend.domain.image.dto.ImageResponseDto;
+import com.backend.domain.keyword.entity.Keyword;
 import com.backend.domain.member.entity.Member;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public record MemberResponseDto(
         ImageResponseDto profileImage,
         List<ImageResponseDto> images,
         String introduction,
-        List<String> keywords,
+        List<Keyword> keywords,
         Boolean liked,
         Boolean chatRequest,
         Boolean blockStatus,
@@ -39,8 +40,8 @@ public record MemberResponseDto(
                     .map(ImageResponseDto::from)
                     .collect(Collectors.toList()),
                 member.getIntroduction(),
-                member.getKeywords(),// 유저키워드 엔티티를 통해 보여짐
-                false, // 좋아요 는 Likes 엔티티를 통해 별도 계산 (기본값 false)
+                null,// 유저키워드 엔티티를 통해 보여짐
+                false, // 좋아요 는 Likes 엔티티를 통해 보여짐 (기본값 false)
                 false, // 채팅요청 여부는 실제 채팅 요청 여부에 따라 동적으로 결정 (기본값 false)
                 member.getBlockStatus(),
                 member.getLatitude(),

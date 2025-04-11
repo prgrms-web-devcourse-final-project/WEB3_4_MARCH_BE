@@ -39,11 +39,6 @@ public class Member extends BaseEntity {
 
     private String introduction; // 소개글
 
-    @ElementCollection
-    @CollectionTable(name = "member_keywords", joinColumns = @JoinColumn(name = "member_id"))
-    @Column(name = "keyword")
-    private List<String> keywords;
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Image> images;
 
