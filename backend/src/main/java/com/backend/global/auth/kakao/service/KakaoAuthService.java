@@ -63,8 +63,6 @@ public class KakaoAuthService {
 //    private String[] adminEmailDomains;
 
     private final AdminWhitelistProperties adminWhitelistProperties;
-    private final
-
 
     /**
      * 카카오 로그인 인가 요청 URL 반환
