@@ -26,7 +26,8 @@ public record MemberInfoDto(
         List<ImageResponseDto> images,
         Double latitude,
         Double longitude,
-        Role role
+        Role role,
+        String introduction
 ) {
     public static MemberInfoDto from(Member member) {
         return new MemberInfoDto(
@@ -43,7 +44,8 @@ public record MemberInfoDto(
                         .collect(Collectors.toList()),
                 member.getLatitude(),
                 member.getLongitude(),
-                member.getRole()
+                member.getRole(),
+                member.getIntroduction()
         );
     }
 }

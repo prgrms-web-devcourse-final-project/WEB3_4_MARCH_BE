@@ -33,8 +33,9 @@ public record MemberRegisterRequestDto(
 
         // 위도, 경도 추가
         Double latitude,
-        Double longitude
+        Double longitude,
 
+        String introduction // 소개글
 ) {
         /**
          * 카카오 사용자 정보로부터 회원가입 DTO 생성
@@ -49,7 +50,8 @@ public record MemberRegisterRequestDto(
                         0,             // 기본 키
 //                        new ArrayList<>(), // 빈 프로필 이미지 리스트
                         null,          // 위도
-                        null           // 경도
+                        null,           // 경도
+                        null
                 );
         }
 }

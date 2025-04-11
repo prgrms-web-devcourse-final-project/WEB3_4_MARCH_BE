@@ -147,7 +147,7 @@ public class MemberService {
                         member.isChatAble(),           // 기존 chatAble 유지
                         requestDto.latitude(),          // 추가 정보: 위도
                         requestDto.longitude(),          // 추가 정보: 경도
-                        member.getIntroduction()
+                        requestDto.introduction()
                 );
                 redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 return MemberInfoDto.from(member);
