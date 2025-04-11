@@ -59,10 +59,19 @@ public class UserKeywordService {
                 () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
         );
 
+        System.out.println("✅ updateUserKeywords 호출됨! 삭제 진행 시작");
+
         // 회원 정보 수정 시에는 기존에 선택한 키워드 전체 삭제 후 재등록
         userKeywordRepository.deleteAllKeywordsByMemberId(userId);
 
+        // 영속성 컨텍스트에 있는 변경 사항을 DB에 즉시 반영
+        userKeywordRepository.flush();
+
+        System.out.println("✅ 삭제 완료, 새로운 키워드 저장 시작");
+
+        // 새 키워드 저장
         List<Keyword> keywords = keywordRepository.findAllById(keywordIds);
+
         for (Keyword keyword : keywords) {
             UserKeyword userKeyword = UserKeyword.builder()
                     .member(member)
@@ -70,6 +79,9 @@ public class UserKeywordService {
                     .build();
             userKeywordRepository.save(userKeyword);
         }
+
+        System.out.println("✅ 키워드 저장 완료");
+
     }
 
     @Transactional(readOnly = true)

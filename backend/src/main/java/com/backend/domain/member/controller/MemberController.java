@@ -113,7 +113,7 @@ public class MemberController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, customUserDetails.getMemberId());
         Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
-        System.out.println("현재 유저 역할 : " + member.getRole());
+//        System.out.println("현재 유저 역할 : " + member.getRole());
         return ResponseEntity.ok().body(GenericResponse.of(responseDto, "자신의 프로필 조회가 완료되었습니다."));
     }
 
@@ -130,14 +130,15 @@ public class MemberController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long id,
             @RequestPart("member") MemberModifyRequestDto dto,
+            @RequestPart(value = "keywordIds", required = false) UserKeywordSaveRequest keywordRequest,
             @RequestPart("keepImageId") String keepIdsJson,
             @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) throws IOException {
 
-        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() {
-        });
-        Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
-        System.out.println(member.getRole());
-        MemberResponseDto res = memberService.modifyMember(id, dto, keepIds, newImages);
+        List<Long> keepIds = objectMapper.readValue(keepIdsJson, new TypeReference<>() { });
+
+        MemberResponseDto res = memberService.modifyMember(id, dto, keywordRequest, keepIds, newImages);
+
+
         return ResponseEntity.ok(GenericResponse.of(res, "회원 정보 수정 완료"));
     }
 

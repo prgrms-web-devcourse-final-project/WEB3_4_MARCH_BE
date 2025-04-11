@@ -5,7 +5,6 @@ import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.chatrequest.service.ChatRequestService;
 import com.backend.domain.image.service.ImageService;
 import com.backend.domain.image.service.PresignedService;
-import com.backend.domain.keyword.entity.Keyword;
 import com.backend.domain.like.service.LikeService;
 import com.backend.domain.member.dto.MemberInfoDto;
 import com.backend.domain.member.dto.MemberModifyRequestDto;
@@ -14,6 +13,7 @@ import com.backend.domain.member.dto.MemberResponseDto;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.entity.Role;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
 import com.backend.domain.userkeyword.dto.response.UserKeywordResponse;
 import com.backend.domain.userkeyword.service.UserKeywordService;
 import com.backend.global.auth.model.CustomUserDetails;
@@ -22,6 +22,7 @@ import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -136,7 +138,7 @@ public class MemberService {
                             member.isChatAble(),           // 기존 chatAble 유지
                             requestDto.latitude(),          // 추가 정보: 위도
                             requestDto.longitude(),          // 추가 정보: 경도
-                            requestDto.introduction()
+                            requestDto.introduction()       // 추가 정보: 소개글
                     );
                     redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 } else {
@@ -166,6 +168,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto modifyMember(Long memberId,
                                           MemberModifyRequestDto dto,
+                                          UserKeywordSaveRequest keywordRequest,
                                           List<Long> keepImageIds,
                                           List<MultipartFile> newImages) throws IOException {
 
@@ -200,19 +203,16 @@ public class MemberService {
         );
 
         // 4. 키워드 수정
-        if (dto.keywords() != null && !dto.keywords().isEmpty()) {
-            // Keyword 엔티티 리스트를 받아 처리
-            List<Long> keywordIds = dto.keywords().stream()
-                    .map(Keyword::getId)
-                    .toList();
-            userKeywordService.updateUserKeywords(memberId, keywordIds);
+        if (keywordRequest != null && keywordRequest.getKeywordIds() != null && !keywordRequest.getKeywordIds().isEmpty()) {
+            log.info("🔥[modifyMember] 키워드 수정 중: keywordIds = {}", keywordRequest.getKeywordIds());
+            userKeywordService.updateUserKeywords(memberId, keywordRequest.getKeywordIds());
         }
 
         // 5. 최신 키워드 조회 및 응답 DTO 반환
-        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(memberId);
+        List<UserKeywordResponse> updatedKeywords = userKeywordService.getUserKeywords(memberId);
 
         // 팩토리 메서드로 응답 DTO 반환
-        return MemberResponseDto.from(member, keywords, false, null);
+        return MemberResponseDto.from(member, updatedKeywords, false, null);
     }
 
     // 위치 정보 갱신 (프론트에서 버튼을 누르면 사용자 위치정보 최신화하여 갱신)
