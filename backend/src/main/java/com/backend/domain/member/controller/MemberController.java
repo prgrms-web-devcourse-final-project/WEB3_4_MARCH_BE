@@ -2,7 +2,6 @@ package com.backend.domain.member.controller;
 
 import com.backend.domain.image.service.PresignedService;
 import com.backend.domain.member.dto.*;
-import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.service.MemberService;
 import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
 import com.backend.domain.userkeyword.service.UserKeywordService;
@@ -112,8 +111,7 @@ public class MemberController {
     public ResponseEntity<GenericResponse<MemberResponseDto>> getMyProfile(
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         MemberResponseDto responseDto = memberService.getMemberInfo(customUserDetails, customUserDetails.getMemberId());
-        Member member = memberService.getMemberEntity(customUserDetails.getMemberId());
-//        System.out.println("현재 유저 역할 : " + member.getRole());
+
         return ResponseEntity.ok().body(GenericResponse.of(responseDto, "자신의 프로필 조회가 완료되었습니다."));
     }
 
