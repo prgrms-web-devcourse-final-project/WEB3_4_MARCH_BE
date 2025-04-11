@@ -20,6 +20,7 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,39 +109,48 @@ public class MemberService {
      * @return 가입된 회원의 정보를 담은 MemberInfoDto 객체
      * @throws GlobalException 이미 가입된 회원일 경우 DUPLICATE_MEMBER 오류 발생
      */
-    @Transactional
-    public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) {
-        // 1. 기존 활성 회원 여부
-        Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+    @Transactional(rollbackFor = Exception.class)
+    public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto,
+                                        List<MultipartFile> imageFiles,
+                                        List<Long> keywordIds,
+                                        HttpServletResponse response) throws IOException {
+        try {
+            // 1. 기존 활성 회원 여부
 
-        // 2. 탈퇴한 회원이면 복구
-        if (member.isDeleted()) {
-            member.rejoin(requestDto);
-            member.updateRole(Role.ROLE_USER);
-        } else {
-            // 임시 회원인지 현재 회원인지 판별 여부
-            if (member.getRole() == Role.ROLE_TEMP_USER) {
-                member.updateProfile(
-                        member.getNickname(),           // 기존 닉네임 유지
-                        requestDto.age(),               // 추가 정보: 나이
-                        requestDto.height(),            // 추가 정보: 키
-                        requestDto.gender(),            // 추가 정보: 성별
-                        member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
-                        member.isChatAble(),           // 기존 chatAble 유지
-                        requestDto.latitude(),          // 추가 정보: 위도
-                        requestDto.longitude(),          // 추가 정보: 경도
-                        requestDto.introduction()
-                );
-                redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
+            Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
+                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+
+            // 2. 탈퇴한 회원이면 복구
+            if (member.isDeleted()) {
+                member.rejoin(requestDto);
+                member.updateRole(Role.ROLE_USER);
             } else {
-                throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
+                // 임시 회원인지 현재 회원인지 판별 여부
+                if (member.getRole() == Role.ROLE_TEMP_USER) {
+                    member.updateProfile(
+                            member.getNickname(),           // 기존 닉네임 유지
+                            requestDto.age(),               // 추가 정보: 나이
+                            requestDto.height(),            // 추가 정보: 키
+                            requestDto.gender(),            // 추가 정보: 성별
+                            member.getImages(),             // 기존 이미지 리스트 유지 (필요 시 별도 수정)
+                            member.isChatAble(),           // 기존 chatAble 유지
+                            requestDto.latitude(),          // 추가 정보: 위도
+                            requestDto.longitude(),          // 추가 정보: 경도
+                            requestDto.introduction()
+                    );
+                    redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
+                } else {
+                    throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
+                }
             }
-        }
 
-        // 키워드 리스트 포함해서 DTO 반환
-        List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(member.getId());
-        return MemberInfoDto.from(member, keywords);
+            // 키워드 리스트 포함해서 DTO 반환
+            List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(member.getId());
+            return MemberInfoDto.from(member, keywords);
+        } catch (Exception e) {
+            // 트랜잭션 내 예외가 발생하면 롤백 유도
+            throw new GlobalException(GlobalErrorCode.MEMBER_REGISTRATION_FAILED, "회원가입 중 예외 발생");
+        }
     }
 
     @Transactional

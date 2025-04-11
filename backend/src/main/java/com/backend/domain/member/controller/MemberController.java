@@ -66,7 +66,11 @@ public class MemberController {
         }
 
         // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
-        MemberInfoDto memberInfo = memberService.registerMember(requestDto);
+        MemberInfoDto memberInfo = memberService.registerMember(
+                requestDto,
+                List.of(files),
+                userKeywordRequest.getKeywordIds(),
+                response);
 
         // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
         //    여기서는 List<MultipartFile>가 필요하므로 배열을 List로 변환합니다.
