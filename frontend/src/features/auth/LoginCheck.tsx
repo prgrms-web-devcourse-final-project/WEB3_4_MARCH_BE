@@ -1,7 +1,7 @@
 import { useActivity } from "@stackflow/react";
 import { useFlow } from "../../stackflow/stackflow";
 import { useEffect } from "react";
-import authService from "./sessionStorageAuth";
+import { apiClient } from "../../api/apiClient";
 
 export const LoginCheck = ({
   children,
@@ -15,17 +15,31 @@ export const LoginCheck = ({
       return;
     }
 
-    const isLoggedIn = authService.isLoggedIn();
+    const checkLoginStatus = async () => {
+      try {
+        const response = await apiClient.member.getMyProfile();
+        if (response.code === 200) {
+          return true;
+        }
 
-    if (isLoggedIn) {
-      return;
-    }
+        return false;
+      } catch (error) {
+        // 에러가 발생하면(특히 403) 로그인하지 않은 상태로 간주
+        return false;
+      }
+    };
 
-    if (activeActivity?.name === "LoginActivity") {
-      return;
-    }
+    checkLoginStatus().then((isLoggedIn) => {
+      if (isLoggedIn) {
+        return;
+      }
 
-    push("LoginActivity", {});
+      if (activeActivity?.name === "LoginActivity") {
+        return;
+      }
+
+      push("LoginActivity", {});
+    });
   }, [push, activeActivity, disabled]);
 
   return <div>{children}</div>;
