@@ -1,71 +1,38 @@
-export const BASE_URL = "http://localhost:8080";
+import {
+  BlockUserControllerApi,
+  ChatControllerApi,
+  ChatRequestControllerApi,
+  ChatRoomControllerApi,
+  Configuration,
+  ImageControllerApi,
+  KakaoAuthControllerApi,
+  KeywordControllerApi,
+  LikeControllerApi,
+  MemberControllerApi,
+  NotificationControllerApi,
+  UserKeywordControllerApi,
+  UserRecommendationControllerApi,
+} from "./__generated__";
 
-// 기본 fetch 함수 추상화
+const BACKEND_API = "http://43.203.149.178";
+
+// API 클라이언트 설정
+const config = new Configuration({
+  basePath: "http://localhost:8080",
+});
+
+// 모든 API 클라이언트를 하나의 객체로 통합
 export const apiClient = {
-  async get<T>(endpoint: string, options = {}): Promise<T> {
-    console.log("get", `${BASE_URL}${endpoint}`);
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    return response.json();
-  },
-
-  async post<T>(endpoint: string, data: object, options = {}): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    return response.json();
-  },
-
-  async put<T>(endpoint: string, data: object, options = {}): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    return response.json();
-  },
-
-  async delete<T>(endpoint: string, options = {}): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    return response.json();
-  },
+  block: new BlockUserControllerApi(config),
+  chat: new ChatControllerApi(config),
+  chatRequest: new ChatRequestControllerApi(config),
+  chatRoom: new ChatRoomControllerApi(config),
+  image: new ImageControllerApi(config),
+  kakaoAuth: new KakaoAuthControllerApi(config),
+  keyword: new KeywordControllerApi(config),
+  like: new LikeControllerApi(config),
+  member: new MemberControllerApi(config),
+  notification: new NotificationControllerApi(config),
+  userKeyword: new UserKeywordControllerApi(config),
+  userRecommend: new UserRecommendationControllerApi(config),
 };

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "codegen": "openapi-generator-cli generate -i http://43.203.149.178/v3/api-docs -g typescript-fetch -o src/api/__generated__"
   },
   "dependencies": {
     "@stackflow/core": "^1.2.0",
@@ -24,15 +25,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@openapitools/openapi-generator-cli": "^2.18.4",
     "@tailwindcss/vite": "^4.0.17",
+    "@types/add": "^2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react-swc": "^3.8.0",
+    "add": "^2.0.6",
     "autoprefixer": "10.4.14",
     "globals": "^15.15.0",
     "tailwindcss": "^4.0.17",
     "typescript": "~5.7.2",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "yarn": "^1.22.22"
   },
   "packageManager": "yarn@4.8.0"
 }
