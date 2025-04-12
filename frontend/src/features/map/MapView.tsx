@@ -1,6 +1,7 @@
 import { MapPin } from "lucide-react";
 import { useMap } from "./kakaomap/contexts/MapContext";
 import KakaoMap from "./kakaomap/KakaoMap";
+import { Loading } from "../../components/Loading";
 
 export const MapView = () => {
   const { mapInstance, loading } = useMap();
@@ -14,12 +15,18 @@ export const MapView = () => {
             position.coords.longitude,
           ),
         );
+
+        mapInstance.setLevel(3);
       }
     });
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="h-full w-full flex flex-col items-center justify-center">
+        <Loading text="지도를 불러오고 있습니다..." />
+      </div>
+    );
   }
 
   return (

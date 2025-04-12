@@ -1,3 +1,4 @@
+import { useUserStore } from "../features/auth/useUserStore";
 import ProfileDetailView from "../features/profile/ProfileDetailView";
 import AppScreenLayout from "../layout/AppScreenLayout";
 
@@ -22,9 +23,26 @@ const myProfile = {
 const MyProfileActivity: React.FC<MyProfileActivityProps> = ({
   params: {},
 }) => {
+  const { myProfile } = useUserStore((s) => ({
+    myProfile: s.profile,
+  }));
+
   return (
     <AppScreenLayout title="CONNECT TO">
-      <ProfileDetailView profile={myProfile} isMyProfile={true} />
+      {myProfile && (
+        <ProfileDetailView
+          profile={{
+            age: myProfile.age ?? 0,
+            bio: myProfile.introduction ?? "",
+            image: myProfile.images?.[0].url ?? "",
+            interests:
+              myProfile.keywords?.map((keyword) => keyword.name ?? "") ?? [],
+            name: myProfile.nickname ?? "",
+            height: myProfile.height ?? 0,
+          }}
+          isMyProfile={true}
+        />
+      )}
     </AppScreenLayout>
   );
 };
