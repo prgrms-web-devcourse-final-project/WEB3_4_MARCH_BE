@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../../api/apiClient";
+import { keywordCategories } from "../dumy";
 
 const useKeywords = () => {
   const {
@@ -8,7 +9,10 @@ const useKeywords = () => {
     isError,
   } = useQuery({
     queryKey: ["keywords"],
-    queryFn: () => apiClient.keyword.getAllKeywords(),
+    queryFn: async () => {
+      return keywordCategories;
+      // return await apiClient.keyword.getAllKeywords();
+    },
   });
 
   return {

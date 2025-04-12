@@ -72,7 +72,9 @@ export const ProfileSetupActivity = () => {
       {page === "profile" && (
         <ProfileUserInfoSetupView onComplete={onConfirmProfileSetup} />
       )}
-      {page === "keyword" && <ProfileKeywordView />}
+      {page === "keyword" && (
+        <ProfileKeywordView onComplete={onConfirmKeywordSetup} />
+      )}
     </AppScreenLayout>
   );
 };
