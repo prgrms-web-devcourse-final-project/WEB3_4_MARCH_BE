@@ -3,9 +3,12 @@ import AppScreenLayout from "../layout/AppScreenLayout";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { apiClient } from "../api/apiClient";
+import { useFlow } from "../stackflow/stackflow";
 
 export const LoginLoadingActivity = () => {
   const { code } = useActivityParams<{ code?: string }>();
+
+  const { push } = useFlow();
 
   useEffect(() => {
     const handleLogin = async () => {
@@ -14,7 +17,12 @@ export const LoginLoadingActivity = () => {
           code,
         });
 
-        console.log("Login successful:", response);
+        if (response.data?.isRegistered) {
+          push("ExploreActivity", {});
+        } else {
+          push("ProfileSetupActivity", {});
+        }
+
         // biome-ignore lint/suspicious/noExplicitAny: API error handling requires any type
       } catch (error: any) {
         console.error("Login error details:", {
@@ -27,7 +35,7 @@ export const LoginLoadingActivity = () => {
     };
 
     handleLogin();
-  }, [code]);
+  }, [code, push]);
 
   return (
     <AppScreenLayout noLoginCheck noBottomBar>

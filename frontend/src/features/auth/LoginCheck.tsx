@@ -2,6 +2,7 @@ import { useActivity } from "@stackflow/react";
 import { useFlow } from "../../stackflow/stackflow";
 import { useEffect } from "react";
 import { apiClient } from "../../api/apiClient";
+import { useUserStore } from "./useUserStore";
 
 export const LoginCheck = ({
   children,
@@ -9,6 +10,10 @@ export const LoginCheck = ({
 }: { disabled: boolean; children: React.ReactNode }) => {
   const { push } = useFlow();
   const activeActivity = useActivity();
+
+  const { setUserProfile } = useUserStore((s) => ({
+    setUserProfile: s.setUserProfile,
+  }));
 
   useEffect(() => {
     if (disabled) {
@@ -18,7 +23,10 @@ export const LoginCheck = ({
     const checkLoginStatus = async () => {
       try {
         const response = await apiClient.member.getMyProfile();
-        if (response.code === 200) {
+
+        if (response.code === 200 && response.data) {
+          setUserProfile(response.data);
+
           return true;
         }
 
@@ -40,7 +48,7 @@ export const LoginCheck = ({
 
       push("LoginActivity", {});
     });
-  }, [push, activeActivity, disabled]);
+  }, [push, activeActivity, disabled, setUserProfile]);
 
   return <div>{children}</div>;
 };

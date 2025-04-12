@@ -8,9 +8,10 @@ export interface UserInfo {
   name: string;
   bio: string;
   gender: "male" | "female";
-  age: string;
-  height: string;
-  weight: string;
+  age: number;
+  height: number;
+  weight: number;
+  email: string;
 }
 
 export const ProfileUserInfoSetupView = ({
@@ -22,9 +23,10 @@ export const ProfileUserInfoSetupView = ({
   const [name, setName] = useState<UserInfo["name"]>("");
   const [bio, setBio] = useState<UserInfo["bio"]>("");
   const [gender, setGender] = useState<UserInfo["gender"] | null>(null);
-  const [age, setAge] = useState<UserInfo["age"]>("");
-  const [height, setHeight] = useState<UserInfo["height"]>("");
-  const [weight, setWeight] = useState<UserInfo["weight"]>("");
+  const [age, setAge] = useState<UserInfo["age"]>(0);
+  const [height, setHeight] = useState<UserInfo["height"]>(0);
+  const [weight, setWeight] = useState<UserInfo["weight"]>(0);
+  const [email, setEmail] = useState<UserInfo["email"]>(""); // 이메일 상태 추가
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const maxImages = 5;
@@ -72,19 +74,11 @@ export const ProfileUserInfoSetupView = ({
       newErrors.gender = "성별을 선택해주세요.";
     }
 
-    if (!age.trim()) {
-      newErrors.age = "나이를 입력해주세요.";
-    } else if (
-      Number.isNaN(Number(age)) ||
-      Number(age) < 18 ||
-      Number(age) > 100
-    ) {
+    if (Number.isNaN(Number(age)) || Number(age) < 18 || Number(age) > 100) {
       newErrors.age = "유효한 나이를 입력해주세요. (18-100)";
     }
 
-    if (!height.trim()) {
-      newErrors.height = "키를 입력해주세요.";
-    } else if (
+    if (
       Number.isNaN(Number(height)) ||
       Number(height) < 140 ||
       Number(height) > 220
@@ -92,9 +86,7 @@ export const ProfileUserInfoSetupView = ({
       newErrors.height = "유효한 키를 입력해주세요. (140-220cm)";
     }
 
-    if (!weight.trim()) {
-      newErrors.weight = "몸무게를 입력해주세요.";
-    } else if (
+    if (
       Number.isNaN(Number(weight)) ||
       Number(weight) < 30 ||
       Number(weight) > 150
@@ -116,6 +108,7 @@ export const ProfileUserInfoSetupView = ({
         age,
         height,
         weight,
+        email,
       });
     }
   };
@@ -193,6 +186,30 @@ export const ProfileUserInfoSetupView = ({
             )}
           </div>
 
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              이메일
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={cn(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
+                errors.email ? "border-red-300" : "border-gray-300",
+              )}
+              placeholder="이메일을 입력해주세요"
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            )}
+          </div>
+
           {/* Bio */}
           <div>
             <label
@@ -266,7 +283,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="age"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => setAge(Number(e.target.value))}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.age ? "border-red-300" : "border-gray-300",
@@ -297,7 +314,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="height"
                 value={height}
-                onChange={(e) => setHeight(e.target.value)}
+                onChange={(e) => setHeight(Number(e.target.value))}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.height ? "border-red-300" : "border-gray-300",
@@ -328,7 +345,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="weight"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => setWeight(Number(e.target.value))}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.weight ? "border-red-300" : "border-gray-300",
