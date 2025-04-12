@@ -16,47 +16,48 @@
 import * as runtime from '../runtime';
 import type {
   GenericResponseBoolean,
-  GenericResponseListMemberInfoDto,
-  GenericResponseMemberInfoDto,
+  GenericResponseListMemberResponseDto,
   GenericResponseMemberRegisterResponseDto,
   GenericResponseMemberResponseDto,
   MemberModifyRequestDto,
-  RegisterMemberRequest,
+  RegisterRequest,
+  UserKeywordSaveRequest,
 } from '../models/index';
 import {
     GenericResponseBooleanFromJSON,
     GenericResponseBooleanToJSON,
-    GenericResponseListMemberInfoDtoFromJSON,
-    GenericResponseListMemberInfoDtoToJSON,
-    GenericResponseMemberInfoDtoFromJSON,
-    GenericResponseMemberInfoDtoToJSON,
+    GenericResponseListMemberResponseDtoFromJSON,
+    GenericResponseListMemberResponseDtoToJSON,
     GenericResponseMemberRegisterResponseDtoFromJSON,
     GenericResponseMemberRegisterResponseDtoToJSON,
     GenericResponseMemberResponseDtoFromJSON,
     GenericResponseMemberResponseDtoToJSON,
     MemberModifyRequestDtoFromJSON,
     MemberModifyRequestDtoToJSON,
-    RegisterMemberRequestFromJSON,
-    RegisterMemberRequestToJSON,
+    RegisterRequestFromJSON,
+    RegisterRequestToJSON,
+    UserKeywordSaveRequestFromJSON,
+    UserKeywordSaveRequestToJSON,
 } from '../models/index';
 
 export interface CheckNicknameRequest {
     nickname: string;
 }
 
-export interface GetMemberInfoRequest {
+export interface GetMemberProfileRequest {
     memberId: number;
 }
 
-export interface ModifyRequest {
+export interface ModifyMemberInfoRequest {
     id: number;
     member: MemberModifyRequestDto;
     keepImageId: string;
+    keywordIds?: UserKeywordSaveRequest;
     newImages?: Array<Blob>;
 }
 
-export interface RegisterMemberOperationRequest {
-    registerMemberRequest?: RegisterMemberRequest;
+export interface RegisterOperationRequest {
+    registerRequest?: RegisterRequest;
 }
 
 export interface SearchMembersByNicknameRequest {
@@ -102,7 +103,7 @@ export class MemberControllerApi extends runtime.BaseAPI {
         }
 
         const response = await this.request({
-            path: `/api/members/check-nickname`,
+            path: `/api/members/checkNickname`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -120,11 +121,11 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async getMemberInfoRaw(requestParameters: GetMemberInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberInfoDto>> {
+    async getMemberProfileRaw(requestParameters: GetMemberProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberResponseDto>> {
         if (requestParameters['memberId'] == null) {
             throw new runtime.RequiredError(
                 'memberId',
-                'Required parameter "memberId" was null or undefined when calling getMemberInfo().'
+                'Required parameter "memberId" was null or undefined when calling getMemberProfile().'
             );
         }
 
@@ -144,37 +145,66 @@ export class MemberControllerApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberInfoDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberResponseDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async getMemberInfo(requestParameters: GetMemberInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberInfoDto> {
-        const response = await this.getMemberInfoRaw(requestParameters, initOverrides);
+    async getMemberProfile(requestParameters: GetMemberProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberResponseDto> {
+        const response = await this.getMemberProfileRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async modifyRaw(requestParameters: ModifyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberResponseDto>> {
+    async getMyProfileRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberResponseDto>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("kakaoOAuth", []);
+        }
+
+        const response = await this.request({
+            path: `/api/members/me`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getMyProfile(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberResponseDto> {
+        const response = await this.getMyProfileRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async modifyMemberInfoRaw(requestParameters: ModifyMemberInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberResponseDto>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
-                'Required parameter "id" was null or undefined when calling modify().'
+                'Required parameter "id" was null or undefined when calling modifyMemberInfo().'
             );
         }
 
         if (requestParameters['member'] == null) {
             throw new runtime.RequiredError(
                 'member',
-                'Required parameter "member" was null or undefined when calling modify().'
+                'Required parameter "member" was null or undefined when calling modifyMemberInfo().'
             );
         }
 
         if (requestParameters['keepImageId'] == null) {
             throw new runtime.RequiredError(
                 'keepImageId',
-                'Required parameter "keepImageId" was null or undefined when calling modify().'
+                'Required parameter "keepImageId" was null or undefined when calling modifyMemberInfo().'
             );
         }
 
@@ -207,6 +237,10 @@ export class MemberControllerApi extends runtime.BaseAPI {
             formParams.append('member', new Blob([JSON.stringify(MemberModifyRequestDtoToJSON(requestParameters['member']))], { type: "application/json", }));
                     }
 
+        if (requestParameters['keywordIds'] != null) {
+            formParams.append('keywordIds', new Blob([JSON.stringify(UserKeywordSaveRequestToJSON(requestParameters['keywordIds']))], { type: "application/json", }));
+                    }
+
         if (requestParameters['keepImageId'] != null) {
             formParams.append('keepImageId', requestParameters['keepImageId'] as any);
         }
@@ -230,14 +264,14 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async modify(requestParameters: ModifyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberResponseDto> {
-        const response = await this.modifyRaw(requestParameters, initOverrides);
+    async modifyMemberInfo(requestParameters: ModifyMemberInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberResponseDto> {
+        const response = await this.modifyMemberInfoRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async registerMemberRaw(requestParameters: RegisterMemberOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberRegisterResponseDto>> {
+    async registerRaw(requestParameters: RegisterOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberRegisterResponseDto>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -254,7 +288,7 @@ export class MemberControllerApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RegisterMemberRequestToJSON(requestParameters['registerMemberRequest']),
+            body: RegisterRequestToJSON(requestParameters['registerRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberRegisterResponseDtoFromJSON(jsonValue));
@@ -262,14 +296,14 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async registerMember(requestParameters: RegisterMemberOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberRegisterResponseDto> {
-        const response = await this.registerMemberRaw(requestParameters, initOverrides);
+    async register(requestParameters: RegisterOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberRegisterResponseDto> {
+        const response = await this.registerRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async searchMembersByNicknameRaw(requestParameters: SearchMembersByNicknameRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseListMemberInfoDto>> {
+    async searchMembersByNicknameRaw(requestParameters: SearchMembersByNicknameRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseListMemberResponseDto>> {
         if (requestParameters['nickname'] == null) {
             throw new runtime.RequiredError(
                 'nickname',
@@ -297,12 +331,12 @@ export class MemberControllerApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseListMemberInfoDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseListMemberResponseDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async searchMembersByNickname(requestParameters: SearchMembersByNicknameRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseListMemberInfoDto> {
+    async searchMembersByNickname(requestParameters: SearchMembersByNicknameRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseListMemberResponseDto> {
         const response = await this.searchMembersByNicknameRaw(requestParameters, initOverrides);
         return await response.value();
     }

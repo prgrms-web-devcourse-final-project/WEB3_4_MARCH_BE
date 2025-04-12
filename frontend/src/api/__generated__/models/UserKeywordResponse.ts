@@ -31,6 +31,18 @@ export interface UserKeywordResponse {
      * @memberof UserKeywordResponse
      */
     name?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserKeywordResponse
+     */
+    categoryId?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserKeywordResponse
+     */
+    categoryName?: string;
 }
 
 /**
@@ -52,6 +64,8 @@ export function UserKeywordResponseFromJSONTyped(json: any, ignoreDiscriminator:
         
         'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
+        'categoryId': json['categoryId'] == null ? undefined : json['categoryId'],
+        'categoryName': json['categoryName'] == null ? undefined : json['categoryName'],
     };
 }
 
@@ -68,6 +82,8 @@ export function UserKeywordResponseToJSONTyped(value?: UserKeywordResponse | nul
         
         'id': value['id'],
         'name': value['name'],
+        'categoryId': value['categoryId'],
+        'categoryName': value['categoryName'],
     };
 }
 

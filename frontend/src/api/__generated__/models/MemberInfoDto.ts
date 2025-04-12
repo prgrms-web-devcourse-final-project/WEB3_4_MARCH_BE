@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { UserKeywordResponse } from './UserKeywordResponse';
+import {
+    UserKeywordResponseFromJSON,
+    UserKeywordResponseFromJSONTyped,
+    UserKeywordResponseToJSON,
+    UserKeywordResponseToJSONTyped,
+} from './UserKeywordResponse';
 import type { ImageResponseDto } from './ImageResponseDto';
 import {
     ImageResponseDtoFromJSON,
@@ -99,6 +106,18 @@ export interface MemberInfoDto {
      * @memberof MemberInfoDto
      */
     role?: MemberInfoDtoRoleEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberInfoDto
+     */
+    introduction?: string;
+    /**
+     * 
+     * @type {Array<UserKeywordResponse>}
+     * @memberof MemberInfoDto
+     */
+    keywords?: Array<UserKeywordResponse>;
 }
 
 
@@ -107,7 +126,8 @@ export interface MemberInfoDto {
  */
 export const MemberInfoDtoRoleEnum = {
     RoleTempUser: 'ROLE_TEMP_USER',
-    RoleUser: 'ROLE_USER'
+    RoleUser: 'ROLE_USER',
+    RoleAdmin: 'ROLE_ADMIN'
 } as const;
 export type MemberInfoDtoRoleEnum = typeof MemberInfoDtoRoleEnum[keyof typeof MemberInfoDtoRoleEnum];
 
@@ -141,6 +161,8 @@ export function MemberInfoDtoFromJSONTyped(json: any, ignoreDiscriminator: boole
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
         'role': json['role'] == null ? undefined : json['role'],
+        'introduction': json['introduction'] == null ? undefined : json['introduction'],
+        'keywords': json['keywords'] == null ? undefined : ((json['keywords'] as Array<any>).map(UserKeywordResponseFromJSON)),
     };
 }
 
@@ -167,6 +189,8 @@ export function MemberInfoDtoToJSONTyped(value?: MemberInfoDto | null, ignoreDis
         'latitude': value['latitude'],
         'longitude': value['longitude'],
         'role': value['role'],
+        'introduction': value['introduction'],
+        'keywords': value['keywords'] == null ? undefined : ((value['keywords'] as Array<any>).map(UserKeywordResponseToJSON)),
     };
 }
 

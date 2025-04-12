@@ -1,6 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AddImagesRequest';
+export * from './AdminMemberDto';
 export * from './BlockUserRequest';
 export * from './BlockedUserResponse';
 export * from './ChatMessageResponse';
@@ -12,12 +13,11 @@ export * from './GenericResponseListBlockedUserResponse';
 export * from './GenericResponseListChatRequestDto';
 export * from './GenericResponseListImageResponseDto';
 export * from './GenericResponseListKeywordCategoryResponse';
-export * from './GenericResponseListMemberInfoDto';
+export * from './GenericResponseListMemberResponseDto';
 export * from './GenericResponseListNotificationDto';
 export * from './GenericResponseListRecommendedUserDto';
 export * from './GenericResponseListUserKeywordResponse';
 export * from './GenericResponseLoginResponseDto';
-export * from './GenericResponseMemberInfoDto';
 export * from './GenericResponseMemberRegisterResponseDto';
 export * from './GenericResponseMemberResponseDto';
 export * from './GenericResponsePageChatRoomResponse';
@@ -35,11 +35,13 @@ export * from './MemberRegisterRequestDto';
 export * from './MemberRegisterResponseDto';
 export * from './MemberResponseDto';
 export * from './NotificationDto';
+export * from './PageAdminMemberDto';
 export * from './PageChatRoomResponse';
+export * from './Pageable';
 export * from './Pageablenull';
 export * from './ProfileImageDto';
 export * from './RecommendedUserDto';
-export * from './RegisterMemberRequest';
+export * from './RegisterRequest';
 export * from './SliceChatMessageResponse';
 export * from './Sortnull';
 export * from './UserKeywordResponse';

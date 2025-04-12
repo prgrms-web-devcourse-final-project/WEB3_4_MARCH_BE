@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ChatRoomResponse } from './ChatRoomResponse';
-import {
-    ChatRoomResponseFromJSON,
-    ChatRoomResponseFromJSONTyped,
-    ChatRoomResponseToJSON,
-    ChatRoomResponseToJSONTyped,
-} from './ChatRoomResponse';
 import type { Sortnull } from './Sortnull';
 import {
     SortnullFromJSON,
@@ -27,6 +20,13 @@ import {
     SortnullToJSON,
     SortnullToJSONTyped,
 } from './Sortnull';
+import type { AdminMemberDto } from './AdminMemberDto';
+import {
+    AdminMemberDtoFromJSON,
+    AdminMemberDtoFromJSONTyped,
+    AdminMemberDtoToJSON,
+    AdminMemberDtoToJSONTyped,
+} from './AdminMemberDto';
 import type { Pageablenull } from './Pageablenull';
 import {
     PageablenullFromJSON,
@@ -38,89 +38,89 @@ import {
 /**
  * 
  * @export
- * @interface PageChatRoomResponse
+ * @interface PageAdminMemberDto
  */
-export interface PageChatRoomResponse {
+export interface PageAdminMemberDto {
     /**
      * 
      * @type {number}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     totalElements?: number;
     /**
      * 
      * @type {number}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     totalPages?: number;
     /**
      * 
      * @type {Pageablenull}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     pageable?: Pageablenull;
     /**
      * 
      * @type {boolean}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     first?: boolean;
     /**
      * 
      * @type {boolean}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     last?: boolean;
     /**
      * 
      * @type {number}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     numberOfElements?: number;
     /**
      * 
      * @type {number}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     size?: number;
     /**
      * 
-     * @type {Array<ChatRoomResponse>}
-     * @memberof PageChatRoomResponse
+     * @type {Array<AdminMemberDto>}
+     * @memberof PageAdminMemberDto
      */
-    content?: Array<ChatRoomResponse>;
+    content?: Array<AdminMemberDto>;
     /**
      * 
      * @type {number}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     number?: number;
     /**
      * 
      * @type {Sortnull}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     sort?: Sortnull;
     /**
      * 
      * @type {boolean}
-     * @memberof PageChatRoomResponse
+     * @memberof PageAdminMemberDto
      */
     empty?: boolean;
 }
 
 /**
- * Check if a given object implements the PageChatRoomResponse interface.
+ * Check if a given object implements the PageAdminMemberDto interface.
  */
-export function instanceOfPageChatRoomResponse(value: object): value is PageChatRoomResponse {
+export function instanceOfPageAdminMemberDto(value: object): value is PageAdminMemberDto {
     return true;
 }
 
-export function PageChatRoomResponseFromJSON(json: any): PageChatRoomResponse {
-    return PageChatRoomResponseFromJSONTyped(json, false);
+export function PageAdminMemberDtoFromJSON(json: any): PageAdminMemberDto {
+    return PageAdminMemberDtoFromJSONTyped(json, false);
 }
 
-export function PageChatRoomResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): PageChatRoomResponse {
+export function PageAdminMemberDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): PageAdminMemberDto {
     if (json == null) {
         return json;
     }
@@ -133,18 +133,18 @@ export function PageChatRoomResponseFromJSONTyped(json: any, ignoreDiscriminator
         'last': json['last'] == null ? undefined : json['last'],
         'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'size': json['size'] == null ? undefined : json['size'],
-        'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ChatRoomResponseFromJSON)),
+        'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(AdminMemberDtoFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
         'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
         'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
 
-export function PageChatRoomResponseToJSON(json: any): PageChatRoomResponse {
-    return PageChatRoomResponseToJSONTyped(json, false);
+export function PageAdminMemberDtoToJSON(json: any): PageAdminMemberDto {
+    return PageAdminMemberDtoToJSONTyped(json, false);
 }
 
-export function PageChatRoomResponseToJSONTyped(value?: PageChatRoomResponse | null, ignoreDiscriminator: boolean = false): any {
+export function PageAdminMemberDtoToJSONTyped(value?: PageAdminMemberDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -158,7 +158,7 @@ export function PageChatRoomResponseToJSONTyped(value?: PageChatRoomResponse | n
         'last': value['last'],
         'numberOfElements': value['numberOfElements'],
         'size': value['size'],
-        'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ChatRoomResponseToJSON)),
+        'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(AdminMemberDtoToJSON)),
         'number': value['number'],
         'sort': SortnullToJSON(value['sort']),
         'empty': value['empty'],

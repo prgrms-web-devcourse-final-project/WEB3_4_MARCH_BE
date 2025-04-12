@@ -56,4 +56,33 @@ export class UserRecommendationControllerApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     */
+    async getRecommendationRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseListRecommendedUserDto>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("kakaoOAuth", []);
+        }
+
+        const response = await this.request({
+            path: `/api/matching`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseListRecommendedUserDtoFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getRecommendation(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseListRecommendedUserDto> {
+        const response = await this.getRecommendationRaw(initOverrides);
+        return await response.value();
+    }
+
 }

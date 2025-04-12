@@ -67,6 +67,12 @@ export interface MemberRegisterRequestDto {
      * @memberof MemberRegisterRequestDto
      */
     longitude?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberRegisterRequestDto
+     */
+    introduction?: string;
 }
 
 /**
@@ -100,6 +106,7 @@ export function MemberRegisterRequestDtoFromJSONTyped(json: any, ignoreDiscrimin
         'height': json['height'],
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
+        'introduction': json['introduction'] == null ? undefined : json['introduction'],
     };
 }
 
@@ -122,6 +129,7 @@ export function MemberRegisterRequestDtoToJSONTyped(value?: MemberRegisterReques
         'height': value['height'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
+        'introduction': value['introduction'],
     };
 }
 

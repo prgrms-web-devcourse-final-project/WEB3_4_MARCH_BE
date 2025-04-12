@@ -55,6 +55,12 @@ export interface MemberModifyRequestDto {
      * @memberof MemberModifyRequestDto
      */
     longitude?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberModifyRequestDto
+     */
+    introduction?: string;
 }
 
 /**
@@ -84,6 +90,7 @@ export function MemberModifyRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
         'gender': json['gender'],
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
+        'introduction': json['introduction'] == null ? undefined : json['introduction'],
     };
 }
 
@@ -104,6 +111,7 @@ export function MemberModifyRequestDtoToJSONTyped(value?: MemberModifyRequestDto
         'gender': value['gender'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
+        'introduction': value['introduction'],
     };
 }
 

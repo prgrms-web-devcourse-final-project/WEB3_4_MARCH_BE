@@ -1,4 +1,4 @@
-.openapi-generator-ignore
+apis/AdminMemberControllerApi.ts
 apis/BlockUserControllerApi.ts
 apis/ChatControllerApi.ts
 apis/ChatRequestControllerApi.ts
@@ -14,6 +14,7 @@ apis/UserRecommendationControllerApi.ts
 apis/index.ts
 index.ts
 models/AddImagesRequest.ts
+models/AdminMemberDto.ts
 models/BlockUserRequest.ts
 models/BlockedUserResponse.ts
 models/ChatMessageResponse.ts
@@ -25,12 +26,11 @@ models/GenericResponseListBlockedUserResponse.ts
 models/GenericResponseListChatRequestDto.ts
 models/GenericResponseListImageResponseDto.ts
 models/GenericResponseListKeywordCategoryResponse.ts
-models/GenericResponseListMemberInfoDto.ts
+models/GenericResponseListMemberResponseDto.ts
 models/GenericResponseListNotificationDto.ts
 models/GenericResponseListRecommendedUserDto.ts
 models/GenericResponseListUserKeywordResponse.ts
 models/GenericResponseLoginResponseDto.ts
-models/GenericResponseMemberInfoDto.ts
 models/GenericResponseMemberRegisterResponseDto.ts
 models/GenericResponseMemberResponseDto.ts
 models/GenericResponsePageChatRoomResponse.ts
@@ -48,11 +48,13 @@ models/MemberRegisterRequestDto.ts
 models/MemberRegisterResponseDto.ts
 models/MemberResponseDto.ts
 models/NotificationDto.ts
+models/PageAdminMemberDto.ts
 models/PageChatRoomResponse.ts
+models/Pageable.ts
 models/Pageablenull.ts
 models/ProfileImageDto.ts
 models/RecommendedUserDto.ts
-models/RegisterMemberRequest.ts
+models/RegisterRequest.ts
 models/SliceChatMessageResponse.ts
 models/Sortnull.ts
 models/UserKeywordResponse.ts

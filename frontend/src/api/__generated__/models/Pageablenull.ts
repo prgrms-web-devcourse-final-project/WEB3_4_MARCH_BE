@@ -29,18 +29,6 @@ import {
 export interface Pageablenull {
     /**
      * 
-     * @type {number}
-     * @memberof Pageablenull
-     */
-    offset?: number;
-    /**
-     * 
-     * @type {Sortnull}
-     * @memberof Pageablenull
-     */
-    sort?: Sortnull;
-    /**
-     * 
      * @type {boolean}
      * @memberof Pageablenull
      */
@@ -63,6 +51,18 @@ export interface Pageablenull {
      * @memberof Pageablenull
      */
     unpaged?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Pageablenull
+     */
+    offset?: number;
+    /**
+     * 
+     * @type {Sortnull}
+     * @memberof Pageablenull
+     */
+    sort?: Sortnull;
 }
 
 /**
@@ -82,12 +82,12 @@ export function PageablenullFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
-        'offset': json['offset'] == null ? undefined : json['offset'],
-        'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
         'paged': json['paged'] == null ? undefined : json['paged'],
         'pageNumber': json['pageNumber'] == null ? undefined : json['pageNumber'],
         'pageSize': json['pageSize'] == null ? undefined : json['pageSize'],
         'unpaged': json['unpaged'] == null ? undefined : json['unpaged'],
+        'offset': json['offset'] == null ? undefined : json['offset'],
+        'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
     };
 }
 
@@ -102,12 +102,12 @@ export function PageablenullToJSONTyped(value?: Pageablenull | null, ignoreDiscr
 
     return {
         
-        'offset': value['offset'],
-        'sort': SortnullToJSON(value['sort']),
         'paged': value['paged'],
         'pageNumber': value['pageNumber'],
         'pageSize': value['pageSize'],
         'unpaged': value['unpaged'],
+        'offset': value['offset'],
+        'sort': SortnullToJSON(value['sort']),
     };
 }
 

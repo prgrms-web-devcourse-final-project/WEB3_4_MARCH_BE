@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AdminMemberControllerApi';
 export * from './BlockUserControllerApi';
 export * from './ChatControllerApi';
 export * from './ChatRequestControllerApi';

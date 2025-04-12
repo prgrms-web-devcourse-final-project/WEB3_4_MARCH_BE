@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { UserKeywordResponse } from './UserKeywordResponse';
+import {
+    UserKeywordResponseFromJSON,
+    UserKeywordResponseFromJSONTyped,
+    UserKeywordResponseToJSON,
+    UserKeywordResponseToJSONTyped,
+} from './UserKeywordResponse';
 import type { ImageResponseDto } from './ImageResponseDto';
 import {
     ImageResponseDtoFromJSON,
@@ -33,12 +40,6 @@ export interface MemberResponseDto {
      * @memberof MemberResponseDto
      */
     id?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof MemberResponseDto
-     */
-    email?: string;
     /**
      * 
      * @type {string}
@@ -77,6 +78,42 @@ export interface MemberResponseDto {
     images?: Array<ImageResponseDto>;
     /**
      * 
+     * @type {string}
+     * @memberof MemberResponseDto
+     */
+    introduction?: string;
+    /**
+     * 
+     * @type {Array<UserKeywordResponse>}
+     * @memberof MemberResponseDto
+     */
+    keywords?: Array<UserKeywordResponse>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof MemberResponseDto
+     */
+    liked?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberResponseDto
+     */
+    chatRequestStatus?: MemberResponseDtoChatRequestStatusEnum;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof MemberResponseDto
+     */
+    blockStatus?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof MemberResponseDto
+     */
+    isDeleted?: boolean;
+    /**
+     * 
      * @type {number}
      * @memberof MemberResponseDto
      */
@@ -88,6 +125,18 @@ export interface MemberResponseDto {
      */
     longitude?: number;
 }
+
+
+/**
+ * @export
+ */
+export const MemberResponseDtoChatRequestStatusEnum = {
+    Pending: 'PENDING',
+    Accepted: 'ACCEPTED',
+    Rejected: 'REJECTED'
+} as const;
+export type MemberResponseDtoChatRequestStatusEnum = typeof MemberResponseDtoChatRequestStatusEnum[keyof typeof MemberResponseDtoChatRequestStatusEnum];
+
 
 /**
  * Check if a given object implements the MemberResponseDto interface.
@@ -107,13 +156,18 @@ export function MemberResponseDtoFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'email': json['email'] == null ? undefined : json['email'],
         'nickname': json['nickname'] == null ? undefined : json['nickname'],
         'gender': json['gender'] == null ? undefined : json['gender'],
         'age': json['age'] == null ? undefined : json['age'],
         'height': json['height'] == null ? undefined : json['height'],
         'profileImage': json['profileImage'] == null ? undefined : ImageResponseDtoFromJSON(json['profileImage']),
         'images': json['images'] == null ? undefined : ((json['images'] as Array<any>).map(ImageResponseDtoFromJSON)),
+        'introduction': json['introduction'] == null ? undefined : json['introduction'],
+        'keywords': json['keywords'] == null ? undefined : ((json['keywords'] as Array<any>).map(UserKeywordResponseFromJSON)),
+        'liked': json['liked'] == null ? undefined : json['liked'],
+        'chatRequestStatus': json['chatRequestStatus'] == null ? undefined : json['chatRequestStatus'],
+        'blockStatus': json['blockStatus'] == null ? undefined : json['blockStatus'],
+        'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
     };
@@ -131,13 +185,18 @@ export function MemberResponseDtoToJSONTyped(value?: MemberResponseDto | null, i
     return {
         
         'id': value['id'],
-        'email': value['email'],
         'nickname': value['nickname'],
         'gender': value['gender'],
         'age': value['age'],
         'height': value['height'],
         'profileImage': ImageResponseDtoToJSON(value['profileImage']),
         'images': value['images'] == null ? undefined : ((value['images'] as Array<any>).map(ImageResponseDtoToJSON)),
+        'introduction': value['introduction'],
+        'keywords': value['keywords'] == null ? undefined : ((value['keywords'] as Array<any>).map(UserKeywordResponseToJSON)),
+        'liked': value['liked'],
+        'chatRequestStatus': value['chatRequestStatus'],
+        'blockStatus': value['blockStatus'],
+        'isDeleted': value['isDeleted'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
     };

@@ -24,12 +24,6 @@ export interface Sortnull {
      * @type {boolean}
      * @memberof Sortnull
      */
-    empty?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Sortnull
-     */
     sorted?: boolean;
     /**
      * 
@@ -37,6 +31,12 @@ export interface Sortnull {
      * @memberof Sortnull
      */
     unsorted?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Sortnull
+     */
+    empty?: boolean;
 }
 
 /**
@@ -56,9 +56,9 @@ export function SortnullFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     }
     return {
         
-        'empty': json['empty'] == null ? undefined : json['empty'],
         'sorted': json['sorted'] == null ? undefined : json['sorted'],
         'unsorted': json['unsorted'] == null ? undefined : json['unsorted'],
+        'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
 
@@ -73,9 +73,9 @@ export function SortnullToJSONTyped(value?: Sortnull | null, ignoreDiscriminator
 
     return {
         
-        'empty': value['empty'],
         'sorted': value['sorted'],
         'unsorted': value['unsorted'],
+        'empty': value['empty'],
     };
 }
 
