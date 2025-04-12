@@ -8,7 +8,7 @@ export const LoginCheck = ({
   children,
   disabled,
 }: { disabled: boolean; children: React.ReactNode }) => {
-  const { push } = useFlow();
+  const { replace } = useFlow();
   const activeActivity = useActivity();
 
   const { setUserProfile } = useUserStore((s) => ({
@@ -46,9 +46,9 @@ export const LoginCheck = ({
         return;
       }
 
-      push("LoginActivity", {});
+      replace("LoginActivity", {}, { animate: false });
     });
-  }, [push, activeActivity, disabled, setUserProfile]);
+  }, [replace, activeActivity, disabled, setUserProfile]);
 
   return <div>{children}</div>;
 };

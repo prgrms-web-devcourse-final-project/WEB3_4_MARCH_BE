@@ -8,7 +8,7 @@ import { useFlow } from "../stackflow/stackflow";
 export const LoginLoadingActivity = () => {
   const { code } = useActivityParams<{ code?: string }>();
 
-  const { push } = useFlow();
+  const { replace } = useFlow();
 
   useEffect(() => {
     const handleLogin = async () => {
@@ -17,10 +17,15 @@ export const LoginLoadingActivity = () => {
           code,
         });
 
+        if (response.code !== 200) {
+          replace("LoginActivity", {});
+          return;
+        }
+
         if (response.data?.isRegistered) {
-          push("ExploreActivity", {});
+          replace("ExploreActivity", {});
         } else {
-          push("ProfileSetupActivity", {});
+          replace("ProfileSetupActivity", {});
         }
 
         // biome-ignore lint/suspicious/noExplicitAny: API error handling requires any type
@@ -35,7 +40,7 @@ export const LoginLoadingActivity = () => {
     };
 
     handleLogin();
-  }, [code, push]);
+  }, [code, replace]);
 
   return (
     <AppScreenLayout noLoginCheck noBottomBar>

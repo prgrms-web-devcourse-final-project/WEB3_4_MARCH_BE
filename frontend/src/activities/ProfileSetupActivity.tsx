@@ -35,10 +35,10 @@ export const ProfileSetupActivity = () => {
     }
 
     setMemberRegisterDto({
-      age: userInfo.age,
+      age: Number(userInfo.age),
       email: userInfo.email,
       gender: userInfo.gender,
-      height: userInfo.height,
+      height: Number(userInfo.height),
       nickname: userInfo.name,
       introduction: userInfo.bio,
       kakaoId,
@@ -68,7 +68,7 @@ export const ProfileSetupActivity = () => {
   };
 
   return (
-    <AppScreenLayout noBottomBar noLoginCheck title="프로필 설정">
+    <AppScreenLayout noBottomBar title="프로필 설정">
       {page === "profile" && (
         <ProfileUserInfoSetupView onComplete={onConfirmProfileSetup} />
       )}

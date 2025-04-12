@@ -8,24 +8,24 @@ export interface UserInfo {
   name: string;
   bio: string;
   gender: "male" | "female";
-  age: number;
-  height: number;
-  weight: number;
+  age: string;
+  height: string;
+  weight: string;
   email: string;
 }
 
 export const ProfileUserInfoSetupView = ({
   onComplete,
 }: {
-  onComplete: (userInfo: UserInfo) => void;
+  onComplete: (userInfo: UserInfo, images: string[]) => void;
 }) => {
   const [images, setImages] = useState<UserInfo["images"]>([]);
   const [name, setName] = useState<UserInfo["name"]>("");
   const [bio, setBio] = useState<UserInfo["bio"]>("");
   const [gender, setGender] = useState<UserInfo["gender"] | null>(null);
-  const [age, setAge] = useState<UserInfo["age"]>(0);
-  const [height, setHeight] = useState<UserInfo["height"]>(0);
-  const [weight, setWeight] = useState<UserInfo["weight"]>(0);
+  const [age, setAge] = useState<UserInfo["age"]>("");
+  const [height, setHeight] = useState<UserInfo["height"]>("");
+  const [weight, setWeight] = useState<UserInfo["weight"]>("");
   const [email, setEmail] = useState<UserInfo["email"]>(""); // 이메일 상태 추가
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -100,16 +100,19 @@ export const ProfileUserInfoSetupView = ({
 
   const handleConfirm = () => {
     if (validateForm() && gender) {
-      onComplete({
+      onComplete(
+        {
+          images,
+          name,
+          bio,
+          gender,
+          age,
+          height,
+          weight,
+          email,
+        },
         images,
-        name,
-        bio,
-        gender,
-        age,
-        height,
-        weight,
-        email,
-      });
+      );
     }
   };
 
@@ -283,7 +286,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="age"
                 value={age}
-                onChange={(e) => setAge(Number(e.target.value))}
+                onChange={(e) => setAge(e.target.value)}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.age ? "border-red-300" : "border-gray-300",
@@ -314,7 +317,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="height"
                 value={height}
-                onChange={(e) => setHeight(Number(e.target.value))}
+                onChange={(e) => setHeight(e.target.value)}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.height ? "border-red-300" : "border-gray-300",
@@ -345,7 +348,7 @@ export const ProfileUserInfoSetupView = ({
                 type="number"
                 id="weight"
                 value={weight}
-                onChange={(e) => setWeight(Number(e.target.value))}
+                onChange={(e) => setWeight(e.target.value)}
                 className={cn(
                   "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
                   errors.weight ? "border-red-300" : "border-gray-300",

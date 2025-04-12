@@ -15,17 +15,11 @@ export const LoginActivity = () => {
       redirectUri: REDIRECT_URI,
     });
 
-    console.log(
-      "###url",
-      kakaoAuthUrl,
-      import.meta.env.VITE_DEFAULT_KAKAO_API_KEY,
-    );
-
     window.location.href = kakaoAuthUrl;
   };
 
   return (
-    <AppScreenLayout noTopBar noBottomBar>
+    <AppScreenLayout noTopBar noBottomBar noLoginCheck>
       <div className="h-[100vh] flex flex-col items-center justify-between bg-white p-6">
         {/* Top logo area */}
         <div className="w-full flex justify-center mt-12">
