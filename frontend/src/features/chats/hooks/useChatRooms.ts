@@ -1,22 +1,39 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../../api/apiClient";
 
-type ChatRoom = {
-  room_id: number;
-  sender_id: number;
-  receiver_id: number;
-  profileImg: string | null;
-  createdAt: string;
-};
-
 export const useChatRooms = () => {
-  const { data: chatRooms } = useQuery<ChatRoom[]>({
+  const {
+    data: chatRooms,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["chats"],
-    queryFn: () => {
-      console.log("hi");
-      return apiClient.get("/api/chat/chatrooms");
+    queryFn: ({ pageParam = 1 }) => {
+      return apiClient.chatRoom.getChatRooms({
+        page: pageParam,
+        size: 10,
+      });
     },
+    getNextPageParam: (lastPage) => {
+      // Check if this is the last page
+      if (lastPage.data?.last === true) {
+        return undefined;
+      }
+      // Return the next page number
+      return (lastPage.data?.number ?? 0) + 1;
+    },
+    initialPageParam: 1,
   });
 
-  return { chatRooms };
+  return {
+    chatRooms,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  };
 };
