@@ -1,24 +1,28 @@
 import { useActivityParams } from "@stackflow/react";
 import AppScreenLayout from "../layout/AppScreenLayout";
 import { useEffect } from "react";
-import { apiClient } from "../api/apiClient";
 import { Loader2 } from "lucide-react";
+import { apiClient } from "../api/apiClient";
 
 export const LoginLoadingActivity = () => {
   const { code } = useActivityParams<{ code?: string }>();
 
   useEffect(() => {
     const handleLogin = async () => {
-      if (code) {
-        console.log("###code", code);
-        // const response = await apiClient.post("/api/auth/kakao/login", {
-          const response = await apiClient.get("/api/auth/kakao/callback", {
-            params: {
-              code,
-            },
+      try {
+        const response = await apiClient.kakaoAuth.loginCallback({
+          code,
         });
 
-        console.log("###response", response);
+        console.log("Login successful:", response);
+        // biome-ignore lint/suspicious/noExplicitAny: API error handling requires any type
+      } catch (error: any) {
+        console.error("Login error details:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          code,
+        });
       }
     };
 
