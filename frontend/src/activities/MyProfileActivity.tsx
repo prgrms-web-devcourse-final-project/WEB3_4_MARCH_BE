@@ -34,7 +34,7 @@ const MyProfileActivity: React.FC<MyProfileActivityProps> = ({
           profile={{
             age: myProfile.age ?? 0,
             bio: myProfile.introduction ?? "",
-            image: myProfile.images?.[0].url ?? "",
+            image: myProfile.images?.[0]?.url ?? "",
             interests:
               myProfile.keywords?.map((keyword) => keyword.name ?? "") ?? [],
             name: myProfile.nickname ?? "",

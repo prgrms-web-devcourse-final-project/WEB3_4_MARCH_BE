@@ -3,7 +3,7 @@ import isEqual from "lodash/isEqual";
 import type { MemberResponseDto } from "../../api/__generated__";
 
 interface UserState {
-  profile: MemberResponseDto;
+  profile: MemberResponseDto | null;
   setUserProfile: (newProfile: MemberResponseDto) => void;
 }
 
