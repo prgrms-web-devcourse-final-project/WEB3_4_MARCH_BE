@@ -84,14 +84,70 @@ import { Marker } from './Marker';
 | `title` | string | - | Title of the marker (displayed on hover) |
 | `content` | ReactNode | - | Content to display in an info window when the marker is clicked |
 
+### CustomOverlay
+
+The `CustomOverlay` component renders custom HTML content at a specified position on the map.
+
+```tsx
+import { CustomOverlay } from './CustomOverlay';
+
+<CustomOverlay
+  position={{ lat: 37.5665, lng: 126.978 }}
+  content="<div style='padding: 5px; background-color: #fff; border-radius: 5px;'>Hello World!</div>"
+  yAnchor={1.0}
+  xAnchor={0.5}
+  onClick={() => console.log('Overlay clicked')}
+/>
+```
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `position` | { lat: number, lng: number } | - | Position of the overlay |
+| `content` | string | - | HTML content of the overlay |
+| `zIndex` | number | - | Z-index of the overlay |
+| `yAnchor` | number | 1.0 | Y-axis anchor point (0-1, where 0 is top, 1 is bottom) |
+| `xAnchor` | number | 0.5 | X-axis anchor point (0-1, where 0 is left, 1 is right) |
+| `onClick` | () => void | - | Function to call when the overlay is clicked |
+
+### TextMarker
+
+The `TextMarker` component renders a marker with a text label. It combines the `Marker` and `CustomOverlay` components.
+
+```tsx
+import { TextMarker } from './TextMarker';
+
+<TextMarker
+  position={{ lat: 37.5665, lng: 126.978 }}
+  title="Seoul"
+  text="Seoul"
+  textStyle={{
+    color: "#fff",
+    backgroundColor: "#000",
+    padding: "5px 10px",
+    borderRadius: "4px"
+  }}
+  onClick={() => console.log('TextMarker clicked')}
+/>
+```
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `position` | { lat: number, lng: number } | - | Position of the marker |
+| `text` | string | - | Text to display with the marker |
+| `textStyle` | { color?: string, backgroundColor?: string, padding?: string, borderRadius?: string, fontSize?: string, fontWeight?: string, custom?: string } | - | Style options for the text |
+| `textYOffset` | number | 0.5 | Y-axis offset of the text relative to the marker (negative values move text up) |
+| ... | ... | ... | All other `Marker` props except `content` |
+
 ## Examples
 
 ### Basic Marker Example
 
 ```tsx
-import KakaoMap from './KakaoMap';
-import { Marker } from './Marker';
-import { MapProvider } from './contexts/MapContext';
+import { KakaoMap, Marker, MapProvider } from './';
 
 const MapWithMarkers = () => {
   const positions = [
@@ -138,5 +194,44 @@ const [position, setPosition] = useState({ lat: 37.5665, lng: 126.978 });
   position={position}
   draggable={true}
   onDragEnd={(newPosition) => setPosition(newPosition)}
+/>
+```
+
+### Text Marker Example
+
+```tsx
+<TextMarker
+  position={{ lat: 37.5665, lng: 126.978 }}
+  title="Seoul"
+  text="Seoul"
+  textStyle={{
+    color: "#fff",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: "5px 10px",
+    borderRadius: "4px",
+    fontSize: "14px"
+  }}
+  textYOffset={-0.5} // Position the text above the marker
+/>
+```
+
+### Custom HTML Overlay Example
+
+```tsx
+<CustomOverlay
+  position={{ lat: 37.5665, lng: 126.978 }}
+  content={`
+    <div style="
+      padding: 10px; 
+      background-color: #fff; 
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    ">
+      <h3 style="margin: 0;">Seoul</h3>
+      <p style="margin: 5px 0 0;">Capital of South Korea</p>
+    </div>
+  `}
+  yAnchor={1.0}
+  xAnchor={0.5}
 />
 ``` 
