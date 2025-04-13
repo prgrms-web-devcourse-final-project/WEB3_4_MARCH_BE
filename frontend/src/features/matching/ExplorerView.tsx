@@ -1,18 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { DumyPeople } from "./dumy";
-import { Heart, RefreshCw, X } from "lucide-react";
+import { Heart, RefreshCw, X, Search } from "lucide-react";
 import { cn } from "../../utils/classNaem";
 import { useFlow } from "../../stackflow/stackflow";
+import type { RecommendedUserDto } from "../../api/__generated__";
 
 type ProfileWithStatus = {
-  profile: (typeof DumyPeople)[0];
+  profile: RecommendedUserDto;
   status: "active" | "swiping" | "removed";
   direction: "left" | "right" | null;
 };
 
-export default function ExploreView() {
+const TEMP_IMAGE = "/placeholder.svg?height=400&width=300";
+const TEMP_KEYWORDS = ["여행", "독서", "카페", "디자인"];
+const TEMP_AGE = 27;
+const TEMP_BIO =
+  "여행과 독서를 좋아하는 디자이너입니다. 같이 카페 투어 하실 분?";
+
+export default function ExploreView({
+  matchings,
+}: {
+  matchings: RecommendedUserDto[];
+}) {
   const [profiles, setProfiles] = useState<ProfileWithStatus[]>(() =>
-    DumyPeople.map((profile, index) => ({
+    matchings.map((profile, index) => ({
       profile,
       status: index === 0 ? "active" : "active",
       direction: null,
@@ -99,7 +109,7 @@ export default function ExploreView() {
   const handleRefresh = () => {
     setShowEndCard(false);
     setProfiles(
-      DumyPeople.map((profile) => ({
+      matchings.map((profile) => ({
         profile,
         status: "active",
         direction: null,
@@ -118,10 +128,32 @@ export default function ExploreView() {
   const { push } = useFlow();
 
   const handleProfileCardClick = () => {
+    if (!profiles[currentIndex].profile.id) return;
+
     push("ProfileDetailActivity", {
       userId: profiles[currentIndex].profile.id.toString(),
     });
   };
+
+  if (profiles.length === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden p-6 text-center animate-fade-in">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Search size={32} className="text-primary" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-3">
+            추천 데이터가 없습니다
+          </h3>
+          <p className="text-gray-600 mb-6">
+            아직 매칭할 수 있는 프로필이 준비되지 않았습니다.
+            <br />
+            조금 후에 다시 확인해주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -222,22 +254,20 @@ export default function ExploreView() {
                   <div className="aspect-[5/7] relative bg-gray-100">
                     <div
                       className="absolute inset-0 bg-center bg-cover"
-                      style={{ backgroundImage: `url(${item.profile.image})` }}
+                      style={{ backgroundImage: `url(${TEMP_IMAGE})` }}
                     />
 
                     {/* Profile info overlay */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
                       <div className="flex items-center">
                         <h3 className="text-xl font-bold">
-                          {item.profile.name}
+                          {item.profile.nickname ?? "알 수 없음"}
                         </h3>
-                        <span className="ml-2">{item.profile.age}</span>
+                        <span className="ml-2">{TEMP_AGE}</span>
                       </div>
-                      <p className="mt-1 text-sm text-gray-200">
-                        {item.profile.bio}
-                      </p>
+                      <p className="mt-1 text-sm text-gray-200">{TEMP_BIO}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {item.profile.interests.map((interest) => (
+                        {TEMP_KEYWORDS.map((interest) => (
                           <span
                             key={interest}
                             className="px-2 py-1 bg-white/20 rounded-full text-xs backdrop-blur-sm"
