@@ -6,6 +6,7 @@ import {
   getCurrentPosition,
   isPermissionDeniedError,
 } from "../../utils/currentPosition";
+import { Marker } from "./kakaomap";
 
 export const MapView = () => {
   const { mapInstance, loading } = useMap();
@@ -41,7 +42,9 @@ export const MapView = () => {
 
   return (
     <div className="relative h-full">
-      <KakaoMap />
+      <KakaoMap>
+        <Marker position={{ lat: 37.494589, lng: 126.868346 }} />
+      </KakaoMap>
       <div className="absolute bottom-6 right-4 z-10">
         <button
           className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center"

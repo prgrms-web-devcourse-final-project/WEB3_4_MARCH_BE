@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { useMap } from "./contexts/MapContext";
 
 interface KakaoMapProps {
@@ -6,6 +7,7 @@ interface KakaoMapProps {
   height?: string;
   center?: { lat: number; lng: number };
   level?: number;
+  children?: ReactNode;
 }
 
 const KakaoMap: React.FC<KakaoMapProps> = ({
@@ -13,6 +15,7 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
   height = "100%",
   center = { lat: 37.5665, lng: 126.978 }, // Default to Seoul
   level = 3,
+  children,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const { mapInstance, setMapInstance } = useMap();
@@ -20,7 +23,6 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    console.log(window.kakao);
     // Initialize the map
     const options = {
       center: new window.kakao.maps.LatLng(center.lat, center.lng),
@@ -59,7 +61,12 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
     mapInstance.setLevel(level);
   }, [level, mapInstance]);
 
-  return <div ref={mapRef} style={{ width, height }} />;
+  return (
+    <div ref={mapRef} style={{ width, height }}>
+      {/* Render children (Markers, etc.) when map is available */}
+      {mapInstance && children}
+    </div>
+  );
 };
 
 export default KakaoMap;
