@@ -11,6 +11,7 @@ import ProfileDetailActivity from "../activities/ProfileDetailActivity";
 import { LoginActivity } from "../activities/LoginActivity";
 import { ProfileSetupActivity } from "../activities/ProfileSetupActivity";
 import { LoginLoadingActivity } from "../activities/LoginLoadingActivity";
+import { NotificationActivity } from "../activities/NotificationActivity";
 
 const activities = {
   LoginActivity,
@@ -21,6 +22,7 @@ const activities = {
   MyProfileActivity,
   ProfileDetailActivity,
   ProfileSetupActivity,
+  NotificationActivity,
 };
 
 export const { Stack, useFlow } = stackflow({
@@ -46,6 +48,7 @@ export const { Stack, useFlow } = stackflow({
         MyProfileActivity: "/profile",
         ProfileDetailActivity: "/profile/:userId",
         ProfileSetupActivity: "/profile-setup",
+        NotificationActivity: "/notification",
       },
       fallbackActivity: () => "ExploreActivity",
     }),

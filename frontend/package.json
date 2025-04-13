@@ -16,6 +16,7 @@
     "@stackflow/plugin-renderer-basic": "^1.1.13",
     "@stackflow/react": "^1.5.1",
     "@tanstack/react-query": "^5.70.0",
+    "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.485.0",
     "react": "^19.0.0",
