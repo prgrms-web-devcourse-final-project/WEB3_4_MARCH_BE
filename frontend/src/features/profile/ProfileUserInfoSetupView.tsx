@@ -16,17 +16,31 @@ export interface UserInfo {
 
 export const ProfileUserInfoSetupView = ({
   onComplete,
+  defaultProfile,
 }: {
   onComplete: (userInfo: UserInfo, images: string[]) => void;
+  defaultProfile?: UserInfo;
 }) => {
-  const [images, setImages] = useState<UserInfo["images"]>([]);
-  const [name, setName] = useState<UserInfo["name"]>("");
-  const [bio, setBio] = useState<UserInfo["bio"]>("");
-  const [gender, setGender] = useState<UserInfo["gender"] | null>(null);
-  const [age, setAge] = useState<UserInfo["age"]>("");
-  const [height, setHeight] = useState<UserInfo["height"]>("");
-  const [weight, setWeight] = useState<UserInfo["weight"]>("");
-  const [email, setEmail] = useState<UserInfo["email"]>(""); // 이메일 상태 추가
+  const [images, setImages] = useState<UserInfo["images"]>(
+    defaultProfile?.images ?? [],
+  );
+  const [name, setName] = useState<UserInfo["name"]>(
+    defaultProfile?.name ?? "",
+  );
+  const [bio, setBio] = useState<UserInfo["bio"]>(defaultProfile?.bio ?? "");
+  const [gender, setGender] = useState<UserInfo["gender"] | null>(
+    defaultProfile?.gender ?? null,
+  );
+  const [age, setAge] = useState<UserInfo["age"]>(defaultProfile?.age ?? "");
+  const [height, setHeight] = useState<UserInfo["height"]>(
+    defaultProfile?.height ?? "",
+  );
+  const [weight, setWeight] = useState<UserInfo["weight"]>(
+    defaultProfile?.weight ?? "",
+  );
+  const [email, setEmail] = useState<UserInfo["email"]>(
+    defaultProfile?.email ?? "",
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const maxImages = 5;

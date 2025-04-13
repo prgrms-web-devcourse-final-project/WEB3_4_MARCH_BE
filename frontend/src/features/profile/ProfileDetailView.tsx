@@ -14,11 +14,13 @@ interface ProfileDetailProps {
     job?: string;
   };
   isMyProfile?: boolean;
+  onProfileEditClick?: () => void;
 }
 
 export default function ProfileDetailView({
   profile,
   isMyProfile,
+  onProfileEditClick,
 }: ProfileDetailProps) {
   const [liked, setLiked] = useState(false);
 
@@ -38,8 +40,7 @@ export default function ProfileDetailView({
   };
 
   const handleEditProfile = () => {
-    // In a real app, this would navigate to the edit profile screen
-    alert("프로필 수정 화면으로 이동합니다.");
+    onProfileEditClick?.();
   };
 
   return (

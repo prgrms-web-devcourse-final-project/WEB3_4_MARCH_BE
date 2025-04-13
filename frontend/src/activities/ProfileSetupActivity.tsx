@@ -6,7 +6,6 @@ import {
   ProfileUserInfoSetupView,
   type UserInfo,
 } from "../features/profile/ProfileUserInfoSetupView";
-import { useFlow } from "../stackflow/stackflow";
 import { useUserStore } from "../features/auth/useUserStore";
 import type {
   MemberRegisterRequestDto,
@@ -20,8 +19,17 @@ import {
   showBrowserPermissionGuide,
   showLocationPermissionDialog,
 } from "../utils/currentPosition";
+import { useFlow, type ActivityName } from "../stackflow/stackflow";
 
-export const ProfileSetupActivity = () => {
+type ProfileSetupActivityParams = {
+  redirectActivity?: ActivityName;
+};
+
+export const ProfileSetupActivity = ({
+  params,
+}: {
+  params: ProfileSetupActivityParams;
+}) => {
   const [page, setPage] = useState<"profile" | "keyword">("profile");
 
   const [memberRegisterDto, setMemberRegisterDto] =
@@ -93,13 +101,37 @@ export const ProfileSetupActivity = () => {
       },
     });
 
-    push("ExploreActivity", {});
+    if (params.redirectActivity) {
+      push(params.redirectActivity, {});
+    } else {
+      push("ExploreActivity", {});
+    }
   };
+
+  const imageUrls =
+    (profile?.images?.map((image) => image.url)?.filter(Boolean) as string[]) ??
+    [];
 
   return (
     <AppScreenLayout noBottomBar title="프로필 설정">
       {page === "profile" && (
-        <ProfileUserInfoSetupView onComplete={onConfirmProfileSetup} />
+        <ProfileUserInfoSetupView
+          onComplete={onConfirmProfileSetup}
+          defaultProfile={
+            profile
+              ? {
+                  age: String(profile?.age) ?? "",
+                  bio: profile?.introduction ?? "",
+                  gender: profile?.gender as "male" | "female",
+                  height: String(profile?.height) ?? "",
+                  images: imageUrls,
+                  name: profile?.nickname ?? "",
+                  weight: "",
+                  email: "",
+                }
+              : undefined
+          }
+        />
       )}
       {page === "keyword" && (
         <ProfileKeywordView onComplete={onConfirmKeywordSetup} />
