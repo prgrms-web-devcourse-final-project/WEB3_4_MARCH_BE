@@ -44,8 +44,8 @@ export const { Stack, useFlow } = stackflow({
         ProfileDetailActivity: "/profile/:userId",
         ProfileSetupActivity: "/profile-setup",
       },
-      fallbackActivity: () => "LoginActivity",
+      fallbackActivity: () => "ExploreActivity",
     }),
   ],
-  initialActivity: () => "LoginActivity",
+  initialActivity: () => "ExploreActivity",
 });

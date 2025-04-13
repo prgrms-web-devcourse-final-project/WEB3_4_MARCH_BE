@@ -15,6 +15,7 @@ interface AppScreenLayoutProps extends AppScreenProps {
   backable?: boolean;
   wideScreen?: boolean;
   noLoginCheck?: boolean;
+  onAfterLoginCheck?: (isLoggedIn: boolean) => void;
 }
 
 const AppScreenLayout: FC<AppScreenLayoutProps> = ({
@@ -25,12 +26,16 @@ const AppScreenLayout: FC<AppScreenLayoutProps> = ({
   title,
   wideScreen,
   noLoginCheck = false,
+  onAfterLoginCheck,
   ...appScreenProps
 }) => {
   return (
     <AppScreen {...appScreenProps}>
       <ErrorBoundary fallbackRender={() => <ErrorBoundaryFallback />}>
-        <LoginCheck disabled={noLoginCheck}>
+        <LoginCheck
+          disabled={noLoginCheck}
+          onAfterLoginCheck={onAfterLoginCheck}
+        >
           <div className="relative h-[100vh] w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white">
             {/* Top Bar */}
             {!noTopBar && (

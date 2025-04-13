@@ -7,7 +7,12 @@ import { useUserStore } from "./useUserStore";
 export const LoginCheck = ({
   children,
   disabled,
-}: { disabled: boolean; children: React.ReactNode }) => {
+  onAfterLoginCheck,
+}: {
+  disabled: boolean;
+  children: React.ReactNode;
+  onAfterLoginCheck?: (isLoggedIn: boolean) => void;
+}) => {
   const { replace } = useFlow();
   const activeActivity = useActivity();
 
@@ -38,6 +43,8 @@ export const LoginCheck = ({
     };
 
     checkLoginStatus().then((isLoggedIn) => {
+      onAfterLoginCheck?.(isLoggedIn);
+
       if (isLoggedIn) {
         return;
       }
@@ -48,7 +55,7 @@ export const LoginCheck = ({
 
       replace("LoginActivity", {}, { animate: false });
     });
-  }, [replace, activeActivity, disabled, setUserProfile]);
+  }, [replace, activeActivity, disabled, setUserProfile, onAfterLoginCheck]);
 
   return <div>{children}</div>;
 };

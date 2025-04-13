@@ -2,23 +2,33 @@ import { MapPin } from "lucide-react";
 import { useMap } from "./kakaomap/contexts/MapContext";
 import KakaoMap from "./kakaomap/KakaoMap";
 import { Loading } from "../../components/Loading";
+import {
+  getCurrentPosition,
+  isPermissionDeniedError,
+} from "../../utils/currentPosition";
 
 export const MapView = () => {
   const { mapInstance, loading } = useMap();
 
-  const handleMoveToCurrentLocation = () => {
-    window.navigator.geolocation.getCurrentPosition((position) => {
-      if (mapInstance) {
-        mapInstance.panTo(
-          new window.kakao.maps.LatLng(
-            position.coords.latitude,
-            position.coords.longitude,
-          ),
-        );
+  const handleMoveToCurrentLocation = async () => {
+    const positionResult = await getCurrentPosition();
 
-        mapInstance.setLevel(3);
-      }
-    });
+    if (!positionResult || isPermissionDeniedError(positionResult)) {
+      return;
+    }
+
+    const position = positionResult as GeolocationPosition;
+
+    if (mapInstance) {
+      mapInstance.panTo(
+        new window.kakao.maps.LatLng(
+          position.coords.latitude,
+          position.coords.longitude,
+        ),
+      );
+
+      mapInstance.setLevel(3);
+    }
   };
 
   if (loading) {

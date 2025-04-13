@@ -14,7 +14,12 @@ import type {
   UserKeywordSaveRequest,
 } from "../api/__generated__";
 import { apiClient } from "../api/apiClient";
-import { convertImagesToBlobs } from "../utils/images";
+import {
+  getCurrentPosition,
+  isPermissionDeniedError,
+  showBrowserPermissionGuide,
+  showLocationPermissionDialog,
+} from "../utils/currentPosition";
 
 export const ProfileSetupActivity = () => {
   const [page, setPage] = useState<"profile" | "keyword">("profile");
@@ -29,12 +34,23 @@ export const ProfileSetupActivity = () => {
     profile: s.profile,
   }));
 
-  const onConfirmProfileSetup = (userInfo: UserInfo) => {
+  const onConfirmProfileSetup = async (userInfo: UserInfo) => {
     const kakaoId = profile?.id;
 
     if (!kakaoId) {
       return;
     }
+
+    const positionResult = await getCurrentPosition({
+      retryPermission: true,
+    });
+
+    if (isPermissionDeniedError(positionResult)) {
+      showBrowserPermissionGuide();
+      return;
+    }
+
+    const position = positionResult as GeolocationPosition;
 
     setMemberRegisterDto({
       age: Number(userInfo.age),
@@ -44,6 +60,8 @@ export const ProfileSetupActivity = () => {
       nickname: userInfo.name,
       introduction: userInfo.bio,
       kakaoId,
+      latitude: position?.coords.latitude,
+      longitude: position?.coords.longitude,
     });
 
     setImages(userInfo.images);
@@ -51,7 +69,7 @@ export const ProfileSetupActivity = () => {
     setPage("keyword");
   };
 
-  const onConfirmKeywordSetup = (keywords: string[]) => {
+  const onConfirmKeywordSetup = async (keywords: string[]) => {
     if (!memberRegisterDto) {
       return;
     }
@@ -65,6 +83,8 @@ export const ProfileSetupActivity = () => {
           height: memberRegisterDto.height,
           nickname: memberRegisterDto.nickname,
           kakaoId: memberRegisterDto.kakaoId,
+          latitude: memberRegisterDto.latitude,
+          longitude: memberRegisterDto.longitude,
         },
         files: images,
         keywords: {
