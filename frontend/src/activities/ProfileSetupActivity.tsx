@@ -94,7 +94,8 @@ export const ProfileSetupActivity = ({
           latitude: memberRegisterDto.latitude,
           longitude: memberRegisterDto.longitude,
         },
-        files: images,
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        files: images as any,
         keywords: {
           keywordIds: [],
         },
