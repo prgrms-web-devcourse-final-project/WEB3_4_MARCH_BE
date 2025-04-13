@@ -13,7 +13,7 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
 
     // Kafka에서 사용할 채팅 토픽 이름 상수
-    public static final String CHAT_TOPIC = "chat-messages";
+    public static final String CHAT_TOPIC = "chat-message";
 
     /**
      * Kafka 토픽을 생성하는 빈입니다.
