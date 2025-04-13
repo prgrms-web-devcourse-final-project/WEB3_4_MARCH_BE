@@ -10,9 +10,11 @@ import { useFlow } from "../stackflow/stackflow";
 import { useUserStore } from "../features/auth/useUserStore";
 import type {
   MemberRegisterRequestDto,
+  RegisterOperationRequest,
   UserKeywordSaveRequest,
 } from "../api/__generated__";
 import { apiClient } from "../api/apiClient";
+import { convertImagesToBlobs } from "../utils/images";
 
 export const ProfileSetupActivity = () => {
   const [page, setPage] = useState<"profile" | "keyword">("profile");
@@ -28,7 +30,7 @@ export const ProfileSetupActivity = () => {
   }));
 
   const onConfirmProfileSetup = (userInfo: UserInfo) => {
-    const kakaoId = profile.id;
+    const kakaoId = profile?.id;
 
     if (!kakaoId) {
       return;
@@ -50,19 +52,26 @@ export const ProfileSetupActivity = () => {
   };
 
   const onConfirmKeywordSetup = (keywords: string[]) => {
-    // apiClient.member.register({
-    //   registerRequest: {
-    //     member: {
-    //       age: userInfo.age,
-    //       email: userInfo.email,
-    //       gender: userInfo.gender,
-    //       height: userInfo.height,
-    //       nickname: userInfo.name,
-    //       kakaoId,
-    //     },
-    //     keywords,
-    //   },
-    // });
+    if (!memberRegisterDto) {
+      return;
+    }
+
+    apiClient.member.register({
+      registerRequest: {
+        member: {
+          age: memberRegisterDto.age,
+          email: memberRegisterDto.email,
+          gender: memberRegisterDto.gender,
+          height: memberRegisterDto.height,
+          nickname: memberRegisterDto.nickname,
+          kakaoId: memberRegisterDto.kakaoId,
+        },
+        files: images,
+        keywords: {
+          keywordIds: [],
+        },
+      },
+    });
 
     push("ExploreActivity", {});
   };
