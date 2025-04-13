@@ -14,13 +14,13 @@ export const NotificationActivity = () => {
     profile: s.profile,
   }));
 
-  // const { notifications, isLoading, isError } = useNotifications({
-  //   memberId: profile?.id,
-  // });
+  const { notifications, isLoading, isError } = useNotifications({
+    memberId: profile?.id,
+  });
 
-  const notifications = DUMMY_NOTIFICATIONS;
-  const isLoading = false;
-  const isError = false;
+  // const notifications = DUMMY_NOTIFICATIONS;
+  // const isLoading = false;
+  // const isError = false;
 
   const { markAsRead } = useNotificationRead();
   const { deleteNotification } = useNotificationDelete();

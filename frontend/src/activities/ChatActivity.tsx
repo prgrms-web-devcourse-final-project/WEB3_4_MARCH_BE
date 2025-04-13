@@ -17,8 +17,8 @@ const ChatActivity: React.FC<ChatActivityProps> = ({ params: {} }) => {
           <Loading text="채팅방 목록을 불러오고 있습니다..." />
         </div>
       )}
-      {isError && <div>채팅방 목록을 불러오는데 실패했습니다.</div>}
-      {!isLoading && !isError && <ChatListView />}
+      {/* {isError && <div>채팅방 목록을 불러오는데 실패했습니다.</div>} */}
+      {!isLoading && <ChatListView />}
     </AppScreenLayout>
   );
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DumyChats } from "./dumy";
-import { MoreVertical, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { cn } from "../../utils/classNaem";
 
 export default function ChatListView() {

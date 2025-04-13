@@ -15,7 +15,7 @@ const MapActivity: React.FC<MapActivityProps> = ({ params: {} }) => {
   return (
     <AppScreenLayout title="CONNECT TO" wideScreen>
       <MapProvider>
-        <MapView matchings={DumyMatchings} />
+        <MapView matchings={data?.data} />
       </MapProvider>
     </AppScreenLayout>
   );
