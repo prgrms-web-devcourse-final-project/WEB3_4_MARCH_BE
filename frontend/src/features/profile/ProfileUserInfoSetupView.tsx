@@ -11,20 +11,36 @@ export interface UserInfo {
   age: string;
   height: string;
   weight: string;
+  email: string;
 }
 
 export const ProfileUserInfoSetupView = ({
   onComplete,
+  defaultProfile,
 }: {
-  onComplete: (userInfo: UserInfo) => void;
+  onComplete: (userInfo: UserInfo, images: string[]) => void;
+  defaultProfile?: UserInfo;
 }) => {
-  const [images, setImages] = useState<UserInfo["images"]>([]);
-  const [name, setName] = useState<UserInfo["name"]>("");
-  const [bio, setBio] = useState<UserInfo["bio"]>("");
-  const [gender, setGender] = useState<UserInfo["gender"] | null>(null);
-  const [age, setAge] = useState<UserInfo["age"]>("");
-  const [height, setHeight] = useState<UserInfo["height"]>("");
-  const [weight, setWeight] = useState<UserInfo["weight"]>("");
+  const [images, setImages] = useState<UserInfo["images"]>(
+    defaultProfile?.images ?? [],
+  );
+  const [name, setName] = useState<UserInfo["name"]>(
+    defaultProfile?.name ?? "",
+  );
+  const [bio, setBio] = useState<UserInfo["bio"]>(defaultProfile?.bio ?? "");
+  const [gender, setGender] = useState<UserInfo["gender"] | null>(
+    defaultProfile?.gender ?? null,
+  );
+  const [age, setAge] = useState<UserInfo["age"]>(defaultProfile?.age ?? "");
+  const [height, setHeight] = useState<UserInfo["height"]>(
+    defaultProfile?.height ?? "",
+  );
+  const [weight, setWeight] = useState<UserInfo["weight"]>(
+    defaultProfile?.weight ?? "",
+  );
+  const [email, setEmail] = useState<UserInfo["email"]>(
+    defaultProfile?.email ?? "",
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const maxImages = 5;
@@ -72,19 +88,11 @@ export const ProfileUserInfoSetupView = ({
       newErrors.gender = "성별을 선택해주세요.";
     }
 
-    if (!age.trim()) {
-      newErrors.age = "나이를 입력해주세요.";
-    } else if (
-      Number.isNaN(Number(age)) ||
-      Number(age) < 18 ||
-      Number(age) > 100
-    ) {
+    if (Number.isNaN(Number(age)) || Number(age) < 18 || Number(age) > 100) {
       newErrors.age = "유효한 나이를 입력해주세요. (18-100)";
     }
 
-    if (!height.trim()) {
-      newErrors.height = "키를 입력해주세요.";
-    } else if (
+    if (
       Number.isNaN(Number(height)) ||
       Number(height) < 140 ||
       Number(height) > 220
@@ -92,9 +100,7 @@ export const ProfileUserInfoSetupView = ({
       newErrors.height = "유효한 키를 입력해주세요. (140-220cm)";
     }
 
-    if (!weight.trim()) {
-      newErrors.weight = "몸무게를 입력해주세요.";
-    } else if (
+    if (
       Number.isNaN(Number(weight)) ||
       Number(weight) < 30 ||
       Number(weight) > 150
@@ -108,15 +114,19 @@ export const ProfileUserInfoSetupView = ({
 
   const handleConfirm = () => {
     if (validateForm() && gender) {
-      onComplete({
+      onComplete(
+        {
+          images,
+          name,
+          bio,
+          gender,
+          age,
+          height,
+          weight,
+          email,
+        },
         images,
-        name,
-        bio,
-        gender,
-        age,
-        height,
-        weight,
-      });
+      );
     }
   };
 
@@ -190,6 +200,30 @@ export const ProfileUserInfoSetupView = ({
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              이메일
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={cn(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
+                errors.email ? "border-red-300" : "border-gray-300",
+              )}
+              placeholder="이메일을 입력해주세요"
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
             )}
           </div>
 

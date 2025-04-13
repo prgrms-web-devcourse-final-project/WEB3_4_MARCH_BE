@@ -23,7 +23,8 @@
         "noEmptyPattern": "off"
       },
       "style": {
-        "useSelfClosingElements": "off"
+        "useSelfClosingElements": "off",
+        "noUselessElse": "off"
       }
     }
   },

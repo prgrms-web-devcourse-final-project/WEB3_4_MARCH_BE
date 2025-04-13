@@ -1,4 +1,4 @@
-import { useFlow } from "@stackflow/react/future";
+import { useActivity, useFlow } from "@stackflow/react/future";
 import { ArrowLeft, Bell } from "lucide-react";
 import type { FC } from "react";
 import { Logo } from "../components/Logo";
@@ -9,10 +9,15 @@ type TopBarProps = {
 };
 
 const TopBar: FC<TopBarProps> = ({ backable, title }) => {
-  const { pop } = useFlow();
+  const { pop, push } = useFlow();
+  const { name } = useActivity();
 
   const handleBackClick = () => {
     pop();
+  };
+
+  const handleNotificationClick = () => {
+    push("NotificationActivity", {});
   };
 
   return (
@@ -30,8 +35,15 @@ const TopBar: FC<TopBarProps> = ({ backable, title }) => {
 
       {title ? <div className="text-lg font-medium">{title}</div> : null}
 
-      <button className="p-2 text-gray-600 hover:text-primary transition-colors">
-        <Bell size={22} />
+      <button
+        onClick={handleNotificationClick}
+        className="p-2 text-gray-600 hover:text-primary transition-colors"
+      >
+        {name === "NotificationActivity" ? (
+          <Bell size={22} fill="black" />
+        ) : (
+          <Bell size={22} />
+        )}
       </button>
     </div>
   );

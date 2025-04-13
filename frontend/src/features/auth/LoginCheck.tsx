@@ -1,32 +1,61 @@
 import { useActivity } from "@stackflow/react";
 import { useFlow } from "../../stackflow/stackflow";
 import { useEffect } from "react";
-import authService from "./sessionStorageAuth";
+import { apiClient } from "../../api/apiClient";
+import { useUserStore } from "./useUserStore";
 
 export const LoginCheck = ({
   children,
   disabled,
-}: { disabled: boolean; children: React.ReactNode }) => {
-  const { push } = useFlow();
+  onAfterLoginCheck,
+}: {
+  disabled: boolean;
+  children: React.ReactNode;
+  onAfterLoginCheck?: (isLoggedIn: boolean) => void;
+}) => {
+  const { replace } = useFlow();
   const activeActivity = useActivity();
+
+  const { setUserProfile } = useUserStore((s) => ({
+    setUserProfile: s.setUserProfile,
+  }));
 
   useEffect(() => {
     if (disabled) {
       return;
     }
 
-    const isLoggedIn = authService.isLoggedIn();
+    const checkLoginStatus = async () => {
+      try {
+        const response = await apiClient.member.getMyProfile();
 
-    if (isLoggedIn) {
-      return;
-    }
+        if (response.code === 200 && response.data) {
+          setUserProfile(response.data);
 
-    if (activeActivity?.name === "LoginActivity") {
-      return;
-    }
+          return true;
+        }
 
-    push("LoginActivity", {});
-  }, [push, activeActivity, disabled]);
+        return false;
+      } catch (error) {
+        // 에러가 발생하면(특히 403) 로그인하지 않은 상태로 간주
+        return false;
+      }
+    };
+
+    checkLoginStatus().then((isLoggedIn) => {
+      onAfterLoginCheck?.(isLoggedIn);
+
+      if (isLoggedIn) {
+        return;
+      }
+
+      if (activeActivity?.name === "LoginActivity") {
+        return;
+      }
+
+      replace("LoginActivity", {}, { animate: false });
+    });
+  }, [replace, activeActivity, disabled, setUserProfile, onAfterLoginCheck]);
 
   return <div>{children}</div>;
 };

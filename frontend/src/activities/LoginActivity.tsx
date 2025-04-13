@@ -3,11 +3,21 @@ import { KaKaoLoginButton } from "../components/KaKaoLoginButton";
 import AppScreenLayout from "../layout/AppScreenLayout";
 import { useFlow } from "../stackflow/stackflow";
 import { getKakaoAuthUrl } from "../features/auth/kakao/kakao-auth";
+import { useUserStore } from "../features/auth/useUserStore";
+import { useEffect } from "react";
 
 const REDIRECT_URI = `${window.location.origin}/login-redirect`;
 
 export const LoginActivity = () => {
   const { push } = useFlow();
+
+  const { profile } = useUserStore();
+
+  useEffect(() => {
+    if (profile) {
+      push("ExploreActivity", {});
+    }
+  }, [profile, push]);
 
   const handleKaKaoLoginClick = async () => {
     const kakaoAuthUrl = getKakaoAuthUrl({
@@ -15,17 +25,21 @@ export const LoginActivity = () => {
       redirectUri: REDIRECT_URI,
     });
 
-    console.log(
-      "###url",
-      kakaoAuthUrl,
-      import.meta.env.VITE_DEFAULT_KAKAO_API_KEY,
-    );
-
     window.location.href = kakaoAuthUrl;
   };
 
+  const handleAfterLoginCheck = (isLoggedIn: boolean) => {
+    if (isLoggedIn) {
+      push("ExploreActivity", {}, { animate: false });
+    }
+  };
+
   return (
-    <AppScreenLayout noTopBar noBottomBar>
+    <AppScreenLayout
+      noTopBar
+      noBottomBar
+      onAfterLoginCheck={handleAfterLoginCheck}
+    >
       <div className="h-[100vh] flex flex-col items-center justify-between bg-white p-6">
         {/* Top logo area */}
         <div className="w-full flex justify-center mt-12">
