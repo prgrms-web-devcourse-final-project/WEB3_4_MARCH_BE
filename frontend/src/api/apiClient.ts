@@ -14,11 +14,12 @@ import {
   UserRecommendationControllerApi,
 } from "./__generated__";
 
-const BACKEND_API = "http://43.203.149.178";
+const BACKEND_API =
+  import.meta.env.VITE_DEFAULT_SERVER_URL ?? "http://43.203.149.178";
 
 // API 클라이언트 설정
 const config = new Configuration({
-  basePath: "http://localhost:8080",
+  basePath: BACKEND_API, // "http://localhost:8080",
   credentials: "include",
 });
 
