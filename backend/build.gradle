@@ -81,6 +81,8 @@ dependencies {
 
     // 테스트
     testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'com.h2database:h2'
+
 }
 
 tasks.named('test') {

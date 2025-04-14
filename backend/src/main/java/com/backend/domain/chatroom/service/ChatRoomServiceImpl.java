@@ -17,6 +17,7 @@ import com.backend.global.exception.GlobalException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 /**
  * 채팅방 관련 비즈니스 로직 구현체입니다.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomServiceImpl implements ChatRoomService {
@@ -44,16 +46,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      */
     @Override
     public Page<ChatRoomResponse> getChatRoomsForMember(Long memberId, Pageable pageable) {
-
+        log.info("조회 요청한 사용자 ID: {}", memberId);
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("사용자 ID {}에 해당하는 멤버를 찾을 수 없습니다.", memberId);
+                    return new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);
+                });
 
         // 일반 회원인지 임시 회원인지 확인
         if (member.getRole() == Role.ROLE_TEMP_USER) {
+            log.error("멤버 ID {}가 임시 회원(ROLE_TEMP_USER)이라 채팅방 조회 권한이 없습니다.", memberId);
             throw new GlobalException(GlobalErrorCode.CHATROOM_FORBIDDEN);
         }
 
         Page<ChatRoom> chatRooms = chatRoomRepository.findAllWithMembers(memberId, pageable);
+        log.info("조회된 채팅방 수: {}", chatRooms.getTotalElements());
 
         // LAZY 초기화
         for (ChatRoom chatRoom : chatRooms) {
@@ -69,29 +76,26 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public void exitChatRoom(Member deletingMember, Member otherMember) {
-
         if (deletingMember.getRole() == Role.ROLE_TEMP_USER) {
+            log.error("멤버 {}는 임시 회원(ROLE_TEMP_USER)이므로 채팅방 나가기 권한이 없습니다.", deletingMember.getId());
             throw new GlobalException(GlobalErrorCode.CHATROOM_FORBIDDEN);
         }
 
         Optional<ChatRoom> optionalChatRoom = chatRoomRepository.findBySenderAndReceiverOrReceiverAndSender(
-                deletingMember, otherMember, otherMember , deletingMember
-                );
+                deletingMember, otherMember, otherMember, deletingMember
+        );
 
         if (optionalChatRoom.isEmpty()) {
+            log.error("멤버 {}와 {} 사이의 채팅방을 찾을 수 없습니다.", deletingMember.getId(), otherMember.getId());
             throw new GlobalException(GlobalErrorCode.CHATROOM_NOT_FOUND);
         }
 
         ChatRoom chatRoom = optionalChatRoom.get();
-
-        // 삭제하는 사용자는 채팅방 참여 목록에서 제거
         chatRoom.removeParticipant(deletingMember);
-        chatRoomRepository.save(chatRoom);  // 변경사항 저장
+        chatRoomRepository.save(chatRoom);
+        log.info("멤버 {}가 채팅방에서 제거되었습니다. 남은 참여자: {}", deletingMember.getId(), chatRoom);
 
-        // 남은 사용자가 있다면 시스템 메시지 전송
         if (chatRoom.hasParticipant(otherMember)) {
-
-            // 시스템 메시지 생성: "{deletingMember}님이 채팅방을 나갔습니다."
             ChatMessage systemMessage = ChatMessage.builder()
                     .roomId(chatRoom.getId())
                     .senderId(deletingMember.getId())
@@ -100,9 +104,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     .type(MessageType.SYSTEM)
                     .sendTime(LocalDateTime.now())
                     .build();
-
-            // Redis로 시스템 메시지 전송
             redisPublisher.publish(systemMessage);
+            log.info("시스템 메시지가 전송되었습니다: {}", systemMessage);
         }
     }
 

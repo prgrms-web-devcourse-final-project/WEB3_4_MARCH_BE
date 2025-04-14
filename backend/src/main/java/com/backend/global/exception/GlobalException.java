@@ -31,4 +31,7 @@ public class GlobalException extends RuntimeException {
         return globalErrorCode.getHttpStatus();
     }
 
+    public GlobalErrorCode getGlobalErrorCode() {
+        return globalErrorCode;
+    }
 }
