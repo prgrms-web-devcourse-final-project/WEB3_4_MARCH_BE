@@ -43,30 +43,6 @@ import {
 export interface SliceChatMessageResponse {
     /**
      * 
-     * @type {Pageablenull}
-     * @memberof SliceChatMessageResponse
-     */
-    pageable?: Pageablenull;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SliceChatMessageResponse
-     */
-    first?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SliceChatMessageResponse
-     */
-    last?: boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof SliceChatMessageResponse
-     */
-    numberOfElements?: number;
-    /**
-     * 
      * @type {number}
      * @memberof SliceChatMessageResponse
      */
@@ -94,6 +70,30 @@ export interface SliceChatMessageResponse {
      * @type {boolean}
      * @memberof SliceChatMessageResponse
      */
+    first?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SliceChatMessageResponse
+     */
+    last?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof SliceChatMessageResponse
+     */
+    numberOfElements?: number;
+    /**
+     * 
+     * @type {Pageablenull}
+     * @memberof SliceChatMessageResponse
+     */
+    pageable?: Pageablenull;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SliceChatMessageResponse
+     */
     empty?: boolean;
 }
 
@@ -114,14 +114,14 @@ export function SliceChatMessageResponseFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
-        'first': json['first'] == null ? undefined : json['first'],
-        'last': json['last'] == null ? undefined : json['last'],
-        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'size': json['size'] == null ? undefined : json['size'],
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ChatMessageResponseFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
         'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
+        'first': json['first'] == null ? undefined : json['first'],
+        'last': json['last'] == null ? undefined : json['last'],
+        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
+        'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
         'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
@@ -137,14 +137,14 @@ export function SliceChatMessageResponseToJSONTyped(value?: SliceChatMessageResp
 
     return {
         
-        'pageable': PageablenullToJSON(value['pageable']),
-        'first': value['first'],
-        'last': value['last'],
-        'numberOfElements': value['numberOfElements'],
         'size': value['size'],
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ChatMessageResponseToJSON)),
         'number': value['number'],
         'sort': SortnullToJSON(value['sort']),
+        'first': value['first'],
+        'last': value['last'],
+        'numberOfElements': value['numberOfElements'],
+        'pageable': PageablenullToJSON(value['pageable']),
         'empty': value['empty'],
     };
 }
