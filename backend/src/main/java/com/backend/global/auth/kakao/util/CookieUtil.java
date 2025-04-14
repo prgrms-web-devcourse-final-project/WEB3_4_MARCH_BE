@@ -64,6 +64,7 @@ public class CookieUtil {
         cookie.setHttpOnly(true); // 쿠키를 브라우저의 JavaScript에서 접근할 수 없도록 설정
 //        cookie.setSecure(true); // HTTPS 환경에서만 쿠키 전송
         cookie.setSecure(false); //스웨거 테스트용 임시 설정
+        cookie.setAttribute("SameSite", "None");
         cookie.setPath("/");
         cookie.setMaxAge((int) maxAge);
         response.addCookie(cookie);
@@ -79,6 +80,7 @@ public class CookieUtil {
         cookie.setMaxAge(0); // 즉시 만료
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
         cookie.setPath("/");
         response.addCookie(cookie);
     }
