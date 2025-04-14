@@ -19,44 +19,41 @@ public class CookieUtil {
 
     /**
      * 요청에 포함된 쿠키 중에서 지정한 이름의 쿠키 값을 반환
+     *
      * @param request 요청 객체
-     * @param name 찾을 쿠키 이름
+     * @param name    찾을 쿠키 이름
      * @return 쿠키 값 또는 null
      */
-//    public String getCookieValue(HttpServletRequest request, String name) {
-//        if (request.getCookies() == null) return null;
-//
-//        for (Cookie cookie : request.getCookies()) {
-//            if (name.equals(cookie.getName())) {
-//                return cookie.getValue();
-//            }
-//        }
-//        return null;
-//    }
+
     public String getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            log.warn("⚠️ [CookieUtil] 요청에 쿠키가 존재하지 않습니다.");
+            log.debug("⚠️ [CookieUtil] 요청에 쿠키가 존재하지 않습니다.");
             return null;
         }
 
         for (Cookie cookie : cookies) {
-            log.info("🔍 [CookieUtil] 쿠키 확인: name={}, value={}", cookie.getName(), cookie.getValue());
+            log.debug("🔍 [CookieUtil] 쿠키 확인: name={}, value={}", cookie.getName(), cookie.getValue());
             if (cookie.getName().equals(name)) {
                 log.info("✅ [CookieUtil] Target cookie '{}' 를 찾았습니다.", name);
                 return cookie.getValue();
             }
         }
 
-        log.warn("❌ [CookieUtil] 요청에서 쿠키 '{}' 를 찾을 수 없습니다.", name);
+        if ("accessToken".equals(name) || "refreshToken".equals(name)) {
+            log.warn("❌ [CookieUtil] 요청에서 필수 쿠키 '{}' 를 찾을 수 없습니다.", name);
+        } else {
+            log.debug("❌ [CookieUtil] 요청에서 쿠키 '{}' 를 찾을 수 없습니다.", name);
+        }
         return null;
     }
 
     /**
      * 쿠키를 생성하고 응답에 추가
-     * @param name 쿠키 이름
-     * @param value 쿠키 값
-     * @param maxAge 쿠키 만료 시간 (초 단위)
+     *
+     * @param name     쿠키 이름
+     * @param value    쿠키 값
+     * @param maxAge   쿠키 만료 시간 (초 단위)
      * @param response 응답 객체
      */
     public void addCookie(String name, String value, long maxAge, HttpServletResponse response) {
@@ -72,7 +69,8 @@ public class CookieUtil {
 
     /**
      * 지정한 이름의 쿠키를 삭제 (유효시간 0으로 설정)
-     * @param name 삭제할 쿠키 이름
+     *
+     * @param name     삭제할 쿠키 이름
      * @param response 응답 객체
      */
     public void deleteCookie(String name, HttpServletResponse response) {
