@@ -82,6 +82,10 @@ public class UserRecommendationService {
                         .nickname(user.getNickname())
                         .latitude(user.getLatitude())
                         .longitude(user.getLongitude())
+                        .age(user.getAge())
+                        .introduction(user.getIntroduction())
+                        .keywords(userKeywordService.getUserKeywords(user.getId()))
+                        .images(imageService.getImagesForMember(user.getId()))
                         .build())
                 .toList();
     }
