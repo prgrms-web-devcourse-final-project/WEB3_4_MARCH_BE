@@ -56,8 +56,17 @@ export const LoginCheck = ({
 
       if (isLoggedIn) {
         console.log("login!", userProfile?.role);
-        if (userProfile?.role === "ROLE_TEMP_USER") {
-          replace("ProfileSetupActivity", {});
+        if (
+          userProfile?.role === "ROLE_TEMP_USER" &&
+          activeActivity?.name !== "ProfileSetupActivity"
+        ) {
+          replace(
+            "ProfileSetupActivity",
+            {},
+            {
+              animate: false,
+            },
+          );
         }
         return;
       }
