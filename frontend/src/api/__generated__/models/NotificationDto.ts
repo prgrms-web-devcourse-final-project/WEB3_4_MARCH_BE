@@ -60,13 +60,13 @@ export interface NotificationDto {
      * @type {boolean}
      * @memberof NotificationDto
      */
-    read?: boolean;
+    deleted?: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof NotificationDto
      */
-    deleted?: boolean;
+    read?: boolean;
 }
 
 
@@ -104,8 +104,8 @@ export function NotificationDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'type': json['type'] == null ? undefined : json['type'],
         'message': json['message'] == null ? undefined : json['message'],
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
-        'read': json['read'] == null ? undefined : json['read'],
         'deleted': json['deleted'] == null ? undefined : json['deleted'],
+        'read': json['read'] == null ? undefined : json['read'],
     };
 }
 
@@ -126,8 +126,8 @@ export function NotificationDtoToJSONTyped(value?: NotificationDto | null, ignor
         'type': value['type'],
         'message': value['message'],
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
-        'read': value['read'],
         'deleted': value['deleted'],
+        'read': value['read'],
     };
 }
 

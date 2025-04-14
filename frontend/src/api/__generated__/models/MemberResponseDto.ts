@@ -124,6 +124,12 @@ export interface MemberResponseDto {
      * @memberof MemberResponseDto
      */
     longitude?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberResponseDto
+     */
+    role?: string;
 }
 
 
@@ -170,6 +176,7 @@ export function MemberResponseDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'isDeleted': json['isDeleted'] == null ? undefined : json['isDeleted'],
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
+        'role': json['role'] == null ? undefined : json['role'],
     };
 }
 
@@ -199,6 +206,7 @@ export function MemberResponseDtoToJSONTyped(value?: MemberResponseDto | null, i
         'isDeleted': value['isDeleted'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
+        'role': value['role'],
     };
 }
 

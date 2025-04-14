@@ -49,6 +49,12 @@ export interface SliceChatMessageResponse {
     pageable?: Pageablenull;
     /**
      * 
+     * @type {number}
+     * @memberof SliceChatMessageResponse
+     */
+    numberOfElements?: number;
+    /**
+     * 
      * @type {boolean}
      * @memberof SliceChatMessageResponse
      */
@@ -59,12 +65,6 @@ export interface SliceChatMessageResponse {
      * @memberof SliceChatMessageResponse
      */
     last?: boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof SliceChatMessageResponse
-     */
-    numberOfElements?: number;
     /**
      * 
      * @type {number}
@@ -115,9 +115,9 @@ export function SliceChatMessageResponseFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
+        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'first': json['first'] == null ? undefined : json['first'],
         'last': json['last'] == null ? undefined : json['last'],
-        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'size': json['size'] == null ? undefined : json['size'],
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ChatMessageResponseFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
@@ -138,9 +138,9 @@ export function SliceChatMessageResponseToJSONTyped(value?: SliceChatMessageResp
     return {
         
         'pageable': PageablenullToJSON(value['pageable']),
+        'numberOfElements': value['numberOfElements'],
         'first': value['first'],
         'last': value['last'],
-        'numberOfElements': value['numberOfElements'],
         'size': value['size'],
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ChatMessageResponseToJSON)),
         'number': value['number'],

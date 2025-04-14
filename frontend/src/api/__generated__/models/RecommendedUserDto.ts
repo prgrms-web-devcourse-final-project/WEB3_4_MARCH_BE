@@ -13,6 +13,21 @@
  */
 
 import { mapValues } from '../runtime';
+import type { UserKeywordResponse } from './UserKeywordResponse';
+import {
+    UserKeywordResponseFromJSON,
+    UserKeywordResponseFromJSONTyped,
+    UserKeywordResponseToJSON,
+    UserKeywordResponseToJSONTyped,
+} from './UserKeywordResponse';
+import type { ImageResponseDto } from './ImageResponseDto';
+import {
+    ImageResponseDtoFromJSON,
+    ImageResponseDtoFromJSONTyped,
+    ImageResponseDtoToJSON,
+    ImageResponseDtoToJSONTyped,
+} from './ImageResponseDto';
+
 /**
  * 
  * @export
@@ -43,6 +58,30 @@ export interface RecommendedUserDto {
      * @memberof RecommendedUserDto
      */
     longitude?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RecommendedUserDto
+     */
+    age?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RecommendedUserDto
+     */
+    introduction?: string;
+    /**
+     * 
+     * @type {Array<UserKeywordResponse>}
+     * @memberof RecommendedUserDto
+     */
+    keywords?: Array<UserKeywordResponse>;
+    /**
+     * 
+     * @type {Array<ImageResponseDto>}
+     * @memberof RecommendedUserDto
+     */
+    images?: Array<ImageResponseDto>;
 }
 
 /**
@@ -66,6 +105,10 @@ export function RecommendedUserDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'nickname': json['nickname'] == null ? undefined : json['nickname'],
         'latitude': json['latitude'] == null ? undefined : json['latitude'],
         'longitude': json['longitude'] == null ? undefined : json['longitude'],
+        'age': json['age'] == null ? undefined : json['age'],
+        'introduction': json['introduction'] == null ? undefined : json['introduction'],
+        'keywords': json['keywords'] == null ? undefined : ((json['keywords'] as Array<any>).map(UserKeywordResponseFromJSON)),
+        'images': json['images'] == null ? undefined : ((json['images'] as Array<any>).map(ImageResponseDtoFromJSON)),
     };
 }
 
@@ -84,6 +127,10 @@ export function RecommendedUserDtoToJSONTyped(value?: RecommendedUserDto | null,
         'nickname': value['nickname'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
+        'age': value['age'],
+        'introduction': value['introduction'],
+        'keywords': value['keywords'] == null ? undefined : ((value['keywords'] as Array<any>).map(UserKeywordResponseToJSON)),
+        'images': value['images'] == null ? undefined : ((value['images'] as Array<any>).map(ImageResponseDtoToJSON)),
     };
 }
 
