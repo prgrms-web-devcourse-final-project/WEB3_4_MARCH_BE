@@ -46,28 +46,28 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 관리자 전용 URL은 ROLE_ADMIN 권한 필요
-                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/members/me").hasAnyAuthority("ROLE_USER", "ROLE_TEMP_USER")
-                        .requestMatchers(
-                                "/",
-                                "/actuator/**",
+                                // 관리자 전용 URL은 ROLE_ADMIN 권한 필요
+                                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers("/api/members/me").hasAnyAuthority("ROLE_USER", "ROLE_TEMP_USER", "ROLE_ADMIN")
+                                .requestMatchers(
+                                        "/",
+                                        "/actuator/**",
 //                                "https://connect-to.pages.dev/",
 //                                "https://connect-to.pages.dev",
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/api/members/register",
-                                "/chat-test.html",
-                                "/page-list-test.html",
-                                "/js/**",
-                                "/ws/**",
-                                "/favicon.ico",
-                                "/error"
-                        ).permitAll().anyRequest().authenticated()
+                                        "/api/auth/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**",
+                                        "/api/members/register",
+                                        "/chat-test.html",
+                                        "/page-list-test.html",
+                                        "/js/**",
+                                        "/ws/**",
+                                        "/favicon.ico",
+                                        "/error"
+                                ).permitAll().anyRequest().authenticated()
                 )
                 .oauth2Login(
                         oauth2Login -> oauth2Login
