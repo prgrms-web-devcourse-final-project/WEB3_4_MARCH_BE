@@ -90,7 +90,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://connect-to.pages.dev",
                 "https://connect-to.pages.dev/",
-                "http://api.connect-to.shop"  // EC2 서버 도메인
+                "https://api.connect-to.shop",  // EC2 서버 도메인
+                "https://www.connect-to.shop"
         )); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
