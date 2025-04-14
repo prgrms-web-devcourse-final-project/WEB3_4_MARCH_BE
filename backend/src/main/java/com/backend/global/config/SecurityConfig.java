@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 관리자 전용 URL은 ROLE_ADMIN 권한 필요
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/members/me").hasAnyAuthority("ROLE_USER", "ROLE_TEMP_USER")
                         .requestMatchers(
                                 "/",
                                 "/actuator/**",

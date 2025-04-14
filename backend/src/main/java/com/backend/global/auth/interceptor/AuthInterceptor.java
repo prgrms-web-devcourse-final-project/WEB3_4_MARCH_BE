@@ -31,7 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             String requestURI = request.getRequestURI();
 
             // TEMP_USER가 추가정보 입력이 아닌 다른 API에 접근하면 차단
-            if (isTempUser && !requestURI.startsWith("/api/members/register")) {
+            if (isTempUser && !requestURI.startsWith("/api/members/register") && !requestURI.startsWith("/api/members/me")) {
                 // 예외 발생
                 throw new GlobalException(GlobalErrorCode.TEMP_USER_ACCESS_DENIED);
             }
