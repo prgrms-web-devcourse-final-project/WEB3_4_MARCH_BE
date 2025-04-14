@@ -4,6 +4,7 @@ import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * 주요 기능(API 경로 포함)에 접근하지 못하도록 제어하는 인터셉터.
  * 단, 회원가입 추가정보 입력 경로 등은 허용.
  */
+@Slf4j
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
@@ -31,7 +33,12 @@ public class AuthInterceptor implements HandlerInterceptor {
             String requestURI = request.getRequestURI();
 
             // TEMP_USER가 추가정보 입력이 아닌 다른 API에 접근하면 차단
-            if (isTempUser && !requestURI.startsWith("/api/members/register") && !requestURI.startsWith("/api/members/me")) {
+            if (isTempUser && !requestURI.startsWith("/api/members/register")
+                    && !requestURI.startsWith("/api/members/me")
+                    && !requestURI.startsWith("/api/keywords")) {
+
+                log.warn("🚫 접근 차단: ROLE_TEMP_USER가 허용되지 않은 경로 [{}]에 접근 시도", requestURI);
+
                 // 예외 발생
                 throw new GlobalException(GlobalErrorCode.TEMP_USER_ACCESS_DENIED);
             }
