@@ -3,4 +3,5 @@ spring:
     active: server
   application:
     name: backend
-
+server:
+  forward-headers-strategy: native

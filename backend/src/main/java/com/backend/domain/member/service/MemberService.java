@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -278,4 +279,26 @@ public class MemberService {
         }
     }
 
+    public Member modifyOrJoin(String username, String email, String nickname) {
+        return null;
+    }
+
+    public Member modifyMember(Long kakaoId, String email, String nickname) {
+        Optional<Member> byKakaoId = memberRepository.findByKakaoId(kakaoId);
+
+        if ( byKakaoId.isEmpty() ) {
+            Member member = Member.ofKakaoUser(
+                    kakaoId,
+                    email,
+                    nickname,
+                    Role.ROLE_TEMP_USER
+            );
+
+            memberRepository.save(member);
+
+            return member;
+        }
+
+        return byKakaoId.get();
+    }
 }

@@ -29,6 +29,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
+    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     // 인증 매니저를 빈으로 등록
     @Bean
@@ -48,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(
                                 "/",
+                                "/actuator/**",
 //                                "https://connect-to.pages.dev/",
 //                                "https://connect-to.pages.dev",
                                 "/api/auth/**",
@@ -64,6 +67,15 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error"
                         ).permitAll().anyRequest().authenticated()
+                )
+                .oauth2Login(
+                        oauth2Login -> oauth2Login
+                                .successHandler(customOAuth2AuthenticationSuccessHandler)
+                                .authorizationEndpoint(
+                                        authorizationEndpoint ->
+                                                authorizationEndpoint
+                                                        .authorizationRequestResolver(customAuthorizationRequestResolver)
+                                )
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
