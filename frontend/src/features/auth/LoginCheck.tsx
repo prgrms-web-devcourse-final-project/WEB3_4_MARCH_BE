@@ -32,20 +32,33 @@ export const LoginCheck = ({
         if (response.code === 200 && response.data) {
           setUserProfile(response.data);
 
-          return true;
+          return {
+            isLoggedIn: true,
+            userProfile: response.data,
+          };
         }
 
-        return false;
+        return {
+          isLoggedIn: false,
+          userProfile: undefined,
+        };
       } catch (error) {
         // 에러가 발생하면(특히 403) 로그인하지 않은 상태로 간주
-        return false;
+        return {
+          isLoggedIn: false,
+          userProfile: undefined,
+        };
       }
     };
 
-    checkLoginStatus().then((isLoggedIn) => {
+    checkLoginStatus().then(({ isLoggedIn, userProfile }) => {
       onAfterLoginCheck?.(isLoggedIn);
 
       if (isLoggedIn) {
+        console.log("login!", userProfile?.role);
+        if (userProfile?.role === "ROLE_TEMP_USER") {
+          replace("ProfileSetupActivity", {});
+        }
         return;
       }
 
