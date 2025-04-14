@@ -72,6 +72,11 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return getUsername();
     }
 
-    @Override
-    public Role getRole() { return getRole(); }
+    public Role getRole() {
+        return authorities.stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .map(Role::valueOf) // "ROLE_TEMP_USER" → Role.ROLE_TEMP_USER
+                .orElse(null);
+    }
 }

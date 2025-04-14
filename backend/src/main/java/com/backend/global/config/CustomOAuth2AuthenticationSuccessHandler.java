@@ -5,7 +5,6 @@ import com.backend.global.auth.kakao.util.TokenProvider;
 import com.backend.global.auth.model.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +38,10 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
 
         // ✅ 액세스 토큰/리프레시 토큰 생성
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String accessToken = tokenProvider.createAccessToken(userDetails.getMemberId(), userDetails.getRole().name());
+        String accessToken = tokenProvider.createAccessToken(
+                userDetails.getMemberId(),
+                userDetails.getRole().name()
+        );
         String refreshToken = tokenProvider.createRefreshToken(userDetails.getMemberId());
 
         // ✅ Set-Cookie 헤더 설정
