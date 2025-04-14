@@ -27,10 +27,5 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 COPY .env .env
 
-COPY .env .env
-
-# .env 파일을 읽어 각 환경변수를 ENV로 설정
-RUN set -a && . .env && set +a
-
 # 실행할 JAR 파일 지정
 ENTRYPOINT ["java", "-Dspring.profiles.active=server", "-jar", "app.jar"]
