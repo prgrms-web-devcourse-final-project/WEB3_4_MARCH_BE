@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "codegen": "openapi-generator-cli generate -i http://localhost:8080/v3/api-docs -g typescript-fetch -o src/api/__generated__"
+    "codegen": "openapi-generator-cli generate -i https://api.connect-to.shop/v3/api-docs -g typescript-fetch -o src/api/__generated__"
   },
   "dependencies": {
     "@stackflow/core": "^1.2.0",
