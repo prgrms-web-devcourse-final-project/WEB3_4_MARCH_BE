@@ -9,7 +9,6 @@ import {
 import { useUserStore } from "../features/auth/useUserStore";
 import type {
   MemberRegisterRequestDto,
-  RegisterOperationRequest,
   UserKeywordSaveRequest,
 } from "../api/__generated__";
 import { apiClient } from "../api/apiClient";
@@ -17,7 +16,6 @@ import {
   getCurrentPosition,
   isPermissionDeniedError,
   showBrowserPermissionGuide,
-  showLocationPermissionDialog,
 } from "../utils/currentPosition";
 import { useFlow, type ActivityName } from "../stackflow/stackflow";
 

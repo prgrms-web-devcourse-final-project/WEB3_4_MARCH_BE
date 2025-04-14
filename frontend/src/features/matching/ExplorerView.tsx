@@ -207,6 +207,8 @@ export default function ExploreView({
                 opacity = 0.5;
               }
 
+              const imageUrl = item.profile.images?.[0]?.url ?? TEMP_IMAGE;
+
               return (
                 <div
                   onClick={handleProfileCardClick}
@@ -254,7 +256,7 @@ export default function ExploreView({
                   <div className="aspect-[5/7] relative bg-gray-100">
                     <div
                       className="absolute inset-0 bg-center bg-cover"
-                      style={{ backgroundImage: `url(${TEMP_IMAGE})` }}
+                      style={{ backgroundImage: `url(${imageUrl})` }}
                     />
 
                     {/* Profile info overlay */}
@@ -263,16 +265,18 @@ export default function ExploreView({
                         <h3 className="text-xl font-bold">
                           {item.profile.nickname ?? "알 수 없음"}
                         </h3>
-                        <span className="ml-2">{TEMP_AGE}</span>
+                        <span className="ml-2">{item.profile.age}</span>
                       </div>
-                      <p className="mt-1 text-sm text-gray-200">{TEMP_BIO}</p>
+                      <p className="mt-1 text-sm text-gray-200">
+                        {item.profile.introduction ?? "알 수 없음"}
+                      </p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {TEMP_KEYWORDS.map((interest) => (
+                        {item.profile.keywords?.map((keyword) => (
                           <span
-                            key={interest}
+                            key={keyword.id}
                             className="px-2 py-1 bg-white/20 rounded-full text-xs backdrop-blur-sm"
                           >
-                            {interest}
+                            {keyword.name}
                           </span>
                         ))}
                       </div>

@@ -67,18 +67,6 @@ export interface SliceChatMessageResponse {
     sort?: Sortnull;
     /**
      * 
-     * @type {boolean}
-     * @memberof SliceChatMessageResponse
-     */
-    first?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SliceChatMessageResponse
-     */
-    last?: boolean;
-    /**
-     * 
      * @type {number}
      * @memberof SliceChatMessageResponse
      */
@@ -89,6 +77,18 @@ export interface SliceChatMessageResponse {
      * @memberof SliceChatMessageResponse
      */
     pageable?: Pageablenull;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SliceChatMessageResponse
+     */
+    first?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SliceChatMessageResponse
+     */
+    last?: boolean;
     /**
      * 
      * @type {boolean}
@@ -118,10 +118,10 @@ export function SliceChatMessageResponseFromJSONTyped(json: any, ignoreDiscrimin
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ChatMessageResponseFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
         'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
-        'first': json['first'] == null ? undefined : json['first'],
-        'last': json['last'] == null ? undefined : json['last'],
         'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
+        'first': json['first'] == null ? undefined : json['first'],
+        'last': json['last'] == null ? undefined : json['last'],
         'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
@@ -141,10 +141,10 @@ export function SliceChatMessageResponseToJSONTyped(value?: SliceChatMessageResp
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ChatMessageResponseToJSON)),
         'number': value['number'],
         'sort': SortnullToJSON(value['sort']),
-        'first': value['first'],
-        'last': value['last'],
         'numberOfElements': value['numberOfElements'],
         'pageable': PageablenullToJSON(value['pageable']),
+        'first': value['first'],
+        'last': value['last'],
         'empty': value['empty'],
     };
 }
