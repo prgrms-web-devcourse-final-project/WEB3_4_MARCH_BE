@@ -1,13 +1,30 @@
-# 베이스 이미지 설정 (예: openjdk:21-jdk)
-FROM openjdk:21-jdk
+# 첫 번째 스테이지: 빌드 스테이지
+FROM gradle:jdk-21-and-23-graal-jammy AS builder
 
-# 작업 디렉토리 생성
+# 작업 디렉토리 설정
 WORKDIR /app
 
-COPY src/main/resources/application-server.yml /app/config/application-server.yml
+# 소스 코드와 Gradle 래퍼 복사
+COPY build.gradle .
+COPY settings.gradle .
 
-# 빌드된 jar 파일을 컨테이너로 복사 (예: backend-0.0.1-SNAPSHOT.jar)
-COPY build/libs/backend-0.0.1-SNAPSHOT.jar app.jar
+# 종속성 설치
+RUN gradle dependencies --no-daemon
 
-# 컨테이너 시작 시 jar 파일을 실행 (Spring profile은 환경변수로 전달)
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:/app/config/application-server.yml"]
+# 소스 코드 복사
+COPY src src
+
+# 애플리케이션 빌드
+RUN gradle build --no-daemon -x test
+
+# 두 번째 스테이지: 실행 스테이지
+FROM container-registry.oracle.com/graalvm/jdk:23
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 첫 번째 스테이지에서 빌드된 JAR 파일 복사
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# 실행할 JAR 파일 지정
+ENTRYPOINT ["java", "-Dspring.profiles.active=server", "-jar", "app.jar"]
