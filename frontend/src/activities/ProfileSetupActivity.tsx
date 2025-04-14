@@ -77,7 +77,7 @@ export const ProfileSetupActivity = ({
     setPage("keyword");
   };
 
-  const onConfirmKeywordSetup = async (keywords: string[]) => {
+  const onConfirmKeywordSetup = async (keywordIds: number[]) => {
     if (!memberRegisterDto) {
       return;
     }
@@ -97,7 +97,7 @@ export const ProfileSetupActivity = ({
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         files: images as any,
         keywords: {
-          keywordIds: [],
+          keywordIds,
         },
       },
     });
