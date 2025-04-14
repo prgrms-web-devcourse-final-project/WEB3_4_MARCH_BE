@@ -35,7 +35,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             // TEMP_USER가 추가정보 입력이 아닌 다른 API에 접근하면 차단
             if (isTempUser && !requestURI.startsWith("/api/members/register")
                     && !requestURI.startsWith("/api/members/me")
-                    && !requestURI.startsWith("/api/keywords")) {
+                    && !requestURI.startsWith("/api/keywords")
+                    && !requestURI.startsWith("/api/matching")) {
 
                 log.warn("🚫 접근 차단: ROLE_TEMP_USER가 허용되지 않은 경로 [{}]에 접근 시도", requestURI);
 

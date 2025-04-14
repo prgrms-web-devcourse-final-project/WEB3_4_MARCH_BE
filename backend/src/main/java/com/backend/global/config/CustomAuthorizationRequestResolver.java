@@ -30,21 +30,22 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
         return customizeAuthorizationRequest(authorizationRequest, request);
     }
 
-    private OAuth2AuthorizationRequest customizeAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request) {
+    private OAuth2AuthorizationRequest customizeAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest,
+                                                                     HttpServletRequest request) {
         if (authorizationRequest == null || request == null) {
             return null;
         }
 
+        // 클라이언트에서 redirectUrl 파라미터가 전달되면 이를 별도의 파라미터로 추가
         String redirectUrl = request.getParameter("redirectUrl");
-
         Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
         if (redirectUrl != null && !redirectUrl.isEmpty()) {
-            additionalParameters.put("state", redirectUrl);
+            additionalParameters.put("redirectUrl", redirectUrl);
         }
 
+        // 기본 state 값은 그대로 사용
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParameters)
-                .state(redirectUrl)
                 .build();
     }
 }
