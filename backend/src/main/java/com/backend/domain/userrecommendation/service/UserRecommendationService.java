@@ -1,8 +1,12 @@
 package com.backend.domain.userrecommendation.service;
 
 import com.backend.domain.blockuser.repository.BlockUserRepository;
+import com.backend.domain.image.dto.ImageResponseDto;
+import com.backend.domain.image.service.ImageService;
 import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
+import com.backend.domain.userkeyword.dto.response.UserKeywordResponse;
+import com.backend.domain.userkeyword.service.UserKeywordService;
 import com.backend.domain.userrecommendation.dto.response.RecommendedUserDto;
 import com.backend.domain.userrecommendation.entity.UserRecommendation;
 import com.backend.domain.userrecommendation.repository.UserRecommendationRepository;
@@ -28,6 +32,8 @@ public class UserRecommendationService {
     private final MemberRepository memberRepository;
     private final UserRecommendationRepository userRecommendationRepository;
     private final BlockUserRepository blockUserRepository;
+    private final UserKeywordService userKeywordService;
+    private final ImageService imageService;
 
     @Transactional
     public List<RecommendedUserDto> generateRecommendations(Member me) {
@@ -90,14 +96,24 @@ public class UserRecommendationService {
                 userRecommendationRepository
                         .findByReceivingUserAndRecommendedDateBetween(me, startOfToday, endOfToday);
 
+
         return todayRecommendations.stream()
                 .map(record -> {
                     Member user = record.getRecommendedUser();
+
+                    List<UserKeywordResponse> keywords = userKeywordService.getUserKeywords(user.getId());
+                    List<ImageResponseDto> images = imageService.getImagesForMember(user.getId());
+
+
                     return RecommendedUserDto.builder()
                             .id(user.getId())
                             .nickname(user.getNickname())
                             .latitude(user.getLatitude())
                             .longitude(user.getLongitude())
+                            .age(user.getAge())
+                            .introduction(user.getIntroduction())
+                            .keywords(keywords)
+                            .images(images)
                             .build();
                 })
                 .toList();
