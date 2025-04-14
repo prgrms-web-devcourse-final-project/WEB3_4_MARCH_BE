@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(
                                 "/",
+                                "/actuator/**",
 //                                "https://connect-to.pages.dev/",
 //                                "https://connect-to.pages.dev",
                                 "/api/auth/**",
