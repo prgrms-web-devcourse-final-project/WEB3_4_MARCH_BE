@@ -125,7 +125,7 @@ export const ProfileSetupActivity = ({
                   height: String(profile?.height) ?? "",
                   images: imageUrls,
                   name: profile?.nickname ?? "",
-                  weight: "",
+                  // weight: "",
                   email: "",
                 }
               : undefined

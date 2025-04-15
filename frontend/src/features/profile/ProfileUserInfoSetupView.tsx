@@ -10,7 +10,7 @@ export interface UserInfo {
   gender: "male" | "female";
   age: string;
   height: string;
-  weight: string;
+  // weight: string;
   email: string;
 }
 
@@ -35,9 +35,9 @@ export const ProfileUserInfoSetupView = ({
   const [height, setHeight] = useState<UserInfo["height"]>(
     defaultProfile?.height ?? "",
   );
-  const [weight, setWeight] = useState<UserInfo["weight"]>(
-    defaultProfile?.weight ?? "",
-  );
+  // const [weight, setWeight] = useState<UserInfo["weight"]>(
+  //   defaultProfile?.weight ?? "",
+  // );
   const [email, setEmail] = useState<UserInfo["email"]>(
     defaultProfile?.email ?? "",
   );
@@ -100,13 +100,13 @@ export const ProfileUserInfoSetupView = ({
       newErrors.height = "유효한 키를 입력해주세요. (140-220cm)";
     }
 
-    if (
-      Number.isNaN(Number(weight)) ||
-      Number(weight) < 30 ||
-      Number(weight) > 150
-    ) {
-      newErrors.weight = "유효한 몸무게를 입력해주세요. (30-150kg)";
-    }
+    // if (
+    //   Number.isNaN(Number(weight)) ||
+    //   Number(weight) < 30 ||
+    //   Number(weight) > 150
+    // ) {
+    //   newErrors.weight = "유효한 몸무게를 입력해주세요. (30-150kg)";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -122,7 +122,7 @@ export const ProfileUserInfoSetupView = ({
           gender,
           age,
           height,
-          weight,
+          // weight,
           email,
         },
         images,
