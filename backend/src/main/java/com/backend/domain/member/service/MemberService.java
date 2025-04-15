@@ -114,14 +114,14 @@ public class MemberService {
      */
     @Transactional(rollbackFor = Exception.class)
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) throws IOException {
-        log.info("📥 [서비스 - 회원가입] 회원등록 시작: memberId: {}", requestDto.memberId());
+        log.info("📥 [서비스 - 회원가입] 회원등록 시작: memberId: {}", requestDto.kakaoId());
 
         try {
             // 1. 기존 활성 회원 여부
 
-            Member member = memberRepository.findById(requestDto.memberId())
+            Member member = memberRepository.findById(requestDto.kakaoId())
                     .orElseThrow(() -> {
-                        log.warn("❌ [서비스 - 회원가입] 해당 ID의 회원이 존재하지 않음: {}", requestDto.memberId());
+                        log.warn("❌ [서비스 - 회원가입] 해당 ID의 회원이 존재하지 않음: {}", requestDto.kakaoId());
                         return new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);
                     });
             // 2. 탈퇴한 회원이면 복구
@@ -144,6 +144,9 @@ public class MemberService {
                             requestDto.introduction()       // 추가 정보: 소개글
 
                     );
+
+                    member.updateRole(Role.ROLE_USER);
+
                     redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 } else {
                     log.warn("❌ [서비스 - 회원가입] 이미 등록된 정회원");

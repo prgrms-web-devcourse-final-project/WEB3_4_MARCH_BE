@@ -55,4 +55,3 @@ backend/env
 /backend/infra/redis/data/
 
 /frontend/public/_redirects
-

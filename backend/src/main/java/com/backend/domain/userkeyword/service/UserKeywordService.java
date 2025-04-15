@@ -33,7 +33,7 @@ public class UserKeywordService {
                 () -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND)
         );
 
-        List<Keyword> keywords = keywordRepository.findAllById(keywordIds);
+        List<Keyword> keywords = keywordRepository.findAllWithCategoryByIdIn(keywordIds);
 
         for (Keyword keyword : keywords) {
             KeywordCategory category = keyword.getCategory();
@@ -70,7 +70,7 @@ public class UserKeywordService {
         log.info("✅ 기존 키워드 정보 삭제 완료, 새로운 키워드 저장 시작");
 
         // 새 키워드 저장
-        List<Keyword> keywords = keywordRepository.findAllById(keywordIds);
+        List<Keyword> keywords = keywordRepository.findAllWithCategoryByIdIn(keywordIds);
 
         for (Keyword keyword : keywords) {
             UserKeyword userKeyword = UserKeyword.builder()

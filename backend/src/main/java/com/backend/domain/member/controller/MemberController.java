@@ -15,7 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -110,7 +113,19 @@ public class MemberController {
             cookieService.addAccessTokenToCookie(accessToken, response);
             cookieService.addRefreshTokenToCookie(refreshToken, response);
 
+            // SecurityContext 업데이트
+            CustomUserDetails userDetails = new CustomUserDetails(
+                    updatedInfo.id(),
+                    updatedInfo.email(),
+                    List.of(new SimpleGrantedAuthority(updatedInfo.role().name()))
+            );
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
             MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
+            log.info("✅ [최종 응답] 회원 등록 응답 반환: {}", responseDto);
+
             return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
         } catch (Exception e) {
             log.error("❌ [회원가입 실패] 예외 발생", e); // <-- stack trace 포함 log

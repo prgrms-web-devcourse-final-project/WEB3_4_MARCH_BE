@@ -16,6 +16,8 @@ import {
 
 export const BACKEND_API = "https://api.connect-to.shop";
 
+// export const BACKEND_API = "http://localhost:8080";
+
 // API 클라이언트 설정
 const config = new Configuration({
   basePath: BACKEND_API, // "http://localhost:8080",
