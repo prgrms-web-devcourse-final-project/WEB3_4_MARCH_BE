@@ -115,7 +115,7 @@ public class MemberService {
         try {
             // 1. 기존 활성 회원 여부
 
-            Member member = memberRepository.findByKakaoId(requestDto.kakaoId())
+            Member member = memberRepository.findById(requestDto.kakaoId())
                     .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
             // 2. 탈퇴한 회원이면 복구
