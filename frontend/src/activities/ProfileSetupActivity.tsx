@@ -81,7 +81,7 @@ export const ProfileSetupActivity = ({
     }
 
     apiClient.member.register({
-      registerRequest: {
+      registerDTO: {
         member: {
           age: memberRegisterDto.age,
           email: memberRegisterDto.email,
@@ -91,9 +91,9 @@ export const ProfileSetupActivity = ({
           kakaoId: memberRegisterDto.kakaoId,
           latitude: memberRegisterDto.latitude,
           longitude: memberRegisterDto.longitude,
+          introduction: memberRegisterDto.introduction,
         },
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        files: images as any,
+        files: images,
         keywords: {
           keywordIds,
         },
