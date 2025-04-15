@@ -1,9 +1,12 @@
 package com.backend.global.config;
 
 import com.backend.global.auth.jwt.JwtFilter;
+import com.backend.global.response.GenericResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +30,7 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    private final ObjectMapper objectMapper;
     private final JwtFilter jwtFilter;
     private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
@@ -42,32 +45,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // 관리자 전용 URL은 ROLE_ADMIN 권한 필요
-                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/members/me").hasAnyRole("USER", "TEMP_USER")
-                        .requestMatchers(
-                                "/",
-                                "/actuator/**",
+                .authorizeHttpRequests(
+                        auth -> auth
+                                // 관리자 전용 URL은 ROLE_ADMIN 권한 필요
+                                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers("/api/members/me").hasAnyAuthority("ROLE_USER", "ROLE_TEMP_USER", "ROLE_ADMIN")
+                                .requestMatchers(
+                                        "/",
+                                        "/actuator/**",
 //                                "https://connect-to.pages.dev/",
 //                                "https://connect-to.pages.dev",
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/api/members/register",
-                                "/chat-test.html",
-                                "/page-list-test.html",
-                                "/js/**",
-                                "/ws/**",
-                                "/favicon.ico",
-                                "/error"
-                        ).permitAll().anyRequest().authenticated()
+                                        "/api/auth/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**",
+                                        "/api/members/register",
+                                        "/chat-test.html",
+                                        "/page-list-test.html",
+                                        "/js/**",
+                                        "/ws/**",
+                                        "/favicon.ico",
+                                        "/error"
+                                ).permitAll()
+                                .anyRequest()
+                                .authenticated()
                 )
                 .oauth2Login(
                         oauth2Login -> oauth2Login
@@ -78,7 +85,36 @@ public class SecurityConfig {
                                                         .authorizationRequestResolver(customAuthorizationRequestResolver)
                                 )
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(
+                        exception -> exception
+                                .authenticationEntryPoint((request, response, authException) -> {
+                                    response.setContentType("application/json;charset=UTF-8");
+                                    response.setStatus(401);
+                                    response.getWriter().write(
+                                            objectMapper.writeValueAsString(
+                                                    GenericResponse.fail(
+                                                            HttpStatus.UNAUTHORIZED.value(),
+                                                            "Unauthorized",
+                                                            "인증되지 않은 사용자입니다."
+                                                    )
+                                            )
+                                    );
+                                })
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    response.setContentType("application/json;charset=UTF-8");
+                                    response.setStatus(403);
+                                    response.getWriter().write(
+                                            objectMapper.writeValueAsString(
+                                                    GenericResponse.fail(
+                                                            HttpStatus.FORBIDDEN.value(),
+                                                            "Forbidden",
+                                                            "권한이 없습니다."
+                                                    )
+                                            )
+                                    );
+                                })
+                );
 
         return http.build();
     }
@@ -91,7 +127,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://connect-to.pages.dev",
                 "https://connect-to.pages.dev/",
-                "http://43.201.9.189:8080"  // EC2 서버 도메인
+                "https://api.connect-to.shop",  // EC2 서버 도메인
+                "https://www.connect-to.shop"
         )); // 프론트 주소
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

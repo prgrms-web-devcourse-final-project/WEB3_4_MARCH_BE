@@ -1,5 +1,6 @@
 package com.backend.global.auth.model;
 
+import com.backend.domain.member.entity.Role;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -69,5 +70,13 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     @Override
     public String getName() {
         return getUsername();
+    }
+
+    public Role getRole() {
+        return authorities.stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .map(Role::valueOf) // "ROLE_TEMP_USER" → Role.ROLE_TEMP_USER
+                .orElse(null);
     }
 }

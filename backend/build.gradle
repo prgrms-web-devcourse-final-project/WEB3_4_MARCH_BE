@@ -77,6 +77,10 @@ dependencies {
     // Spring Boot Actuator (헬스체크 및 모니터링)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    implementation 'org.apache.tika:tika-core:2.9.1'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-fileupload:commons-fileupload:1.5'
+
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
 
     // 테스트

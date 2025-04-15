@@ -49,7 +49,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = kakaoAccount.get("email");
         String nickname = attributesProperties.get("nickname");
 
-        Member member = memberService.modifyMember(Long.parseLong(oauthId), email, nickname);
+        Member member = memberService.modifyOrJoinMember(Long.parseLong(oauthId), email, nickname);
 
         // 4. JWT access, refresh 토큰 생성
         // JWT 토큰 발급 시 권한은 member.getRole() 기준으로 생성
@@ -66,8 +66,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // Redis에 jti를 포함해 refreshToken과 클라이언트 정보 저장
         redisRefreshTokenService.saveRefreshToken(member.getId(), jti, refreshToken, ttl, ip, userAgent);
 
-        cookieService.addAccessTokenToCookie(accessToken, httpServletResponse);
         cookieService.addRefreshTokenToCookie(refreshToken, httpServletResponse);
+        cookieService.addAccessTokenToCookie(accessToken, httpServletResponse);
 
         return new CustomUserDetails(
                 member.getId(),

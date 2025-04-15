@@ -54,5 +54,4 @@ backend/env
 # Redis 영속성
 /backend/infra/redis/data/
 
-#
 /frontend/public/_redirects

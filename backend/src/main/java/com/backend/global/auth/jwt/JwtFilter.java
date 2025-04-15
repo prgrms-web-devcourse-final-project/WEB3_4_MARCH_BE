@@ -38,9 +38,16 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        // Actuator health 엔드포인트 로그 출력 건너뛰기
+        boolean isHelathEndPoint = request.getRequestURI().contains("/actuator/health");
+
         // 1. 쿠키에서 AccessToken 추출 (CookieService 활용)
         String token = cookieService.getAccessTokenFromCookie(request);
-        log.info("✅ [JwtFilter] 쿠키로부터 추출한 AccessToken: {}", token);
+
+        // health 엔드포인트가 아닐 때 로그 출력
+        if (!isHelathEndPoint) {
+            log.info("✅ [JwtFilter] 쿠키로부터 추출한 AccessToken: {}", token);
+        }
 
         // 2. 토큰이 존재하고 유효하면
         if (token != null) {
@@ -69,7 +76,11 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // 인증 실패 → SecurityContextHolder에 아무것도 안 넣고 넘어감
                 // 토큰이 유효하지 않아도, Swagger나 로그인 페이지처럼 비회원도 접근해야 하는 리소스에 대한 접근 허용
-                log.warn("⚠️ [JwtFilter] JWT 토큰이 유효하지 않음: {}", e.getMessage());
+
+                // health 엔드포인트가 아닐 때만 출력
+                if (!isHelathEndPoint) {
+                    log.warn("⚠️ [JwtFilter] JWT 토큰이 유효하지 않음: {}", e.getMessage());
+                }
             }
         }
         // 4. 다음 필터로 이동

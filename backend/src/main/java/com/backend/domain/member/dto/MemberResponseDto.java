@@ -28,7 +28,8 @@ public record MemberResponseDto(
         Boolean blockStatus,
         Boolean isDeleted,
         Double latitude,
-        Double longitude
+        Double longitude,
+        String role
 ) {
     public static MemberResponseDto from(Member member, List<UserKeywordResponse> keywords, boolean liked, ChatRequestStatus chatRequestStatus) {
         return new MemberResponseDto(
@@ -48,7 +49,8 @@ public record MemberResponseDto(
                 member.getBlockStatus(),
                 member.isDeleted(),
                 member.getLatitude(),
-                member.getLongitude()
+                member.getLongitude(),
+                member.getRole().name()
         );
     }
 }

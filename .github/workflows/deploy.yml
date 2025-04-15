@@ -8,7 +8,7 @@ on:
       - "backend/settings.gradle"
       - "backend/Dockerfile"
     branches:
-      - feature/deploy
+      - feature/dev
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest
