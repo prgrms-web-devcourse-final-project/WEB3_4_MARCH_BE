@@ -350,35 +350,35 @@ export const ProfileUserInfoSetupView = ({
           </div>
 
           {/* Weight */}
-          <div>
-            <label
-              htmlFor="weight"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              몸무게
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                id="weight"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className={cn(
-                  "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  errors.weight ? "border-red-300" : "border-gray-300",
-                )}
-                placeholder="몸무게를 입력해주세요"
-                min="30"
-                max="150"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span className="text-gray-500">kg</span>
-              </div>
-            </div>
-            {errors.weight && (
-              <p className="mt-1 text-sm text-red-500">{errors.weight}</p>
-            )}
-          </div>
+          {/*<div>*/}
+          {/*  <label*/}
+          {/*    htmlFor="weight"*/}
+          {/*    className="block text-sm font-medium text-gray-700 mb-2"*/}
+          {/*  >*/}
+          {/*    몸무게*/}
+          {/*  </label>*/}
+          {/*  <div className="relative">*/}
+          {/*    <input*/}
+          {/*      type="number"*/}
+          {/*      id="weight"*/}
+          {/*      value={weight}*/}
+          {/*      onChange={(e) => setWeight(e.target.value)}*/}
+          {/*      className={cn(*/}
+          {/*        "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20",*/}
+          {/*        errors.weight ? "border-red-300" : "border-gray-300",*/}
+          {/*      )}*/}
+          {/*      placeholder="몸무게를 입력해주세요"*/}
+          {/*      min="30"*/}
+          {/*      max="150"*/}
+          {/*    />*/}
+          {/*    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">*/}
+          {/*      <span className="text-gray-500">kg</span>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
+          {/*  {errors.weight && (*/}
+          {/*    <p className="mt-1 text-sm text-red-500">{errors.weight}</p>*/}
+          {/*  )}*/}
+          {/*</div>*/}
         </div>
       </div>
 

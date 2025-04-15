@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 public record MemberRegisterRequestDto(
 
         @NotNull(message = "카카오 ID는 필수입니다.")
-        Long kakaoId,
+        Long memberId,
 
         @NotBlank(message = "이메일은 필수입니다.")
         String email,

@@ -17,6 +17,7 @@ import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
 import com.backend.domain.userkeyword.dto.response.UserKeywordResponse;
 import com.backend.domain.userkeyword.service.UserKeywordService;
 import com.backend.global.auth.model.CustomUserDetails;
+import com.backend.global.config.AdminWhitelistProperties;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
@@ -43,6 +44,7 @@ public class MemberService {
     private final UserKeywordService userKeywordService;
     private final LikeService likeService;
     private final ChatRequestService chatRequestService;
+    private final AdminWhitelistProperties adminWhitelistProperties;
 
     // 회원 프로필 정보 조회
     // 서비스 내부 조회/리스트 반환용 (Service → API/Query)
@@ -115,7 +117,7 @@ public class MemberService {
         try {
             // 1. 기존 활성 회원 여부
 
-            Member member = memberRepository.findById(requestDto.kakaoId())
+            Member member = memberRepository.findById(requestDto.memberId())
                     .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
 
             // 2. 탈퇴한 회원이면 복구
@@ -163,11 +165,11 @@ public class MemberService {
     // 회원 정보 수정
     @Transactional
     public MemberResponseDto modifyMember(
-        Long memberId,
-        MemberModifyRequestDto dto,
-        List<Long> keepImageIds,
-        String[] newImages,
-        UserKeywordSaveRequest keywordRequest
+            Long memberId,
+            MemberModifyRequestDto dto,
+            List<Long> keepImageIds,
+            String[] newImages,
+            UserKeywordSaveRequest keywordRequest
     ) throws IOException {
 
         Member member = getMemberEntity(memberId);
@@ -183,7 +185,7 @@ public class MemberService {
         if (finalCount < 1 || finalCount > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
         }
-        if (newImages != null && newImages.length!=0) {
+        if (newImages != null && newImages.length != 0) {
             imageService.uploadBase64Images(newImages, memberId);
         }
 
@@ -277,9 +279,27 @@ public class MemberService {
     }
 
     public Member modifyOrJoinMember(Long kakaoId, String email, String nickname) {
+
+//        // 1. 인가 코드로 accessToken, refreshToken 발급받기
+//        KakaoTokenResponseDto kakaoTokenDto = getTokenFromKakao(code);
+//        String kakaoAccessToken = kakaoTokenDto.accessToken();
+//        String kakaoRefreshToken = kakaoTokenDto.refreshToken();
+
         Optional<Member> byKakaoId = memberRepository.findByKakaoId(kakaoId);
 
-        if ( byKakaoId.isEmpty() ) {
+//        // 2. 카카오 accessToken으로 사용자 정보 요청
+//        KakaoUserInfoResponseDto kakaoUserInfo = getUserInfo(kakaoAccessToken);
+//        Long kakaoId = kakaoUserInfo.id();
+//
+//        // 관리자 화이트리스트에서 카카오 Id, 이메일 가져오기
+//        List<Long> kakaoIds = adminWhitelistProperties.getKakaoIds();
+//        List<String> emailDomains = adminWhitelistProperties.getEmailDomains();
+//
+//        log.info("🧪 [admin list] kakaoIds={}", adminWhitelistProperties.getKakaoIds());
+//        log.info("🧪 [admin list] emailDomains={}", adminWhitelistProperties.getEmailDomains());
+//        log.info("🧪 [current user] kakaoId={}", kakaoId);
+
+        if (byKakaoId.isEmpty()) {
             Member member = Member.ofKakaoUser(
                     kakaoId,
                     email,
@@ -289,6 +309,32 @@ public class MemberService {
 
             memberRepository.save(member);
 
+//            boolean isAdmin = false;
+
+//            // 카카오ID 화이트리스트 체크
+//            if (kakaoIds != null && kakaoIds.contains(kakaoId)) {
+//                isAdmin = true;
+//                log.info("[KakaoAuthService] 관리자 ID 일치: kakaoId={} matched with whitelist", kakaoId);
+//            }
+//
+//            // 이메일 화이트리스트 체크
+//            String email = kakaoUserInfo.kakaoAccount().email();
+//            if (email != null && emailDomains != null && emailDomains.contains(email.trim().toLowerCase())) {
+//                isAdmin = true;
+//                log.info("[KakaoAuthService] 관리자 이메일 일치: email={} matched with whitelist", email);
+//            }
+//
+//            // 관리자 권한으로 변경
+//            if (isAdmin && !member.getRole().equals(Role.ROLE_ADMIN)) {
+//                member.updateRole(Role.ROLE_ADMIN); // Role 업데이트
+//                memberRepository.saveAndFlush(member);
+//                member = memberRepository.findById(member.getId()).orElseThrow();
+//                log.info("[KakaoAuthService] 관리자 권한 반영 완료: memberId={}, Role={}", member.getId(), member.getRole());
+//            }
+//
+//            if (member.getRole().equals(Role.ROLE_ADMIN)) {
+//                log.info("[KakaoAuthService] 관리자 계정 로그인 성공: memberId={}", member.getId());
+//            }
             return member;
         }
 
