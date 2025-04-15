@@ -1,13 +1,5 @@
 package com.backend.domain.member.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.backend.domain.chatrequest.dto.response.ChatRequestDto;
 import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.chatrequest.service.ChatRequestService;
@@ -28,9 +20,15 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -164,7 +162,7 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public MemberResponseDto modifyMember(
+    public MemberResponseDto modifyOrJoinMember(
         Long memberId,
         MemberModifyRequestDto dto,
         List<Long> keepImageIds,
@@ -278,11 +276,7 @@ public class MemberService {
         }
     }
 
-    public Member modifyOrJoin(String username, String email, String nickname) {
-        return null;
-    }
-
-    public Member modifyMember(Long kakaoId, String email, String nickname) {
+    public Member modifyOrJoinMember(Long kakaoId, String email, String nickname) {
         Optional<Member> byKakaoId = memberRepository.findByKakaoId(kakaoId);
 
         if ( byKakaoId.isEmpty() ) {

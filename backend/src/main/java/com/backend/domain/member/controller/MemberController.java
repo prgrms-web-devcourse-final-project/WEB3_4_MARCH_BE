@@ -165,7 +165,7 @@ public class MemberController {
             List<Long> keepIds = data.keepImageIds;
             UserKeywordSaveRequest keywordReq = data.keywords;
 
-            MemberResponseDto updated = memberService.modifyMember(
+            MemberResponseDto updated = memberService.modifyOrJoinMember(
                 memberId,
                 memberReq,
                 keepIds,
