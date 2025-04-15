@@ -13,6 +13,7 @@ import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
+@Slf4j
 public class MemberController {
 
     private final MemberService memberService;
@@ -74,35 +76,38 @@ public class MemberController {
             String[] base64Images = data.files;
             UserKeywordSaveRequest keywordReq = data.keywords;
 
-
             if (base64Images == null || base64Images.length < 1 || base64Images.length > 5) {
                 throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
             }
 
             // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
             MemberInfoDto memberInfo = memberService.registerMember(memberReq);
+            log.info("통과 1");
 
             // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
             imageService.uploadBase64Images(base64Images, memberInfo.id());
+            log.info("통과 2");
 
             // 3. 선택한 키워드 저장
             userKeywordService.saveUserKeywords(memberInfo.id(), keywordReq.getKeywordIds());
             memberService.setRole(memberInfo.id());
+            log.info("통과 3");
 
             // 4. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
             MemberInfoDto updatedInfo = memberService.getMemberInfoForInternal(memberInfo.id());
-
+            log.info("통과 4");
             // 5. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
             String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
             String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
+            log.info("통과 5");
 
             // 6. 새로 발급된 토큰을 쿠키에 저장.
             cookieService.addAccessTokenToCookie(accessToken, response);
             cookieService.addRefreshTokenToCookie(refreshToken, response);
+            log.info("통과 6");
 
             // 7. 응답 DTO 생성
             MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
-
 
             return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
     }
