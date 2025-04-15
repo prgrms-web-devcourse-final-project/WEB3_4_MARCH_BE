@@ -9,11 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
-
     private final DefaultOAuth2AuthorizationRequestResolver defaultResolver;
 
     public CustomAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
@@ -41,12 +39,12 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
         if (redirectUrl != null && !redirectUrl.isEmpty()) {
-            additionalParameters.put("redirectUrl", redirectUrl);
+            additionalParameters.put("state", redirectUrl);
         }
 
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParameters)
-                .state(UUID.randomUUID().toString())
+                .state(redirectUrl)
                 .build();
     }
 }
