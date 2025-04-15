@@ -114,12 +114,16 @@ public class MemberService {
      */
     @Transactional(rollbackFor = Exception.class)
     public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) throws IOException {
+        log.info("📥 [서비스 - 회원가입] 회원등록 시작: memberId: {}", requestDto.memberId());
+
         try {
             // 1. 기존 활성 회원 여부
 
             Member member = memberRepository.findById(requestDto.memberId())
-                    .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
-
+                    .orElseThrow(() -> {
+                        log.warn("❌ [서비스 - 회원가입] 해당 ID의 회원이 존재하지 않음: {}", requestDto.memberId());
+                        return new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);
+                    });
             // 2. 탈퇴한 회원이면 복구
             if (member.isDeleted()) {
                 member.rejoin(requestDto);
@@ -127,6 +131,7 @@ public class MemberService {
             } else {
                 // 임시 회원인지 현재 회원인지 판별 여부
                 if (member.getRole() == Role.ROLE_TEMP_USER) {
+                    log.info("📝 [서비스 - 회원가입] 임시 회원 정보 업데이트");
                     member.updateProfile(
                             member.getNickname(),           // 기존 닉네임 유지
                             requestDto.age(),               // 추가 정보: 나이
@@ -137,9 +142,11 @@ public class MemberService {
                             requestDto.latitude(),          // 추가 정보: 위도
                             requestDto.longitude(),          // 추가 정보: 경도
                             requestDto.introduction()       // 추가 정보: 소개글
+
                     );
                     redisGeoService.addLocation(member.getId(), member.getLatitude(), member.getLongitude());
                 } else {
+                    log.warn("❌ [서비스 - 회원가입] 이미 등록된 정회원");
                     throw new GlobalException(GlobalErrorCode.DUPLICATE_MEMBER);
                 }
             }
@@ -149,6 +156,7 @@ public class MemberService {
             return MemberInfoDto.from(member, keywords);
         } catch (Exception e) {
             // 트랜잭션 내 예외가 발생하면 롤백 유도
+            log.error("❌ [서비스 - 회원가입] 예외 발생", e); // stack trace
             throw new GlobalException(GlobalErrorCode.MEMBER_REGISTRATION_FAILED, "회원가입 중 예외 발생");
         }
     }
