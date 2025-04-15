@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class CookieUtil {
+
+    @Value("${custom.cookie.domain}")
+    private String cookieDomain;
 
     /**
      * 요청에 포함된 쿠키 중에서 지정한 이름의 쿠키 값을 반환
@@ -62,6 +66,7 @@ public class CookieUtil {
 //        cookie.setSecure(true); // HTTPS 환경에서만 쿠키 전송
         cookie.setSecure(true); //스웨거 테스트용 임시 설정
         cookie.setAttribute("SameSite", "None");
+        cookie.setDomain(cookieDomain); // 도메인 설정 (서브도메인에서 접근 가능)
         cookie.setPath("/");
         cookie.setMaxAge((int) maxAge);
         response.addCookie(cookie);
@@ -79,6 +84,7 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setAttribute("SameSite", "None");
+        cookie.setDomain(cookieDomain); // 도메인 설정 (서브도메인에서 접근 가능)
         cookie.setPath("/");
         response.addCookie(cookie);
     }

@@ -66,8 +66,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // Redis에 jti를 포함해 refreshToken과 클라이언트 정보 저장
         redisRefreshTokenService.saveRefreshToken(member.getId(), jti, refreshToken, ttl, ip, userAgent);
 
-        cookieService.addAccessTokenToCookie(accessToken, httpServletResponse);
         cookieService.addRefreshTokenToCookie(refreshToken, httpServletResponse);
+        cookieService.addAccessTokenToCookie(accessToken, httpServletResponse);
 
         return new CustomUserDetails(
                 member.getId(),
