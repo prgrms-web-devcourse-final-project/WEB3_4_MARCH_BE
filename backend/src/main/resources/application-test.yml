@@ -1,0 +1,38 @@
+spring:
+  config:
+    import: optional:file:.env.test[.properties]
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MYSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      mode: never
+
+
+  security:
+    jwt:
+      secret: dXNlLXN0cm9uZy1yYW5kb20tc2VjcmV0LWtleS1oZXJlLXNlY3VyZQ==
+      access-token:
+        expiration: 1800000
+      refresh-token:
+        expiration: 1209600000
+
+server:
+  port: 8081
+
+logging:
+  level:
+    org.springframework.security: DEBUG

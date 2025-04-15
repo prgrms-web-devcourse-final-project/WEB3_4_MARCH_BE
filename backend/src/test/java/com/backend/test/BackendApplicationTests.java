@@ -1,8 +1,7 @@
-package com.backend.domain;
+package com.backend.test;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 @Disabled
 class BackendApplicationTests {
