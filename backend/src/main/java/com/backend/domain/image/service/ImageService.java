@@ -1,5 +1,16 @@
 package com.backend.domain.image.service;
 
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.apache.tika.mime.MimeTypes;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.backend.domain.image.dto.ImageResponseDto;
 import com.backend.domain.image.entity.Image;
 import com.backend.domain.image.repository.ImageRepository;
@@ -7,15 +18,10 @@ import com.backend.domain.member.entity.Member;
 import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +29,71 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
+    private final PresignedService presignedService;
     private final S3Client s3Client;
     private final String bucketName = "devcouse4-team06-bucket";
     private final String urlPrefix = "https://devcouse4-team06-bucket.s3.ap-northeast-2.amazonaws.com/";
 
     private static final int MAX_IMAGES = 5;
 
+
+    public List<String> uploadBase64Images(String[] base64Images, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND));
+
+        List<Image> currentImages = imageRepository.findByMember(member);
+        if (currentImages.size() + base64Images.length > MAX_IMAGES) {
+            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
+        }
+
+        boolean hasPrimary = imageRepository.findByMemberAndIsPrimaryTrue(member).isPresent();
+        List<String> resultUrls = new ArrayList<>();
+
+        for (String base64Str : base64Images) {
+            if (!base64Str.startsWith("data:") || !base64Str.contains("base64,")) {
+                throw new GlobalException(GlobalErrorCode.INVALID_IMAGE_FORMAT);
+            }
+            int commaIndex = base64Str.indexOf(",");
+            String meta = base64Str.substring(0, commaIndex);
+            String dataPart = base64Str.substring(commaIndex + 1);
+            // meta 예: "data:image/jpeg;base64"
+            String mimeType = meta.substring(meta.indexOf(":") + 1, meta.indexOf(";"));
+            // extension 추출
+            String extension;
+            try {
+                extension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+            } catch (Exception e) {
+                throw new GlobalException(GlobalErrorCode.INVALID_IMAGE_TYPE_FORMAT);
+            }
+
+            byte[] fileBytes = Base64.getDecoder().decode(dataPart);
+            String uuid = UUID.randomUUID().toString();
+            String key = "images/" + uuid + extension;  // ".jpg" 등
+            String imageUrl = urlPrefix + key;
+
+            String presignedUrl = presignedService.createPresignedUrl(key, mimeType);
+            boolean success = presignedService.uploadFileToS3(presignedUrl, fileBytes, mimeType);
+            if (!success) {
+                throw new GlobalException(GlobalErrorCode.INTERNAL_SERVER_ERROR, "S3 업로드 실패");
+            }
+
+            Image image = Image.builder()
+                .url(imageUrl)
+                .isPrimary(!hasPrimary) // 대표 이미지가 없으면 이걸 대표로
+                .member(member)
+                .build();
+            imageRepository.save(image);
+            member.getImages().add(image);
+
+            if (!hasPrimary) {
+                member.setProfileImage(image);
+                memberRepository.save(member);
+                hasPrimary = true;
+            }
+            resultUrls.add(imageUrl);
+        }
+        return resultUrls;
+    }
     /**
      * 회원의 이미지 목록을 조회한다.
      *

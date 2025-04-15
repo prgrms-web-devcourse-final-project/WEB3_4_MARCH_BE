@@ -24,6 +24,9 @@ public enum GlobalErrorCode {
 	IMAGE_NOT_FOUND(HttpStatus.BAD_REQUEST, 400, "이미지를 찾을 수 없습니다."),
 	UNAUTHORIZED_IMAGE_OPERATION(HttpStatus.BAD_REQUEST, 400, "다른 유저의 이미지는 조작할 수 없습니다."),
 	ALREADY_PRIMARY_IMAGE(HttpStatus.BAD_REQUEST, 400, "이미 대표 이미지로 설정되어 있습니다."),
+	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 400, "S3 업로드 실패"),
+	INVALID_IMAGE_FORMAT(HttpStatus.INTERNAL_SERVER_ERROR, 400,"Base64 데이터가 올바르지 않습니다."),
+	INVALID_IMAGE_TYPE_FORMAT(HttpStatus.INTERNAL_SERVER_ERROR, 400,"mimeType 해석 실패"),
 
 	// 채팅요청 오류코드
 	ALREADY_REQUESTED(HttpStatus.BAD_REQUEST, 400, "이미 채팅요청을 보냈습니다."),

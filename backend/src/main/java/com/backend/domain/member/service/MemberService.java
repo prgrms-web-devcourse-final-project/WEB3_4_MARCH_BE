@@ -1,5 +1,13 @@
 package com.backend.domain.member.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.backend.domain.chatrequest.dto.response.ChatRequestDto;
 import com.backend.domain.chatrequest.entity.ChatRequestStatus;
 import com.backend.domain.chatrequest.service.ChatRequestService;
@@ -20,17 +28,9 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.redis.service.RedisGeoService;
-import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -113,10 +113,7 @@ public class MemberService {
      * @throws GlobalException 이미 가입된 회원일 경우 DUPLICATE_MEMBER 오류 발생
      */
     @Transactional(rollbackFor = Exception.class)
-    public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto,
-                                        List<MultipartFile> imageFiles,
-                                        List<Long> keywordIds,
-                                        HttpServletResponse response) throws IOException {
+    public MemberInfoDto registerMember(MemberRegisterRequestDto requestDto) throws IOException {
         try {
             // 1. 기존 활성 회원 여부
 
@@ -167,11 +164,13 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public MemberResponseDto modifyMember(Long memberId,
-                                          MemberModifyRequestDto dto,
-                                          UserKeywordSaveRequest keywordRequest,
-                                          List<Long> keepImageIds,
-                                          List<MultipartFile> newImages) throws IOException {
+    public MemberResponseDto modifyMember(
+        Long memberId,
+        MemberModifyRequestDto dto,
+        List<Long> keepImageIds,
+        String[] newImages,
+        UserKeywordSaveRequest keywordRequest
+    ) throws IOException {
 
         Member member = getMemberEntity(memberId);
 
@@ -182,12 +181,12 @@ public class MemberService {
                 .forEach(img -> imageService.deleteImage(memberId, img.getId()));
 
         // 2. 새 이미지 추가 로직
-        int finalCount = keepImageIds.size() + (newImages == null ? 0 : newImages.size());
+        int finalCount = keepImageIds.size() + (newImages == null ? 0 : newImages.length);
         if (finalCount < 1 || finalCount > 5) {
             throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
         }
-        if (newImages != null && !newImages.isEmpty()) {
-            presignedService.uploadFiles(newImages, memberId);
+        if (newImages != null && newImages.length!=0) {
+            imageService.uploadBase64Images(newImages, memberId);
         }
 
         // 3. 프로필 정보 수정
