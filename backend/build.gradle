@@ -82,6 +82,11 @@ dependencies {
     implementation 'commons-fileupload:commons-fileupload:1.5'
 
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+
+    // 테스트
+    testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'com.h2database:h2'
+
 }
 
 tasks.named('test') {

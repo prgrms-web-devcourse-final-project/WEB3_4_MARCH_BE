@@ -32,12 +32,12 @@ public class KafkaChatConsumer {
     private final MemberRepository memberRepository;
 
     /**
-     * Kafka에서 "chat-massage" 토픽의 메시지를 수신합니다.
+     * Kafka에서 "chat-message" 토픽의 메시지를 수신합니다.
      *
      * @param chatMessage Kafka를 통해 전달받은 채팅 메시지 DTO
      */
     @KafkaListener(
-            topics = "chat-massage",
+            topics = "chat-message",
             groupId = "chat-group",
             containerFactory = "kafkaListenerContainerFactory"
     )

@@ -47,6 +47,7 @@ models/MemberModifyRequestDto.ts
 models/MemberRegisterRequestDto.ts
 models/MemberRegisterResponseDto.ts
 models/MemberResponseDto.ts
+models/ModifyMemberDto.ts
 models/NotificationDto.ts
 models/PageAdminMemberDto.ts
 models/PageChatRoomResponse.ts
@@ -54,7 +55,7 @@ models/Pageable.ts
 models/Pageablenull.ts
 models/ProfileImageDto.ts
 models/RecommendedUserDto.ts
-models/RegisterRequest.ts
+models/RegisterDTO.ts
 models/SliceChatMessageResponse.ts
 models/Sortnull.ts
 models/UserKeywordResponse.ts

@@ -9,7 +9,6 @@ import {
 import { useUserStore } from "../features/auth/useUserStore";
 import type {
   MemberRegisterRequestDto,
-  RegisterOperationRequest,
   UserKeywordSaveRequest,
 } from "../api/__generated__";
 import { apiClient } from "../api/apiClient";
@@ -17,7 +16,6 @@ import {
   getCurrentPosition,
   isPermissionDeniedError,
   showBrowserPermissionGuide,
-  showLocationPermissionDialog,
 } from "../utils/currentPosition";
 import { useFlow, type ActivityName } from "../stackflow/stackflow";
 
@@ -77,13 +75,13 @@ export const ProfileSetupActivity = ({
     setPage("keyword");
   };
 
-  const onConfirmKeywordSetup = async (keywords: string[]) => {
+  const onConfirmKeywordSetup = async (keywordIds: number[]) => {
     if (!memberRegisterDto) {
       return;
     }
 
     apiClient.member.register({
-      registerRequest: {
+      registerDTO: {
         member: {
           age: memberRegisterDto.age,
           email: memberRegisterDto.email,
@@ -93,11 +91,11 @@ export const ProfileSetupActivity = ({
           kakaoId: memberRegisterDto.kakaoId,
           latitude: memberRegisterDto.latitude,
           longitude: memberRegisterDto.longitude,
+          introduction: memberRegisterDto.introduction,
         },
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        files: images as any,
+        files: images,
         keywords: {
-          keywordIds: [],
+          keywordIds,
         },
       },
     });

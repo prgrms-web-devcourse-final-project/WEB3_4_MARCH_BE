@@ -19,9 +19,8 @@ import type {
   GenericResponseListMemberResponseDto,
   GenericResponseMemberRegisterResponseDto,
   GenericResponseMemberResponseDto,
-  MemberModifyRequestDto,
-  RegisterRequest,
-  UserKeywordSaveRequest,
+  ModifyMemberDto,
+  RegisterDTO,
 } from '../models/index';
 import {
     GenericResponseBooleanFromJSON,
@@ -32,12 +31,10 @@ import {
     GenericResponseMemberRegisterResponseDtoToJSON,
     GenericResponseMemberResponseDtoFromJSON,
     GenericResponseMemberResponseDtoToJSON,
-    MemberModifyRequestDtoFromJSON,
-    MemberModifyRequestDtoToJSON,
-    RegisterRequestFromJSON,
-    RegisterRequestToJSON,
-    UserKeywordSaveRequestFromJSON,
-    UserKeywordSaveRequestToJSON,
+    ModifyMemberDtoFromJSON,
+    ModifyMemberDtoToJSON,
+    RegisterDTOFromJSON,
+    RegisterDTOToJSON,
 } from '../models/index';
 
 export interface CheckNicknameRequest {
@@ -50,14 +47,11 @@ export interface GetMemberProfileRequest {
 
 export interface ModifyMemberInfoRequest {
     id: number;
-    member: MemberModifyRequestDto;
-    keepImageId: string;
-    keywordIds?: UserKeywordSaveRequest;
-    newImages?: Array<Blob>;
+    modifyMemberDto: ModifyMemberDto;
 }
 
-export interface RegisterOperationRequest {
-    registerRequest?: RegisterRequest;
+export interface RegisterRequest {
+    registerDTO: RegisterDTO;
 }
 
 export interface SearchMembersByNicknameRequest {
@@ -194,17 +188,10 @@ export class MemberControllerApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['member'] == null) {
+        if (requestParameters['modifyMemberDto'] == null) {
             throw new runtime.RequiredError(
-                'member',
-                'Required parameter "member" was null or undefined when calling modifyMemberInfo().'
-            );
-        }
-
-        if (requestParameters['keepImageId'] == null) {
-            throw new runtime.RequiredError(
-                'keepImageId',
-                'Required parameter "keepImageId" was null or undefined when calling modifyMemberInfo().'
+                'modifyMemberDto',
+                'Required parameter "modifyMemberDto" was null or undefined when calling modifyMemberInfo().'
             );
         }
 
@@ -212,43 +199,11 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         if (this.configuration && this.configuration.accessToken) {
             // oauth required
             headerParameters["Authorization"] = await this.configuration.accessToken("kakaoOAuth", []);
-        }
-
-        const consumes: runtime.Consume[] = [
-            { contentType: 'multipart/form-data' },
-        ];
-        // @ts-ignore: canConsumeForm may be unused
-        const canConsumeForm = runtime.canConsumeForm(consumes);
-
-        let formParams: { append(param: string, value: any): any };
-        let useForm = false;
-        // use FormData to transmit files using content-type "multipart/form-data"
-        useForm = canConsumeForm;
-        if (useForm) {
-            formParams = new FormData();
-        } else {
-            formParams = new URLSearchParams();
-        }
-
-        if (requestParameters['member'] != null) {
-            formParams.append('member', new Blob([JSON.stringify(MemberModifyRequestDtoToJSON(requestParameters['member']))], { type: "application/json", }));
-                    }
-
-        if (requestParameters['keywordIds'] != null) {
-            formParams.append('keywordIds', new Blob([JSON.stringify(UserKeywordSaveRequestToJSON(requestParameters['keywordIds']))], { type: "application/json", }));
-                    }
-
-        if (requestParameters['keepImageId'] != null) {
-            formParams.append('keepImageId', requestParameters['keepImageId'] as any);
-        }
-
-        if (requestParameters['newImages'] != null) {
-            requestParameters['newImages'].forEach((element) => {
-                formParams.append('newImages', element as any);
-            })
         }
 
         const response = await this.request({
@@ -256,7 +211,7 @@ export class MemberControllerApi extends runtime.BaseAPI {
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,
-            body: formParams,
+            body: ModifyMemberDtoToJSON(requestParameters['modifyMemberDto']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberResponseDtoFromJSON(jsonValue));
@@ -271,7 +226,14 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async registerRaw(requestParameters: RegisterOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberRegisterResponseDto>> {
+    async registerRaw(requestParameters: RegisterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GenericResponseMemberRegisterResponseDto>> {
+        if (requestParameters['registerDTO'] == null) {
+            throw new runtime.RequiredError(
+                'registerDTO',
+                'Required parameter "registerDTO" was null or undefined when calling register().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -288,7 +250,7 @@ export class MemberControllerApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RegisterRequestToJSON(requestParameters['registerRequest']),
+            body: RegisterDTOToJSON(requestParameters['registerDTO']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => GenericResponseMemberRegisterResponseDtoFromJSON(jsonValue));
@@ -296,7 +258,7 @@ export class MemberControllerApi extends runtime.BaseAPI {
 
     /**
      */
-    async register(requestParameters: RegisterOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberRegisterResponseDto> {
+    async register(requestParameters: RegisterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GenericResponseMemberRegisterResponseDto> {
         const response = await this.registerRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -55,30 +55,6 @@ export interface PageChatRoomResponse {
     totalPages?: number;
     /**
      * 
-     * @type {Pageablenull}
-     * @memberof PageChatRoomResponse
-     */
-    pageable?: Pageablenull;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageChatRoomResponse
-     */
-    numberOfElements?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof PageChatRoomResponse
-     */
-    first?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof PageChatRoomResponse
-     */
-    last?: boolean;
-    /**
-     * 
      * @type {number}
      * @memberof PageChatRoomResponse
      */
@@ -101,6 +77,30 @@ export interface PageChatRoomResponse {
      * @memberof PageChatRoomResponse
      */
     sort?: Sortnull;
+    /**
+     * 
+     * @type {number}
+     * @memberof PageChatRoomResponse
+     */
+    numberOfElements?: number;
+    /**
+     * 
+     * @type {Pageablenull}
+     * @memberof PageChatRoomResponse
+     */
+    pageable?: Pageablenull;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PageChatRoomResponse
+     */
+    first?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PageChatRoomResponse
+     */
+    last?: boolean;
     /**
      * 
      * @type {boolean}
@@ -128,14 +128,14 @@ export function PageChatRoomResponseFromJSONTyped(json: any, ignoreDiscriminator
         
         'totalElements': json['totalElements'] == null ? undefined : json['totalElements'],
         'totalPages': json['totalPages'] == null ? undefined : json['totalPages'],
-        'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
-        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
-        'first': json['first'] == null ? undefined : json['first'],
-        'last': json['last'] == null ? undefined : json['last'],
         'size': json['size'] == null ? undefined : json['size'],
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ChatRoomResponseFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
         'sort': json['sort'] == null ? undefined : SortnullFromJSON(json['sort']),
+        'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
+        'pageable': json['pageable'] == null ? undefined : PageablenullFromJSON(json['pageable']),
+        'first': json['first'] == null ? undefined : json['first'],
+        'last': json['last'] == null ? undefined : json['last'],
         'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
@@ -153,14 +153,14 @@ export function PageChatRoomResponseToJSONTyped(value?: PageChatRoomResponse | n
         
         'totalElements': value['totalElements'],
         'totalPages': value['totalPages'],
-        'pageable': PageablenullToJSON(value['pageable']),
-        'numberOfElements': value['numberOfElements'],
-        'first': value['first'],
-        'last': value['last'],
         'size': value['size'],
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ChatRoomResponseToJSON)),
         'number': value['number'],
         'sort': SortnullToJSON(value['sort']),
+        'numberOfElements': value['numberOfElements'],
+        'pageable': PageablenullToJSON(value['pageable']),
+        'first': value['first'],
+        'last': value['last'],
         'empty': value['empty'],
     };
 }

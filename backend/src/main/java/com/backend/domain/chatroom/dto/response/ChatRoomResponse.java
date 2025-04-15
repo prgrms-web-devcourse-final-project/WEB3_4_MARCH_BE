@@ -1,13 +1,19 @@
 package com.backend.domain.chatroom.dto.response;
 
+import com.backend.domain.chat.entity.Chat;
 import com.backend.domain.chatroom.entity.ChatRoom;
 import com.backend.domain.member.entity.Member;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.cglib.core.Local;
 
 /**
  * 채팅방 응답 DTO입니다.
@@ -20,37 +26,36 @@ import lombok.NoArgsConstructor;
 public class ChatRoomResponse {
 
     private Long id;
-    private Long senderId;
-    private Long receiverId;
-    private LocalDateTime createdAt;
+    private MemberSummary opponent;
+
+    @JsonProperty("lastMessage")
+    private MessageSummary message;
     private int unreadCount;
 
-    // 상대방 정보 (현재 로그인한 사용자를 기준으로 동적으로 설정)
-    private String opponentNickname;
-    private String opponentProfileImgUrl;
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberSummary {
 
-    /**
-     * ChatRoom 엔티티를 기반으로 응답 DTO를 생성합니다.
-     * - 현재 로그인한 사용자의 ID를 기준으로 상대방 정보를 추출하여 포함합니다.
-     * - 상대방 닉네임(opponentNickname), 프로필 이미지(opponentProfileImgUrl)를 함께 반환합니다.
-     *
-     * @param chatRoom        채팅방 엔티티
-     * @param currentMemberId 현재 로그인한 사용자 ID
-     * @return ChatRoomResponse 응답 DTO
-     */
-    public static ChatRoomResponse from(ChatRoom chatRoom, Long currentMemberId, int unreadCount) {
-        Member opponent = chatRoom.getSender().getId().equals(currentMemberId)
-                ? chatRoom.getReceiver()
-                : chatRoom.getSender();
+        private Long id;
+        private String name;
+        private String image;
+    }
 
-        return ChatRoomResponse.builder()
-                .id(chatRoom.getId())
-                .senderId(chatRoom.getSender().getId())
-                .receiverId(chatRoom.getReceiver().getId())
-                .createdAt(chatRoom.getCreateAt())
-                .opponentNickname(opponent.getNickname())
-                .opponentProfileImgUrl(opponent.getProfileImage() != null ? opponent.getProfileImage().getUrl() : null)
-                .unreadCount(unreadCount)
-                .build();
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MessageSummary {
+
+        private String text;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "a hh:mm", timezone = "Asia/Seoul")
+        private LocalDateTime timestamp;
+
+        private boolean isRead;
+
+        private boolean isFromMe;
     }
 }

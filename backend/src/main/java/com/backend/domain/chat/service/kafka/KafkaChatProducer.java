@@ -1,6 +1,7 @@
 package com.backend.domain.chat.service.kafka;
 
 import com.backend.domain.chat.dto.ChatMessage;
+import com.backend.global.config.KafkaTopicConfig;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +21,7 @@ public class KafkaChatProducer {
     private final ObjectMapper objectMapper;
 
     // 카프카 토픽명
-    private static final String TOPIC_NAME = "chat-massage";
+    private static final String TOPIC_NAME = KafkaTopicConfig.CHAT_TOPIC;
 
     /**
      * Kafka 토픽에 채팅 메시지를 전송합니다.

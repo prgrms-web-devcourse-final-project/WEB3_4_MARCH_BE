@@ -14,7 +14,7 @@ import {
   UserRecommendationControllerApi,
 } from "./__generated__";
 
-export const BACKEND_API = import.meta.env.VITE_DEFAULT_SERVER_URL ?? "";
+export const BACKEND_API = "https://api.connect-to.shop";
 
 // API 클라이언트 설정
 const config = new Configuration({

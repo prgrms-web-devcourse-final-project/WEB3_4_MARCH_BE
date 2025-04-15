@@ -15,6 +15,9 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     // 채팅방 번호 기준으로 보낸 시간 오름차순 정렬
     List<Chat> findByChatRoomIdOrderBySendTimeAsc(Long chatRoomId);
 
+    // 채팅방 번호 기준 마지막으로 보낸 메시지
+    Optional<Chat> findFirstByChatRoomIdOrderBySendTimeDesc(Long chatRoomId);
+
     // UUID 찾는 메서드
     Optional<Chat> findByUuid(String uuid);
 
