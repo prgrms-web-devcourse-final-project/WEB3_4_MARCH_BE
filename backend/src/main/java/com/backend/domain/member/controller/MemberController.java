@@ -39,11 +39,13 @@ public class MemberController {
      * RegisterDTO: 기존에 사용하려 했던 Base64ImagesWrapper 대신,
      * 여기서는 files 필드에 base64 문자열 배열을 직접 받습니다.
      */
-    record RegisterDTO (
-        MemberRegisterRequestDto member,
-        String[] files,
-        UserKeywordSaveRequest keywords
-    ) {}
+    record RegisterDTO(
+            MemberRegisterRequestDto member,
+            String[] files,
+            UserKeywordSaveRequest keywords
+    ) {
+    }
+
     /**
      * 회원 가입을 처리하는 엔드포인트이다.
      *
@@ -54,62 +56,97 @@ public class MemberController {
      * 이때, 첫 번째 업로드된 이미지는 자동으로 대표 이미지로 지정된다.
      * 3. 최종적으로 업로드된 이미지를 반영한 최신 회원 정보를 반환한다.
      * </p>
-     *
+     * <p>
      * 입력 예시
      * {
-     *   "member": { ... 회원 기본 정보 ... },
-     *   "files": [ "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...", ... ],
-     *   "keywords": { "keywordIds": [1, 2, 3] }
+     * "member": { ... 회원 기본 정보 ... },
+     * "files": [ "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...", ... ],
+     * "keywords": { "keywordIds": [1, 2, 3] }
      * }
      *
-     * @param data   회원 생성 시 필요한 정보를 담은 RegisterDTO
+     * @param data 회원 생성 시 필요한 정보를 담은 RegisterDTO
      * @return 회원 가입에 성공한 회원의 최신 정보를 담은 응답 객체 (MemberInfoDto)
      * @throws IOException     파일 처리 중 I/O 예외가 발생할 경우
      * @throws GlobalException 이미지 파일 수가 1장 미만이거나 5장을 초과할 경우 IMAGE_COUNT_INVALID 오류 발생
      */
-	@PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<GenericResponse<MemberRegisterResponseDto>> register(
             @RequestBody RegisterDTO data,
             HttpServletResponse response
     ) throws IOException {
-            MemberRegisterRequestDto memberReq = data.member;
-            String[] base64Images = data.files;
-            UserKeywordSaveRequest keywordReq = data.keywords;
+        MemberRegisterRequestDto memberReq = data.member;
+        String[] base64Images = data.files;
+        UserKeywordSaveRequest keywordReq = data.keywords;
 
-            if (base64Images == null || base64Images.length < 1 || base64Images.length > 5) {
-                throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
-            }
+        log.info("🚀 [회원가입 요청 수신] data: {}", data); // 1. 요청 전체 로그
 
-            // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
+        if (base64Images == null || base64Images.length < 1 || base64Images.length > 5) {
+            log.warn("⚠️ [회원가입 실패] 이미지 개수 오류. count: {}", (base64Images == null ? 0 : base64Images.length));
+            throw new GlobalException(GlobalErrorCode.IMAGE_COUNT_INVALID);
+        }
+
+        try {
+            log.info("✅ [1단계] 회원 기본 정보 등록 시작");
             MemberInfoDto memberInfo = memberService.registerMember(memberReq);
-            log.info("통과 1");
+            log.info("✅ [1단계] 회원 기본 정보 등록 완료. memberId: {}", memberInfo.id());
 
-            // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
+            log.info("✅ [2단계] 이미지 업로드 시작");
             imageService.uploadBase64Images(base64Images, memberInfo.id());
-            log.info("통과 2");
+            log.info("✅ [2단계] 이미지 업로드 완료");
 
-            // 3. 선택한 키워드 저장
+            log.info("✅ [3단계] 키워드 저장 시작");
             userKeywordService.saveUserKeywords(memberInfo.id(), keywordReq.getKeywordIds());
             memberService.setRole(memberInfo.id());
-            log.info("통과 3");
+            log.info("✅ [3단계] 키워드 저장 및 역할 설정 완료");
 
-            // 4. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
+            log.info("✅ [4단계] 최신 정보 조회");
             MemberInfoDto updatedInfo = memberService.getMemberInfoForInternal(memberInfo.id());
-            log.info("통과 4");
-            // 5. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
+
+            log.info("✅ [5단계] 토큰 발급 시작");
             String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
             String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
-            log.info("통과 5");
+            log.info("✅ [5단계] 토큰 발급 완료");
 
-            // 6. 새로 발급된 토큰을 쿠키에 저장.
             cookieService.addAccessTokenToCookie(accessToken, response);
             cookieService.addRefreshTokenToCookie(refreshToken, response);
-            log.info("통과 6");
 
-            // 7. 응답 DTO 생성
             MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
-
             return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
+        } catch (Exception e) {
+            log.error("❌ [회원가입 실패] 예외 발생", e); // <-- stack trace 포함 log
+            throw e; // GlobalException 등으로 위임
+        }
+
+//            // 1. 회원 기본 정보로 회원 생성 (이미지 정보는 없음)
+//            MemberInfoDto memberInfo = memberService.registerMember(memberReq);
+//            log.info("통과 1");
+//
+//            // 2. 이미지 파일들을 PresignedService.uploadFiles()를 통해 S3 업로드 및 DB 등록
+//            imageService.uploadBase64Images(base64Images, memberInfo.id());
+//            log.info("통과 2");
+//
+//            // 3. 선택한 키워드 저장
+//            userKeywordService.saveUserKeywords(memberInfo.id(), keywordReq.getKeywordIds());
+//            memberService.setRole(memberInfo.id());
+//            log.info("통과 3");
+//
+//            // 4. 최신 회원 정보를 다시 조회하여 반환 (profileImage 등 업데이트 반영)
+//            MemberInfoDto updatedInfo = memberService.getMemberInfoForInternal(memberInfo.id());
+//            log.info("통과 4");
+//            // 5. 토큰 재발급 (ROLE_TEMP_USER -> ROLE_USER 로 role 변경시 토큰 재발급이 필요)
+//            String accessToken = tokenProvider.createAccessToken(updatedInfo.id(), updatedInfo.role().name());
+//            String refreshToken = tokenProvider.createRefreshToken(updatedInfo.id());
+//            log.info("통과 5");
+//
+//            // 6. 새로 발급된 토큰을 쿠키에 저장.
+//            cookieService.addAccessTokenToCookie(accessToken, response);
+//            cookieService.addRefreshTokenToCookie(refreshToken, response);
+//            log.info("통과 6");
+//
+//            // 7. 응답 DTO 생성
+//            MemberRegisterResponseDto responseDto = new MemberRegisterResponseDto(updatedInfo, accessToken, refreshToken);
+//
+//            return ResponseEntity.ok(GenericResponse.of(responseDto, "회원 등록이 완료되었습니다."));
     }
 
     // 다른 멤버 정보 조회
@@ -139,11 +176,13 @@ public class MemberController {
 
     // 회원 정보 수정
     record ModifyMemberDto(
-        MemberModifyRequestDto member,
-        String[] newImages,
-        List<Long> keepImageIds,
-        UserKeywordSaveRequest keywords
-    ) {}
+            MemberModifyRequestDto member,
+            String[] newImages,
+            List<Long> keepImageIds,
+            UserKeywordSaveRequest keywords
+    ) {
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<GenericResponse<MemberResponseDto>> modifyMemberInfo(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -151,18 +190,18 @@ public class MemberController {
             @RequestBody ModifyMemberDto data
     ) throws IOException {
 
-            MemberModifyRequestDto memberReq = data.member;
-            String[] base64NewImages = data.newImages;
-            List<Long> keepIds = data.keepImageIds;
-            UserKeywordSaveRequest keywordReq = data.keywords;
+        MemberModifyRequestDto memberReq = data.member;
+        String[] base64NewImages = data.newImages;
+        List<Long> keepIds = data.keepImageIds;
+        UserKeywordSaveRequest keywordReq = data.keywords;
 
-            MemberResponseDto updated = memberService.modifyMember(
+        MemberResponseDto updated = memberService.modifyMember(
                 memberId,
                 memberReq,
                 keepIds,
                 base64NewImages,
                 keywordReq
-            );
+        );
         return ResponseEntity.ok(GenericResponse.of(updated, "회원 정보 수정 완료"));
     }
 
