@@ -162,7 +162,7 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public MemberResponseDto modifyOrJoinMember(
+    public MemberResponseDto modifyMember(
         Long memberId,
         MemberModifyRequestDto dto,
         List<Long> keepImageIds,

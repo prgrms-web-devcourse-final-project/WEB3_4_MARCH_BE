@@ -1,26 +1,7 @@
 package com.backend.domain.member.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.backend.domain.image.service.ImageService;
-import com.backend.domain.member.dto.MemberInfoDto;
-import com.backend.domain.member.dto.MemberModifyRequestDto;
-import com.backend.domain.member.dto.MemberRegisterRequestDto;
-import com.backend.domain.member.dto.MemberRegisterResponseDto;
-import com.backend.domain.member.dto.MemberResponseDto;
+import com.backend.domain.member.dto.*;
 import com.backend.domain.member.service.MemberService;
 import com.backend.domain.userkeyword.dto.request.UserKeywordSaveRequest;
 import com.backend.domain.userkeyword.service.UserKeywordService;
@@ -30,9 +11,14 @@ import com.backend.global.auth.model.CustomUserDetails;
 import com.backend.global.exception.GlobalErrorCode;
 import com.backend.global.exception.GlobalException;
 import com.backend.global.response.GenericResponse;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -165,7 +151,7 @@ public class MemberController {
             List<Long> keepIds = data.keepImageIds;
             UserKeywordSaveRequest keywordReq = data.keywords;
 
-            MemberResponseDto updated = memberService.modifyOrJoinMember(
+            MemberResponseDto updated = memberService.modifyMember(
                 memberId,
                 memberReq,
                 keepIds,
