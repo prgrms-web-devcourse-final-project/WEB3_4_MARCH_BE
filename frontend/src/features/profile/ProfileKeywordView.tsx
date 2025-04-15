@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useKeywords from "../keywords/hooks/useKeywords";
 import { cn } from "../../utils/classNaem";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "../../components/Button";
-import { DUMMY_KEYWORDS } from "../keywords/dumy";
+import type { UserKeywordResponse } from "../../api/__generated__";
 
 export const ProfileKeywordView = ({
   onComplete,
-}: { onComplete: (keywords: number[]) => void }) => {
+  defaultKeywords,
+}: {
+  onComplete: (keywords: number[]) => void;
+  defaultKeywords: UserKeywordResponse[];
+}) => {
   const { keywords: keywordsData, isLoading, isError } = useKeywords();
   const keywords = keywordsData?.data ?? [];
 
@@ -18,7 +22,41 @@ export const ProfileKeywordView = ({
   // State to track selected keyword IDs for each category
   const [selectedKeywords, setSelectedKeywords] = useState<
     Record<number, number[]>
-  >(Object.fromEntries(keywords.map((category) => [category.categoryId, []])));
+  >({});
+
+  // Initialize selectedKeywords when keywords are loaded
+  useEffect(() => {
+    if (keywords.length === 0) return;
+
+    // Create initial state with empty arrays for each category
+    const initialState = Object.fromEntries(
+      keywords.map((category) => [category.categoryId, []]),
+    );
+
+    // Group defaultKeywords by their categories
+    if (defaultKeywords.length > 0) {
+      for (const keyword of defaultKeywords) {
+        if (!keyword.categoryId || !keyword.id) continue;
+
+        const categoryId = keyword.categoryId;
+        if (initialState[categoryId]) {
+          // Ensure we respect multipleChoice property
+          const category = keywords.find((c) => c.categoryId === categoryId);
+          if (category) {
+            if (category.multipleChoice) {
+              // Add to existing array for multiple choice categories
+              initialState[categoryId].push(keyword.id);
+            } else {
+              // Replace array for single choice categories
+              initialState[categoryId] = [keyword.id];
+            }
+          }
+        }
+      }
+    }
+
+    setSelectedKeywords(initialState);
+  }, [keywords, defaultKeywords]);
 
   // Toggle keyword selection
   const toggleKeyword = (categoryId: number, keywordId: number) => {
