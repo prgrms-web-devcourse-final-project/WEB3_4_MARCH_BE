@@ -46,7 +46,7 @@ public class ChatRoom {
     private ChatRequest chatRequest;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     /**
      * 채팅창에서 현재 참여자(currentMemberId)를 제외한 다른 참여자(수신자)를 찾는 메서드입니다.

@@ -83,7 +83,7 @@ public class ChatRequestService {
                 .sender(request.getSender())
                 .receiver(request.getReceiver())
                 .chatRequest(request)
-                .createAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         chatRoomRepository.save(chatRoom);
