@@ -53,7 +53,7 @@ export const NotificationActivity = () => {
       {isError && <div>알림을 불러오는데 실패했습니다.</div>}
       {!isLoading && !isError && (
         <NotificationListView
-          notifications={notifications ?? DUMMY_NOTIFICATIONS}
+          notifications={notifications ?.length ? notifications : DUMMY_NOTIFICATIONS}
           loading={isLoading}
           onMarkAsReadNotification={handleMarkAsRead}
           onDeleteNotification={handleDeleteNotification}

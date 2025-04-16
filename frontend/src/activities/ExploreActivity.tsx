@@ -19,9 +19,10 @@ const ExploreActivity: React.FC<ExploreActivityProps> = ({ params: {} }) => {
         </div>
       )}
       {isError && <div>추천 데이터를 불러오는데 실패했습니다.</div>}
-      {!isLoading && !isError && <ExploreView matchings={data?.data ?? DumyMatchings} />}
+      {!isLoading && !isError && <ExploreView matchings={data?.data?.length ? data.data : DumyMatchings} />}
     </AppScreenLayout>
   );
 };
 
 export default ExploreActivity;
+
