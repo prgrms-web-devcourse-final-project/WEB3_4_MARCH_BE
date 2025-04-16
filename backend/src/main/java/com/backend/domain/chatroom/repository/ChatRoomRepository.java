@@ -40,6 +40,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("SELECT DISTINCT cr FROM ChatRoom cr " +
             "JOIN FETCH cr.sender " +
             "JOIN FETCH cr.receiver " +
-            "WHERE cr.id = :chatRoomId")
+            "WHERE cr.id = :memberId")
     Page<ChatRoom> findAllWithMembers(@Param("memberId") Long memberId, Pageable pageable);
 }
