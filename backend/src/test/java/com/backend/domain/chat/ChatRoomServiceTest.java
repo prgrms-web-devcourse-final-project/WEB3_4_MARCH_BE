@@ -67,7 +67,7 @@ class ChatRoomServiceTest {
                 .id(100L)
                 .sender(sender)
                 .receiver(receiver)
-                .createAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 
