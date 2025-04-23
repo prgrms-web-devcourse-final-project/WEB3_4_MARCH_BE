@@ -3,7 +3,7 @@ name: Gemini Code Review
 on:
   pull_request:
     branches:
-      - main
+      - feature/dev
     types: [ opened ]
 
 jobs:
