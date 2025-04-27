@@ -1,24 +1,52 @@
 import { useState } from "react";
-import { DumyChats } from "./dumy";
 import { Search } from "lucide-react";
 import { cn } from "../../utils/classNaem";
 
-export default function ChatListView() {
-  const [chats, setChats] = useState(DumyChats);
+interface User {
+  id: number;
+  name: string;
+  image: string | null;
+}
+
+interface LastMessage {
+  text: string;
+  timestamp: string;
+  isRead: boolean;
+  isFromMe: boolean;
+}
+
+interface ChatRoom {
+  id: number;
+  opponent: User;
+  lastMessage: LastMessage;
+  unreadCount: number;
+}
+
+interface ChatListViewProps {
+  chatRooms: ChatRoom[];
+  onChatClick: (chatId: number) => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
+}
+
+export default function ChatListView({ chatRooms, onChatClick, onLoadMore, hasMore }: ChatListViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredChats = searchQuery
-    ? chats.filter(
+    ? chatRooms.filter(
         (chat) =>
-          chat.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          chat.lastMessage.text
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()),
+          chat.opponent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          chat.lastMessage.text.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : chats;
+    : chatRooms;
 
-  const handleChatClick = (chatId: number) => {
-    // In a real app, this would navigate to the chat detail view
+  // 스크롤 이벤트 핸들러
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    // 스크롤이 바닥에 가까워지면 더 로드
+    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100 && hasMore) {
+      onLoadMore();
+    }
   };
 
   return (
@@ -38,7 +66,7 @@ export default function ChatListView() {
       </div>
 
       {/* Chat list */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" onScroll={handleScroll}>
         {filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -52,15 +80,21 @@ export default function ChatListView() {
               <li key={chat.id} className="hover:bg-gray-50">
                 <button
                   className="w-full text-left py-3 px-4 flex items-start"
-                  onClick={() => handleChatClick(chat.id)}
+                  onClick={() => onChatClick(chat.id)}
                 >
                   {/* User avatar */}
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-                      <div
-                        className="w-full h-full bg-center bg-cover"
-                        style={{ backgroundImage: `url(${chat.user.image})` }}
-                      />
+                      {chat.opponent.image ? (
+                        <div
+                          className="w-full h-full bg-center bg-cover"
+                          style={{ backgroundImage: `url(${chat.opponent.image})` }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 font-medium text-lg">
+                          {chat.opponent.name.charAt(0)}
+                        </div>
+                      )}
                     </div>
                     {chat.unreadCount > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center">
@@ -73,7 +107,7 @@ export default function ChatListView() {
                   <div className="ml-3 flex-1 min-w-0">
                     <div className="flex justify-between items-baseline">
                       <h3 className="text-sm font-medium truncate">
-                        {chat.user.name}
+                        {chat.opponent.name}
                       </h3>
                       <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
                         {chat.lastMessage.timestamp}
@@ -84,7 +118,7 @@ export default function ChatListView() {
                         "text-sm truncate mt-1",
                         chat.unreadCount > 0
                           ? "text-gray-900 font-medium"
-                          : "text-gray-500",
+                          : "text-gray-500"
                       )}
                     >
                       {chat.lastMessage.isFromMe && "나: "}
@@ -95,6 +129,12 @@ export default function ChatListView() {
               </li>
             ))}
           </ul>
+        )}
+
+        {hasMore && (
+          <div className="py-4 text-center">
+            <p className="text-sm text-gray-500">더 불러오는 중...</p>
+          </div>
         )}
       </div>
     </div>
