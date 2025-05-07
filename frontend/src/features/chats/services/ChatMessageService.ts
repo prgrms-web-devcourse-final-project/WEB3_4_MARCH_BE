@@ -1,4 +1,3 @@
-// src/features/chats/services/ChatMessageService.ts
 
 import { apiClient } from "../../../api/apiClient";
 import { useMutation, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";

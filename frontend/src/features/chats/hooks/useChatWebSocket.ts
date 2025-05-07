@@ -10,7 +10,7 @@ export const useChatWebSocket = (roomId?: number) => {
   // WebSocket 연결 설정
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS("/api/ws-endpoint"), // API 엔드포인트 경로 수정 필요
+      webSocketFactory: () => new SockJS("/ws"), // API 엔드포인트 경로 수정 필요
       connectHeaders: {
         // JWT 토큰을 헤더에 추가 (필요에 따라 수정)
       },
@@ -37,7 +37,7 @@ export const useChatWebSocket = (roomId?: number) => {
     const client = clientRef.current;
     if (!client || !roomId || !client.active) return;
 
-    const subscription = client.subscribe(`/topic/chat/rooms/${roomId}`, (message) => {
+    const subscription = client.subscribe(`/sub/chat/rooms/${roomId}`, (message) => {
       try {
         const receivedMessage = JSON.parse(message.body);
 
@@ -63,7 +63,7 @@ export const useChatWebSocket = (roomId?: number) => {
     }
 
     client.publish({
-      destination: `/app/${roomId}/message`,
+      destination: `/pub/${roomId}/message`,
       body: JSON.stringify({ roomId, content }),
     });
 
