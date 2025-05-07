@@ -52,9 +52,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        // TODO : 테스트 인터셉터
-        registration.interceptors(new SecurityContextChannelInterceptor("dummyAuth"));
-
-//        registration.interceptors(stompHandler);
+        registration.interceptors(stompHandler);
     }
 }
