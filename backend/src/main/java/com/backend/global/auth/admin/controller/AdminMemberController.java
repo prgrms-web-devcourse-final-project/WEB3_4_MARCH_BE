@@ -1,7 +1,11 @@
 package com.backend.global.auth.admin.controller;
 
+import com.backend.domain.member.entity.Member;
+import com.backend.domain.member.repository.MemberRepository;
 import com.backend.global.auth.admin.dto.AdminMemberDto;
 import com.backend.global.auth.admin.service.AdminMemberService;
+import com.backend.global.redis.service.RedisGeoService;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +24,14 @@ import org.springframework.web.bind.annotation.*;
 public class AdminMemberController {
 
     private final AdminMemberService adminMemberService;
+    private final RedisGeoService redisGeoService;
+    private final MemberRepository memberRepository;
 
-    public AdminMemberController(AdminMemberService adminMemberService) {
+    public AdminMemberController(AdminMemberService adminMemberService,
+            RedisGeoService redisGeoService, MemberRepository memberRepository) {
         this.adminMemberService = adminMemberService;
+        this.redisGeoService = redisGeoService;
+        this.memberRepository = memberRepository;
     }
 
     // 1. 회원 목록 조회 (페이징, 검색)
@@ -62,5 +71,25 @@ public class AdminMemberController {
             @RequestParam String role) {
         adminMemberService.updateMemberRole(memberId, role);
         return ResponseEntity.ok().build();
+    }
+
+    // 6. Redis 데이터 로드하는 API 엔드포인트
+    @PostMapping("/redis/reload-geo-data")
+    public ResponseEntity<String> reloadGeoData() {
+        List<Member> allMembers = memberRepository.findAll();
+        int count = 0;
+
+        for (Member member : allMembers) {
+            if (member.getLatitude() != null && member.getLongitude() != null) {
+                redisGeoService.addLocation(
+                        member.getId(),
+                        member.getLatitude(),
+                        member.getLongitude()
+                );
+                count++;
+            }
+        }
+
+        return ResponseEntity.ok("로드 완료: " + count + "개 위치 불러오기 성공");
     }
 }
